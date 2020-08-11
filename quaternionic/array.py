@@ -2,7 +2,7 @@ from .properties import QuaternionPropertiesMixin
 from .converters import QuaternionConvertersMixin
 
 
-class Quaternion(QuaternionPropertiesMixin, QuaternionicConvertersMixin, np.ndarray):
+class Quaternion(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
 
     # https://numpy.org/doc/1.18/user/basics.subclassing.html
     def __new__(cls, input_array, *args, **kwargs):
