@@ -1,0 +1,24 @@
+[tool.black]
+line-length = 120
+target-version = ['py36']
+
+[tool.poetry]
+name = "quaternionic"
+version = "0.0.1a"
+license = "MIT"
+description = "Interpret numpy arrays as quaternion arrays with numba acceleration"
+readme = "README.md"
+authors = ["Michael Boyle <michael.oliver.boyle@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+numpy = "^1.13"
+scipy = "^1.0"
+numba = "^0.50"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
