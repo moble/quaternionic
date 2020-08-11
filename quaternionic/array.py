@@ -1,3 +1,5 @@
+import numpy as np
+
 from .properties import QuaternionPropertiesMixin
 from .converters import QuaternionConvertersMixin
 
