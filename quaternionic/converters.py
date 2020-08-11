@@ -17,6 +17,17 @@ class QuaternionConvertersMixin(abc.ABC):
     def as_rotation_matrix(self):
         """Convert quaternions to 3x3 rotation matrices
 
+        Assuming the quaternion R rotates a vector v according to
+
+            v' = R * v * R⁻¹,
+
+        we can also express this rotation in terms of a 3x3 matrix ℛ such that
+
+            v' = ℛ * v.
+
+        This function returns that matrix.
+
+
         Returns
         -------
         rot: float array
@@ -185,6 +196,50 @@ class QuaternionConvertersMixin(abc.ABC):
             q /= np.linalg.norm(q, axis=-1)[..., np.newaxis]
 
             return cls(q)
+
+    @property
+    @jit
+    def as_transformation_matrix(self):
+        """Convert quaternions to 4x4 transformation matrices
+
+        Assuming the quaternion Q transforms another quaternion P according to
+
+            P' = Q * P * Q̄,
+
+        we can also express this rotation in terms of a 4x4 matrix ℳ such that
+
+            P' = ℳ * P,
+
+        where P is viewed as a 4-vector in the last line.  This function
+        returns that matrix.
+
+
+        Returns
+        -------
+        m: float array
+            Output shape is self.shape[:-1]+(4,4).  This matrix should multiply
+            (from the left) a column vector to produce the transformed column
+            vector.
+
+        See also
+        --------
+        as_rotation_matrix: assumes Q is a unit quaternion
+
+        """
+        s = self.flattened
+        m = np.zeros(s.shape[0] + (4, 4))
+        for i in range(s.shape[0]):
+            m[i, 0, 0] = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
+            m[i, 1, 1] = s[i, 0]**2 + s[i, 1]**2 - s[i, 2]**2 - s[i, 3]**2
+            m[i, 1, 2] = 2 * (s[i, 1]*s[i, 2] - s[i, 3]*s[i, 0])
+            m[i, 1, 3] = 2 * (s[i, 1]*s[i, 3] + s[i, 2]*s[i, 0])
+            m[i, 2, 1] = 2 * (s[i, 1]*s[i, 2] + s[i, 3]*s[i, 0])
+            m[i, 2, 2] = s[i, 0]**2 - s[i, 1]**2 + s[i, 2]**2 - s[i, 3]**2
+            m[i, 2, 3] = 2 * (s[i, 2]*s[i, 3] - s[i, 1]*s[i, 0])
+            m[i, 3, 1] = 2 * (s[i, 1]*s[i, 3] - s[i, 2]*s[i, 0])
+            m[i, 3, 2] = 2 * (s[i, 2]*s[i, 3] + s[i, 1]*s[i, 0])
+            m[i, 3, 3] = s[i, 0]**2 - s[i, 1]**2 - s[i, 2]**2 + s[i, 3]**2
+        return m.reshape(self.shape[:-1] + (4, 4))
 
     @property
     def as_axis_angle(self):
