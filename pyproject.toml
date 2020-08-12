@@ -9,7 +9,7 @@ addopts = "-v --tb=short --doctest-glob=''"
 
 [tool.poetry]
 name = "quaternionic"
-version = "0.0.1a1"
+version = "0.0.1a2"
 license = "MIT"
 description = "Interpret numpy arrays as quaternion arrays with numba acceleration"
 readme = "README.md"
