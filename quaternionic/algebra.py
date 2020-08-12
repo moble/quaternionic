@@ -1,10 +1,12 @@
+import math
 import numpy as np
+from numba import float64, boolean
 from . import guvectorize
 
 _quaternion_resolution = 10 * np.finfo(float).resolution
 
-unary_guvectorize = guvectorize([(nb.float64[:], nb.float64[:])], '(n)->(n)')
-binary_guvectorize = guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:])], '(n),(n)->(n)')
+unary_guvectorize = guvectorize([(float64[:], float64[:])], '(n)->(n)')
+binary_guvectorize = guvectorize([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 
 
 @binary_guvectorize
@@ -37,12 +39,12 @@ def divide(q1, q2, qout):
 true_divide = divide
 
 
-@guvectorize([(nb.float64, nb.float64[:], nb.float64[:])], '(),(n)->(n)')
+@guvectorize([(float64, float64[:], float64[:])], '(),(n)->(n)')
 def multiply_scalar(s, q, qout):
     qout[:] = s * q[:]
 
 
-@guvectorize([(nb.float64, nb.float64[:], nb.float64[:])], '(),(n)->(n)')
+@guvectorize([(float64, float64[:], float64[:])], '(),(n)->(n)')
 def divide_scalar(s, q, qout):
     qnorm = q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2
     qout[0] = s * q[0] / qnorm
@@ -52,12 +54,12 @@ def divide_scalar(s, q, qout):
 true_divide_scalar = divide_scalar
 
 
-@guvectorize([(nb.float64[:], nb.float64, nb.float64[:])], '(n),()->(n)')
+@guvectorize([(float64[:], float64, float64[:])], '(n),()->(n)')
 def scalar_multiply(q, s, qout):
     qout[:] = q[:] * s
 
 
-@guvectorize([(nb.float64[:], nb.float64, nb.float64[:])], '(n),()->(n)')
+@guvectorize([(float64[:], float64, float64[:])], '(n),()->(n)')
 def scalar_divide(q, s, qout):
     qout[:] = q[:] / s
 
@@ -72,10 +74,10 @@ def negative(qin, qout):
 
 @unary_guvectorize
 def positive(qin, qout):
-    qout[:] = +qin[:]
+    qout[:] = qin[:]
 
 
-@guvectorize([(nb.float64[:], nb.float64, nb.float64[:])], '(n),()->(n)')
+@guvectorize([(float64[:], float64, float64[:])], '(n),()->(n)')
 def float_power(qin, s, qout):
     b = np.sqrt(qin[1]**2 + qin[2]**2 + qin[3]**2)
     if np.abs(b) <= _quaternion_resolution * np.abs(qin[0]):
@@ -91,7 +93,7 @@ def float_power(qin, s, qout):
             qout[0] = np.log(qin[0])
             qout[1:] = 0.0
     else:
-        v = np.atan2(b, qin[0])
+        v = np.arctan2(b, qin[0])
         f = v / b
         qout[0] = np.log(qin[0] * qin[0] + b * b) / 2.0
         qout[1:] = f * qin[1:]
@@ -106,9 +108,9 @@ def float_power(qin, s, qout):
         qout[1:] = 0.0
 
 
-@guvectorize([(nb.float64[:], nb.float64)], '(n)->()')
+@guvectorize([(float64[:], float64[:])], '(n)->()')
 def absolute(qin, qout):
-    qout[:] = np.sqrt(qin[0]**2 + qin[1]**2 + qin[2]**2 + qin[3]**2)
+    qout[0] = math.sqrt(qin[0]**2 + qin[1]**2 + qin[2]**2 + qin[3]**2)
 
 
 @unary_guvectorize
@@ -122,16 +124,16 @@ conjugate = conj
 
 @unary_guvectorize
 def exp(qin, qout):
-    vnorm = np.sqrt(q[1]**2 + q[2]**2 + q[3]**2)
+    vnorm = np.sqrt(qin[1]**2 + qin[2]**2 + qin[3]**2)
     if vnorm > _quaternion_resolution:
         s = np.sin(vnorm) / vnorm
-        e = np.exp(q[0])
-        qout[0] = e * cos(vnorm)
-        qout[1] = e * s * q[1]
-        qout[2] = e * s * q[2]
-        qout[3] = e * s * q[3]
+        e = np.exp(qin[0])
+        qout[0] = e * np.cos(vnorm)
+        qout[1] = e * s * qin[1]
+        qout[2] = e * s * qin[2]
+        qout[3] = e * s * qin[3]
     else:
-        qout[0] = np.exp(q[0])
+        qout[0] = np.exp(qin[0])
         qout[1:] = 0.0
 
 
@@ -151,7 +153,7 @@ def log(qin, qout):
             qout[0] = np.log(qin[0])
             qout[1:] = 0.0
     else:
-        v = np.atan2(b, qin[0])
+        v = np.arctan2(b, qin[0])
         f = v / b
         qout[0] = np.log(qin[0] * qin[0] + b * b) / 2.0
         qout[1:] = f * qin[1:]
@@ -208,36 +210,36 @@ def right_shift(q1, q2, qout):  # right contraction (= reverse of left-contracti
     raise NotImplementedError()
 
 
-@guvectorize([(nb.float64[:], nb.float64[:], nb.boolean)], '(n),(n)->()')
-def not_equal(q1, q2, qout):
-    qout[:] = np.any(q1[:] != q2[:])
+@guvectorize([(float64[:], float64[:], boolean[:])], '(n),(n)->()')
+def not_equal(q1, q2, bout):
+    bout[0] = np.any(q1[:] != q2[:])
 
 
-@guvectorize([(nb.float64[:], nb.float64[:], nb.boolean)], '(n),(n)->()')
-def equal(q1, q2, qout):
-    qout[:] = np.all(q1[:] == q2[:])
+@guvectorize([(float64[:], float64[:], boolean[:])], '(n),(n)->()')
+def equal(q1, q2, bout):
+    bout[0] = np.all(q1[:] == q2[:])
 
 
-@guvectorize([(nb.float64[:], nb.float64[:], nb.boolean)], '(n),(n)->()')
-def logical_and(q1, q2, qout):
-    qout[:] = np.any(q1[:]) and np.any(q2[:])
+@guvectorize([(float64[:], float64[:], boolean[:])], '(n),(n)->()')
+def logical_and(q1, q2, bout):
+    bout[0] = np.any(q1[:]) and np.any(q2[:])
 
 
-@guvectorize([(nb.float64[:], nb.float64[:], nb.boolean)], '(n),(n)->()')
-def logical_or(q1, q2, qout):
-    qout[:] = np.any(q1[:]) or np.any(q2[:])
+@guvectorize([(float64[:], float64[:], boolean[:])], '(n),(n)->()')
+def logical_or(q1, q2, bout):
+    bout[0] = np.any(q1[:]) or np.any(q2[:])
 
 
-@guvectorize([(nb.float64[:], nb.boolean)], '(n)->()')
-def isfinite(qin, qout):
-    qout[:] = np.isfinite(qin[0]) and np.isfinite(qin[1]) and np.isfinite(qin[2]) and np.isfinite(qin[3])
+@guvectorize([(float64[:], boolean[:])], '(n)->()')
+def isfinite(qin, bout):
+    bout[0] = np.isfinite(qin[0]) and np.isfinite(qin[1]) and np.isfinite(qin[2]) and np.isfinite(qin[3])
 
 
-@guvectorize([(nb.float64[:], nb.boolean)], '(n)->()')
-def isinf(qin, qout):
-    qout[:] = np.isinf(qin[0]) or np.isinf(qin[1]) or np.isinf(qin[2]) or np.isinf(qin[3])
+@guvectorize([(float64[:], boolean[:])], '(n)->()')
+def isinf(qin, bout):
+    bout[0] = np.isinf(qin[0]) or np.isinf(qin[1]) or np.isinf(qin[2]) or np.isinf(qin[3])
 
 
-@guvectorize([(nb.float64[:], nb.boolean)], '(n)->()')
-def isnan(qin, qout):
-    qout[:] = np.isnan(qin[0]) or np.isnan(qin[1]) or np.isnan(qin[2]) or np.isnan(qin[3])
+@guvectorize([(float64[:], boolean[:])], '(n)->()')
+def isnan(qin, bout):
+    bout[0] = np.isnan(qin[0]) or np.isnan(qin[1]) or np.isnan(qin[2]) or np.isnan(qin[3])

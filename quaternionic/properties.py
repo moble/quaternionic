@@ -69,7 +69,7 @@ class QuaternionPropertiesMixin(abc.ABC):
     @property
     @jit
     def norm(self):
-        s = self.flattened
+        s = self.reshape((-1, 4))
         n = np.empty(s.shape[0])
         for i in range(s.shape[0]):
             n[i] = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
@@ -78,11 +78,16 @@ class QuaternionPropertiesMixin(abc.ABC):
     @property
     @jit
     def abs(self):
-        s = self.flattened
+        s = self.reshape((-1, 4))
         n = np.empty(s.shape[0])
         for i in range(s.shape[0]):
             n[i] = np.sqrt(s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2)
         return n.reshape(self.shape[:-1])
+
+    def conjugate(self):
+        c = self.ndarray.copy()
+        c[..., 1:] *= -1
+        return type(self)(c)
 
     # Aliases
     scalar = w
@@ -97,6 +102,7 @@ class QuaternionPropertiesMixin(abc.ABC):
     mag2 = norm
     modulus = abs
     magnitude = abs
+    conj = conjugate
 
     @property
     def normalized(self):
@@ -104,6 +110,9 @@ class QuaternionPropertiesMixin(abc.ABC):
 
     @property
     def iterator(self):
-        s = self.flattened
+        s = self.reshape((-1, 4))
         for i in range(s.shape[0]):
             yield(s[i])
+
+    def nonzero(self):
+        return np.nonzero(np.any(self.ndarray, axis=-1))

@@ -8,7 +8,9 @@ class Quaternion(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarra
 
     # https://numpy.org/doc/1.18/user/basics.subclassing.html
     def __new__(cls, input_array, *args, **kwargs):
-        input_array = np.asanyarray(input_array).view(float)
+        if isinstance(input_array, int) and len(args) == 3:
+            input_array = [input_array, *args]
+        input_array = np.asanyarray(input_array, dtype=float)
         if input_array.shape[-1] != 4:
             raise ValueError(
                 f"\nInput array has shape {input_array.shape} when viewed as a float array.\n"
@@ -19,7 +21,7 @@ class Quaternion(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarra
 
     def __getitem__(self, i):
         r = super().__getitem__(i)
-        if hasattr(r, 'shape') and r.shape[-1] == 4:
+        if hasattr(r, 'shape') and len(r.shape)>0 and r.shape[-1] == 4:
             return type(self)(r)
         else:
             return r
@@ -107,8 +109,8 @@ class Quaternion(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarra
             np.exp, np.log, np.sqrt, np.square, np.reciprocal,
         ]:
             if this_type(args[0]):
-                qout = np.empty_like(args[0]) if out is None else out[0]
-                getattr(algebra, ufunc.__name__)(args[0], qout)
+                qout = np.empty(args[0].shape) if out is None else out[0]
+                getattr(algebra, ufunc.__name__)(args[0].ndarray, qout)
                 result = type(self)(qout)
             else:
                 return NotImplemented
@@ -131,7 +133,7 @@ class Quaternion(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarra
         elif ufunc in [np.absolute]:
             if this_type(args[0]):
                 qout = np.empty(args[0].shape[:-1]) if out is None else out[0]
-                algebra.absolute(args[0], qout)
+                algebra.absolute(args[0].ndarray, qout)
                 result = qout
             else:
                 return NotImplemented
@@ -153,9 +155,10 @@ class Quaternion(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarra
         elif ufunc in [np.isfinite, np.isinf, np.isnan]:
             if this_type(args[0]):
                 qout = np.empty(args[0].shape[:-1], dtype=bool) if out is None else out[0]
-                getattr(algebra, ufunc.__name__)(args[0], qout)
+                getattr(algebra, ufunc.__name__)(args[0].ndarray, qout)
                 result = qout
             else:
+                print('this_type False')
                 return NotImplemented
 
         else:
