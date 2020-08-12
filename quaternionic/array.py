@@ -4,7 +4,7 @@ from .properties import QuaternionPropertiesMixin
 from .converters import QuaternionConvertersMixin
 
 
-class Quaternion(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
+class array(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
 
     # https://numpy.org/doc/1.18/user/basics.subclassing.html
     def __new__(cls, input_array, *args, **kwargs):
@@ -46,14 +46,6 @@ class Quaternion(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarra
             raise NotImplementedError(f"Unrecognized arguments to {type(self).__name__}.__array_ufunc__: {kwargs}")
 
         this_type = lambda o: isinstance(o, type(self))
-
-        # # These are required for basic support, but can be more-or-less passed through because they return bools
-        # if ufunc in [np.not_equal, np.logical_or, np.isinf, np.isnan]:
-        #     args = [arg.view(np.ndarray) if isinstance(arg, type(self)) else arg for arg in args]
-        #     return np.any(self.view(np.ndarray).__array_ufunc__(ufunc, method, *args, **kwargs), axis=-1, out=out)
-        # if ufunc in [np.equal, np.logical_and, np.logical_or, np.isfinite]:
-        #     args = [arg.view(np.ndarray) if isinstance(arg, type(self)) else arg for arg in args]
-        #     return np.all(self.view(np.ndarray).__array_ufunc__(ufunc, method, *args, **kwargs), axis=-1, out=out)
 
         if ufunc in [
             np.add, np.subtract, np.multiply, np.divide, np.true_divide,
@@ -140,6 +132,8 @@ class Quaternion(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarra
 
         # bool(float64[4], float64[4])
         elif ufunc in [np.not_equal, np.equal, np.logical_and, np.logical_or]:
+            # Note that these ufuncs are used in numerous unexpected places
+            # throughout numpy, so we really need them for basic things to work
             a1, a2 = args[:2]
             b1 = a1.ndarray[..., 0]
             b2 = a2.ndarray[..., 0]
@@ -154,11 +148,10 @@ class Quaternion(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarra
         # bool(float64[4])
         elif ufunc in [np.isfinite, np.isinf, np.isnan]:
             if this_type(args[0]):
-                qout = np.empty(args[0].shape[:-1], dtype=bool) if out is None else out[0]
-                getattr(algebra, ufunc.__name__)(args[0].ndarray, qout)
-                result = qout
+                bout = np.empty(args[0].shape[:-1], dtype=bool) if out is None else out[0]
+                getattr(algebra, ufunc.__name__)(args[0].ndarray, bout)
+                result = bout
             else:
-                print('this_type False')
                 return NotImplemented
 
         else:
