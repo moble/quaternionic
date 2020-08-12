@@ -89,6 +89,17 @@ class QuaternionPropertiesMixin(abc.ABC):
         c[..., 1:] *= -1
         return type(self)(c)
 
+    @property
+    @jit
+    def inverse(self):
+        s = self.reshape((-1, 4))
+        inv = np.empty(s.shape[0])
+        for i in range(s.shape[0]):
+            n = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
+            inv[i, 0] = s[i, 0] / n
+            inv[i, 1:] = s[i, 1:] / n
+        return n.reshape(self.shape[:-1])
+
     # Aliases
     scalar = w
     real = w
