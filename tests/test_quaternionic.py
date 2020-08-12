@@ -19,7 +19,7 @@ def test_version():
 
 
 def test_basic_construction():
-    q = quaternionic.Quaternion([1, 2, 3, 4])  # Note the integer input
+    q = quaternionic.array([1, 2, 3, 4])  # Note the integer input
     assert q.w == 1.0
     assert q.x == 2.0
     assert q.y == 3.0
@@ -28,7 +28,7 @@ def test_basic_construction():
 
 def test_basis_multiplication():
     # Basis components
-    one, i, j, k = tuple(quaternionic.Quaternion(np.eye(4)))
+    one, i, j, k = tuple(quaternionic.array(np.eye(4)))
 
     # Full multiplication table
     assert one * one == one
@@ -48,7 +48,7 @@ def test_basis_multiplication():
     assert k * j == -i
     assert k * k == -one
 
-    # Standard criteria
+    # Standard expressions
     assert one*one == one
     assert i*i == -one
     assert j*j == -one
@@ -67,7 +67,7 @@ def Qs():
     return quaternion_sampler()
 
 def quaternion_sampler():
-    return quaternionic.Quaternion([
+    return quaternionic.array([
         [np.nan, 0., 0., 0.],
         [np.inf, 0., 0., 0.],
         [-np.inf, 0., 0., 0.],
@@ -113,12 +113,12 @@ with warnings.catch_warnings():
 def Rs():
     ones = [0, -1., 1.]
     rs = [
-        quaternionic.Quaternion([w, x, y, z]).normalized()
+        quaternionic.array([w, x, y, z]).normalized()
         for w in ones for x in ones for y in ones for z in ones
     ][1:]
     np.random.seed(1842)
-    rs = rs + [r.normalized() for r in [quaternionic.Quaternion(np.random.uniform(-1, 1, size=4)) for _ in range(20)]]
-    return quaternionic.Quaternion(rs)
+    rs = rs + [r.normalized() for r in [quaternionic.array(np.random.uniform(-1, 1, size=4)) for _ in range(20)]]
+    return quaternionic.array(rs)
 
 
 
@@ -255,7 +255,19 @@ def test_quaternion_npconjugate(Qs):
 
 def test_quaternion_sqrt(Qs):
     sqrt_precision = 2.e-15
-    one, i, j, k = tuple(quaternionic.Quaternion(np.eye(4)))
+    # Test sqrt of basis elements
+    sqrthalf = np.sqrt(0.5)
+    assert np.array_equal(
+        np.sqrt(quaternionic.array(np.eye(4))).ndarray,
+        np.array([
+            [1, 0, 0, 0],
+            [sqrthalf, sqrthalf, 0, 0],
+            [sqrthalf, 0, sqrthalf, 0],
+            [sqrthalf, 0, 0, sqrthalf],
+        ])
+    )
+    # Test all my samples
+    one, i, j, k = tuple(quaternionic.array(np.eye(4)))
     for q in Qs[Qs_finitenonzero]:
         assert allclose(np.sqrt(q) * np.sqrt(q), q, rtol=sqrt_precision)
         # Ensure that non-unit quaternions are handled correctly
@@ -263,20 +275,24 @@ def test_quaternion_sqrt(Qs):
             for r in [one, i, j, k]:
                 srq = s*r*q
                 assert allclose(np.sqrt(srq) * np.sqrt(srq), srq, rtol=sqrt_precision)
+    # Test a huge batch of random quaternions
+    np.random.seed(1234)
+    a = quaternionic.array(np.random.uniform(-10, 10, size=10_000*4).reshape((-1, 4)))
+    assert np.allclose(a, np.square(np.sqrt(a)), rtol=10*sqrt_precision, atol=0)
 
 
 def test_quaternion_square(Qs):
     square_precision = 1.e-15
     for q in Qs[Qs_finite]:
         assert (q*q - q**2).norm < square_precision
-        a = quaternionic.Quaternion([q])
-        assert (a**2 - quaternionic.Quaternion([q**2])).norm < square_precision
+        a = quaternionic.array([q])
+        assert (a**2 - quaternionic.array([q**2])).norm < square_precision
 
 
 def test_quaternion_log_exp(Qs):
     qlogexp_precision = 4.e-15
-    zero = quaternionic.Quaternion([0, 0, 0, 0])
-    one, i, j, k = tuple(quaternionic.Quaternion(np.eye(4)))
+    zero = quaternionic.array([0, 0, 0, 0])
+    one, i, j, k = tuple(quaternionic.array(np.eye(4)))
     assert (np.log(Qs[Q]) - Qs[Qlog]).abs < qlogexp_precision
     assert (np.exp(Qs[Q]) - Qs[Qexp]).abs < qlogexp_precision
     assert (np.exp(np.log(Qs[Q])) - Qs[Q]).abs < qlogexp_precision
@@ -286,3 +302,72 @@ def test_quaternion_log_exp(Qs):
     assert np.log(j) == (np.pi / 2) * j
     assert np.log(k) == (np.pi / 2) * k
     assert np.log(-one) == (np.pi) * i
+
+
+
+def test_xor():
+    basis = one, i, j, k = tuple(quaternionic.array(np.eye(4)))
+    zero = 0 * one
+    assert one ^ one == one
+    assert one ^ i == i
+    assert one ^ j == j
+    assert one ^ k == k
+    assert i ^ one == i
+    assert i ^ i == zero
+    assert i ^ j == zero
+    assert i ^ k == zero
+    assert j ^ one == j
+    assert j ^ i == zero
+    assert j ^ j == zero
+    assert j ^ k == zero
+    assert k ^ one == k
+    assert k ^ i == zero
+    assert k ^ j == zero
+    assert k ^ k == zero
+
+
+def test_contractions():
+    basis = one, i, j, k = tuple(quaternionic.array(np.eye(4)))
+    zero = 0 * one
+
+    assert one << one == one
+    assert one << i == i
+    assert one << j == j
+    assert one << k == k
+    assert i << one == zero
+    assert i << i == -one
+    assert i << j == zero
+    assert i << k == zero
+    assert j << one == zero
+    assert j << i == zero
+    assert j << j == -one
+    assert j << k == zero
+    assert k << one == zero
+    assert k << i == zero
+    assert k << j == zero
+    assert k << k == -one
+
+    assert one >> one == one
+    assert one >> i == zero
+    assert one >> j == zero
+    assert one >> k == zero
+    assert i >> one == i
+    assert i >> i == -one
+    assert i >> j == zero
+    assert i >> k == zero
+    assert j >> one == j
+    assert j >> i == zero
+    assert j >> j == -one
+    assert j >> k == zero
+    assert k >> one == k
+    assert k >> i == zero
+    assert k >> j == zero
+    assert k >> k == -one
+
+    for a in basis:
+        for b in basis:
+            for c in basis:
+                assert np.allclose((a ^ b) | c, a | (b << c))
+                assert np.allclose(c | (b ^ a), (c >> b) | a)
+
+    
