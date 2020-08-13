@@ -18,16 +18,8 @@ class QuaternionPropertiesMixin(abc.ABC):
     """
 
     @property
-    def ndarray(self):
-        return self.view(np.ndarray)
-
-    @property
-    @jit
-    def flattened(self):
-        return self.reshape((-1, 4))
-
-    @property
     def w(self):
+        """The first (scalar) component of the quaternion"""
         return self.ndarray[..., 0]
 
     @w.setter
@@ -36,30 +28,40 @@ class QuaternionPropertiesMixin(abc.ABC):
 
     @property
     def x(self):
+        """The second component of the quaternion (rotation about x)"""
         return self.ndarray[..., 1]
 
     @x.setter
     def x(self, xprime):
-        self.ndarray[..., 0] = xprime
+        self.ndarray[..., 1] = xprime
 
     @property
     def y(self):
+        """The third component of the quaternion (rotation about y)"""
         return self.ndarray[..., 2]
 
     @y.setter
     def y(self, yprime):
-        self.ndarray[..., 0] = yprime
+        self.ndarray[..., 2] = yprime
 
     @property
     def z(self):
+        """The fourth component of the quaternion (rotation about z)"""
         return self.ndarray[..., 3]
 
     @z.setter
     def z(self, zprime):
-        self.ndarray[..., 0] = zprime
+        self.ndarray[..., 3] = zprime
 
     @property
     def vector(self):
+        """The "vector" part of the quaternion (final three components)
+
+        Note that it is entirely standard to describe this part of the
+        quaternion as the "vector" part.  It would be more correct to refer to
+        it as the "bivector" part, as explained by geometric algebra.
+
+        """
         return self.ndarray[..., 1:]
 
     @vector.setter
@@ -69,6 +71,27 @@ class QuaternionPropertiesMixin(abc.ABC):
     @property
     @jit
     def norm(self):
+        """The (squared) norm of the quaternion
+
+        This quantity is the sum of the squares of the components of the
+        quaternion — equal to the square of the absolute value.
+
+        Note that it may be surprising to find that this "norm" does not
+        include the usual square root.  This is conventional.  For example, the
+        Boost library's implementation of quaternions also uses this
+        convention.  Similarly, the implementation of complex numbers in C++
+        defines the `abs` and `norm` functions in this way, while python and
+        numpy only define `abs`.
+
+        If you are uncomfortable with this choice of the meaning of `norm`, it
+        may make more sense to use one of the aliases of this function, which include
+
+          * abs2
+          * absolute_square
+          * squared_norm
+          * mag2
+
+        """
         s = self.reshape((-1, 4))
         n = np.empty(s.shape[0])
         for i in range(s.shape[0]):
@@ -78,6 +101,15 @@ class QuaternionPropertiesMixin(abc.ABC):
     @property
     @jit
     def abs(self):
+        """The absolute value of the quaternion
+
+        This quantity is the square-root of the sum of the squares of the
+        components of each quaternion.
+
+        See the note in `norm` for the difference between this function and
+        that.  Basically, this is the square-root of that function.
+
+        """
         s = self.reshape((-1, 4))
         n = np.empty(s.shape[0])
         for i in range(s.shape[0]):
@@ -85,13 +117,15 @@ class QuaternionPropertiesMixin(abc.ABC):
         return n.reshape(self.shape[:-1])
 
     def conjugate(self):
-        c = self.ndarray.copy()
-        c[..., 1:] *= -1
-        return type(self)(c)
+        """The quaternion conjugate of this quaternion"""
+        c = self.copy()
+        c.vector *= -1
+        return c
 
     @property
     @jit
     def inverse(self):
+        """The multiplicative inverse of this quaternion"""
         s = self.reshape((-1, 4))
         inv = np.empty(s.shape[0])
         for i in range(s.shape[0]):
@@ -117,13 +151,33 @@ class QuaternionPropertiesMixin(abc.ABC):
 
     @property
     def normalized(self):
+        """The normalized version of this quaternion"""
         return self / self.abs
 
     @property
+    def ndarray(self):
+        """View this array as a numpy ndarray"""
+        return self.view(np.ndarray)
+
+    @property
+    @jit
+    def flattened(self):
+        """A view of this array with all but the last dimension combined into one"""
+        return self.reshape((-1, 4))
+
+    @property
     def iterator(self):
+        """Iterate over all but the last dimension of this quaternion array"""
         s = self.reshape((-1, 4))
         for i in range(s.shape[0]):
             yield(s[i])
 
     def nonzero(self):
+        """Return the indices of all nonzero elements
+
+        This is essentially the same function as numpy.nonzero, except that the
+        last dimension is treated as a single quaternion; if any component of
+        the quaternion is nonzero, the quaternion is considered nonzero.
+
+        """
         return np.nonzero(np.any(self.ndarray, axis=-1))
