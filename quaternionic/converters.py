@@ -14,7 +14,7 @@ class QuaternionConvertersMixin(abc.ABC):
 
     @property
     @jit
-    def as_rotation_matrix(self):
+    def to_rotation_matrix(self):
         """Convert quaternions to 3x3 rotation matrices
 
         Assuming the quaternion R rotates a vector v according to
@@ -43,7 +43,7 @@ class QuaternionConvertersMixin(abc.ABC):
         """
         n = self.norm
         if not np.all(n):
-            raise ZeroDivisionError("Quaternion input to `as_rotation_matrix` has at least one element with zero norm")
+            raise ZeroDivisionError("Quaternion input to `to_rotation_matrix` has at least one element with zero norm")
         s = self.flattened
         m = np.empty(s.shape[0] + (3, 3))
         for i in range(s.shape[0]):
@@ -199,7 +199,7 @@ class QuaternionConvertersMixin(abc.ABC):
 
     @property
     @jit
-    def as_transformation_matrix(self):
+    def to_transformation_matrix(self):
         """Convert quaternions to 4x4 transformation matrices
 
         Assuming the quaternion Q transforms another quaternion P according to
@@ -223,7 +223,7 @@ class QuaternionConvertersMixin(abc.ABC):
 
         See also
         --------
-        as_rotation_matrix: assumes Q is a unit quaternion
+        to_rotation_matrix: assumes Q is a unit quaternion
 
         """
         s = self.flattened
@@ -242,7 +242,7 @@ class QuaternionConvertersMixin(abc.ABC):
         return m.reshape(self.shape[:-1] + (4, 4))
 
     @property
-    def as_axis_angle(self):
+    def to_axis_angle(self):
         """Convert input quaternion to the axis-angle representation
 
         Note that if any of the input quaternions has norm zero, no error is
@@ -258,7 +258,7 @@ class QuaternionConvertersMixin(abc.ABC):
         """
         return 2 * np.log(self.normalized).vector
 
-    as_rotation_vector = as_axis_angle
+    to_rotation_vector = to_axis_angle
 
     @classmethod
     def from_axis_angle(cls, vec):
@@ -286,7 +286,7 @@ class QuaternionConvertersMixin(abc.ABC):
 
     @property
     @jit
-    def as_euler_angles(self):
+    def to_euler_angles(self):
         """Open Pandora's Box
 
         If somebody is trying to make you use Euler angles, tell them no, and
@@ -389,7 +389,7 @@ class QuaternionConvertersMixin(abc.ABC):
         return cls(R)
 
     @property
-    def as_spherical_coords(self):
+    def to_spherical_coordinates(self):
         """Return the spherical coordinates corresponding to this quaternion
 
         Obviously, spherical coordinates do not contain as much information as a
@@ -406,10 +406,10 @@ class QuaternionConvertersMixin(abc.ABC):
             rotation about `z`.
 
         """
-        return as_euler_angles(self)[..., 1::-1]
+        return to_euler_angles(self)[..., 1::-1]
 
     @classmethod
-    def from_spherical_coords(cls, theta_phi, phi=None):
+    def from_spherical_coordinates(cls, theta_phi, phi=None):
         """Return the quaternion corresponding to these spherical coordinates
 
         Assumes the spherical coordinates correspond to the quaternion R via
