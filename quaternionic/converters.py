@@ -35,27 +35,20 @@ class QuaternionConvertersMixin(abc.ABC):
             (from the left) a column vector to produce the rotated column
             vector.
 
-        Raises
-        ------
-        ZeroDivisionError
-            If any of the input quaternions have norm 0.0.
-
         """
-        n = self.norm
-        if not np.all(n):
-            raise ZeroDivisionError("Quaternion input to `to_rotation_matrix` has at least one element with zero norm")
-        s = self.flattened
-        m = np.empty(s.shape[0] + (3, 3))
+        s = self.reshape((-1, 4))
+        m = np.empty(s.shape[:1] + (3, 3))
         for i in range(s.shape[0]):
-            m[i, 0, 0] = 1.0 - 2*(s[i, 2]**2 + s[i, 3]**2)/n
-            m[i, 0, 1] = 2*(s[i, 1]*s[i, 2] - s[i, 3]*s[i, 0])/n
-            m[i, 0, 2] = 2*(s[i, 1]*s[i, 3] + s[i, 2]*s[i, 0])/n
-            m[i, 1, 0] = 2*(s[i, 1]*s[i, 2] + s[i, 3]*s[i, 0])/n
-            m[i, 1, 1] = 1.0 - 2*(s[i, 1]**2 + s[i, 3]**2)/n
-            m[i, 1, 2] = 2*(s[i, 2]*s[i, 3] - s[i, 1]*s[i, 0])/n
-            m[i, 2, 0] = 2*(s[i, 1]*s[i, 3] - s[i, 2]*s[i, 0])/n
-            m[i, 2, 1] = 2*(s[i, 2]*s[i, 3] + s[i, 1]*s[i, 0])/n
-            m[i, 2, 2] = 1.0 - 2*(s[i, 1]**2 + s[i, 2]**2)/n
+            n = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
+            m[i, 0, 0] = 1.0 - 2*(s[i, 2]**2 + s[i, 3]**2) / n
+            m[i, 0, 1] = 2*(s[i, 1]*s[i, 2] - s[i, 3]*s[i, 0]) / n
+            m[i, 0, 2] = 2*(s[i, 1]*s[i, 3] + s[i, 2]*s[i, 0]) / n
+            m[i, 1, 0] = 2*(s[i, 1]*s[i, 2] + s[i, 3]*s[i, 0]) / n
+            m[i, 1, 1] = 1.0 - 2*(s[i, 1]**2 + s[i, 3]**2) / n
+            m[i, 1, 2] = 2*(s[i, 2]*s[i, 3] - s[i, 1]*s[i, 0]) / n
+            m[i, 2, 0] = 2*(s[i, 1]*s[i, 3] - s[i, 2]*s[i, 0]) / n
+            m[i, 2, 1] = 2*(s[i, 2]*s[i, 3] + s[i, 1]*s[i, 0]) / n
+            m[i, 2, 2] = 1.0 - 2*(s[i, 1]**2 + s[i, 2]**2) / n
         return m.reshape(self.shape[:-1] + (3, 3))
 
     @classmethod
@@ -226,7 +219,7 @@ class QuaternionConvertersMixin(abc.ABC):
         to_rotation_matrix: assumes Q is a unit quaternion
 
         """
-        s = self.flattened
+        s = self.reshape((-1, 4))
         m = np.zeros(s.shape[0] + (4, 4))
         for i in range(s.shape[0]):
             m[i, 0, 0] = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
@@ -326,7 +319,7 @@ class QuaternionConvertersMixin(abc.ABC):
         alpha_beta_gamma = np.empty(s.shape[0] + (3,))
         for i in range(s.shape[0]):
             alpha_beta_gamma[i, 0] = np.arctan2(q[i, 3], q[i, 0]) + np.arctan2(-q[i, 1], q[i, 2])
-            alpha_beta_gamma[i, 1] = 2*np.arccos(np.sqrt((q[i, 0]**2 + q[i, 3]**2)/n))
+            alpha_beta_gamma[i, 1] = 2*np.arccos(np.sqrt((q[i, 0]**2 + q[i, 3]**2) / n))
             alpha_beta_gamma[i, 2] = np.arctan2(q[i, 3], q[i, 0]) - np.arctan2(-q[i, 1], q[i, 2])
         return alpha_beta_gamma.reshape(self.shape[:-1] + (3,))
 
