@@ -32,7 +32,6 @@ geometric operations.
 """
 
 
-import math
 import numpy as np
 from numba import float64, boolean
 from . import guvectorize
@@ -189,7 +188,7 @@ def float_power(q, s, qout):
 @guvectorize([(float64[:], float64[:])], '(n)->()')
 def absolute(q, qout):
     """Return absolute value of quaternion |q|"""
-    qout[0] = math.sqrt(q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2)
+    qout[0] = np.sqrt(q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2)
 
 
 @unary_guvectorize
@@ -289,10 +288,10 @@ def square(q, qout):
 def reciprocal(q, qout):
     """Return reciprocal (inverse) of quaternion q.inverse"""
     norm = q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2
-    qout[0] = qout[0] / norm
-    qout[1] = -qout[1] / norm
-    qout[2] = -qout[2] / norm
-    qout[3] = -qout[3] / norm
+    qout[0] = q[0] / norm
+    qout[1] = -q[1] / norm
+    qout[2] = -q[2] / norm
+    qout[3] = -q[3] / norm
 
 
 @binary_guvectorize
