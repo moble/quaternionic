@@ -1,6 +1,7 @@
 import abc
 import numpy as np
 from . import jit
+from .utilities import type_self_return
 
 
 class QuaternionPropertiesMixin(abc.ABC):
@@ -123,16 +124,19 @@ class QuaternionPropertiesMixin(abc.ABC):
         return c
 
     @property
+    @type_self_return
     @jit
     def inverse(self):
         """The multiplicative inverse of this quaternion"""
         s = self.reshape((-1, 4))
-        inv = np.empty(s.shape[0])
+        inv = np.empty(s.shape)
         for i in range(s.shape[0]):
             n = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
             inv[i, 0] = s[i, 0] / n
-            inv[i, 1:] = s[i, 1:] / n
-        return n.reshape(self.shape[:-1])
+            inv[i, 1] = -s[i, 1] / n
+            inv[i, 2] = -s[i, 2] / n
+            inv[i, 3] = -s[i, 3] / n
+        return inv.reshape(self.shape)
 
     # Aliases
     scalar = w
