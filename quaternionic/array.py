@@ -5,6 +5,51 @@ from .converters import QuaternionConvertersMixin
 
 
 class array(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
+    """Subclass of numpy arrays interpreted as quaternions
+
+    This class encapsulates quaternion algebra, with numpy's "ufunc"s
+    overridden by quaternionic methods.  Standard algebraic operations can be
+    performed naturally — as in `q1+q2`, `q1*q2`, etc.  Numpy functions can
+    also be used as expected — as in `np.exp(q)`, `np.log(q)`, etc.
+
+    Because this is a subclass of numpy's ndarray object, its constructor takes
+    anything the ndarray constructor takes, or just an ndarray to be considered
+    as a quaternion array:
+
+        q1 = quaternionic.array([1, 2, 3, 4])  # explicit array
+        q2 = quaternionic.array(np.random.rand(10, 4))  # re-interpret ndarray
+
+    In addition to the basic numpy array features, we also have a number of
+    extra properties that are particularly useful for quaternions, including
+
+      * Methods to extract and/or set components
+        * w, x, y, z
+        * i, j, k (equivalent to x, y, z)
+        * scalar, vector (equivalent to w, [x, y, z])
+        * real, imag (equivalent to scalar, vector)
+      * Methods related to norms
+        * abs (square-root of sum of squares of components)
+        * norm (sum of squares of components)
+        * modulus, magnitude (equal to abs)
+        * absolute_square, abs2, mag2, squared_norm (equal to norm)
+        * normalized
+        * conjugate, conj
+        * inverse
+      * Methods related to array infrastructure
+        * ndarray
+        * flattened
+        * iterator
+
+    There are also several converters to and from other representations of
+    rotations, including
+
+       * to/from_rotation_matrix
+       * to_transformation_matrix
+       * to/from_axis_angle
+       * to/from_euler_angles
+       * to/from_spherical_coordinates
+
+    """
 
     # https://numpy.org/doc/1.18/user/basics.subclassing.html
     def __new__(cls, input_array, *args, **kwargs):
@@ -20,6 +65,10 @@ class array(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
         return obj
 
     def __getitem__(self, i):
+        # Note that this simply assumes that if the returned array has last
+        # dimension of size 4, it is a quaternionic array.  Obviously, this may
+        # not always be true, but there's no simple way to decide more
+        # correctly.
         r = super().__getitem__(i)
         if hasattr(r, 'shape') and len(r.shape)>0 and r.shape[-1] == 4:
             return type(self)(r)
