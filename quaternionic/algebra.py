@@ -4,8 +4,8 @@
 
 """Essential functions for quaternion algebra
 
-These functions form the basic algebraic behavior of a quaternion class
-— additional, multiplication, exp, log, etc.
+These functions form the basic algebraic behavior of quaternions — addition,
+multiplication, exp, log, etc.
 
 Each function takes one or two array-like inputs — depending on whether it is
 unary or binary — as the first parameter or two, and another array-like object
@@ -38,8 +38,6 @@ from numba import float64, boolean
 from . import guvectorize
 
 
-
-
 _quaternion_resolution = 10 * np.finfo(float).resolution
 
 unary_guvectorize = guvectorize([(float64[:], float64[:])], '(n)->(n)')
@@ -49,13 +47,19 @@ binary_guvectorize = guvectorize([(float64[:], float64[:], float64[:])], '(n),(n
 @binary_guvectorize
 def add(q1, q2, qout):
     """Add two quaternions q1+q2"""
-    qout[:] = q1[:] + q2[:]
+    qout[0] = q1[0] + q2[0]
+    qout[1] = q1[1] + q2[1]
+    qout[2] = q1[2] + q2[2]
+    qout[3] = q1[3] + q2[3]
 
 
 @binary_guvectorize
 def subtract(q1, q2, qout):
     """Subtract quaternion q1-q2"""
-    qout[:] = q1[:] - q2[:]
+    qout[0] = q1[0] - q2[0]
+    qout[1] = q1[1] - q2[1]
+    qout[2] = q1[2] - q2[2]
+    qout[3] = q1[3] - q2[3]
 
 
 @binary_guvectorize
@@ -83,7 +87,10 @@ true_divide = divide
 @guvectorize([(float64, float64[:], float64[:])], '(),(n)->(n)')
 def multiply_scalar(s, q, qout):
     """Multiply scalar by quaternion s*q"""
-    qout[:] = s * q[:]
+    qout[0] = s * q[0]
+    qout[1] = s * q[1]
+    qout[2] = s * q[2]
+    qout[3] = s * q[3]
 
 
 @guvectorize([(float64, float64[:], float64[:])], '(),(n)->(n)')
@@ -91,7 +98,9 @@ def divide_scalar(s, q, qout):
     """Divide scalar by quaternion s/q = s * q.inverse"""
     qnorm = q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2
     qout[0] = s * q[0] / qnorm
-    qout[1:] = -s * q[1:] / qnorm
+    qout[1] = -s * q[1] / qnorm
+    qout[2] = -s * q[2] / qnorm
+    qout[3] = -s * q[3] / qnorm
 
 
 true_divide_scalar = divide_scalar
@@ -100,13 +109,19 @@ true_divide_scalar = divide_scalar
 @guvectorize([(float64[:], float64, float64[:])], '(n),()->(n)')
 def scalar_multiply(q, s, qout):
     """Multiply quaternion by scalar q*s"""
-    qout[:] = q[:] * s
+    qout[0] = q[0] * s
+    qout[1] = q[1] * s
+    qout[2] = q[2] * s
+    qout[3] = q[3] * s
 
 
 @guvectorize([(float64[:], float64, float64[:])], '(n),()->(n)')
 def scalar_divide(q, s, qout):
     """Divide quaternion by scalar q/s"""
-    qout[:] = q[:] / s
+    qout[0] = q[0] / s
+    qout[1] = q[1] / s
+    qout[2] = q[2] / s
+    qout[3] = q[3] / s
 
 
 scalar_true_divide = scalar_divide
@@ -115,13 +130,19 @@ scalar_true_divide = scalar_divide
 @unary_guvectorize
 def negative(q, qout):
     """Return negative quaternion -q"""
-    qout[:] = -q[:]
+    qout[0] = -q[0]
+    qout[1] = -q[1]
+    qout[2] = -q[2]
+    qout[3] = -q[3]
 
 
 @unary_guvectorize
 def positive(q, qout):
     """Return input quaternion q"""
-    qout[:] = q[:]
+    qout[0] = q[0]
+    qout[1] = q[1]
+    qout[2] = q[2]
+    qout[3] = q[3]
 
 
 @guvectorize([(float64[:], float64, float64[:])], '(n),()->(n)')
@@ -133,18 +154,25 @@ def float_power(q, s, qout):
             if np.abs(q[0] + 1) > _quaternion_resolution:
                 qout[0] = np.log(-q[0])
                 qout[1] = np.pi
-                qout[2:] = 0.0
+                qout[2] = 0.0
+                qout[3] = 0.0
             else:
-                qout[:] = 0.0
+                qout[0] = 0.0
                 qout[1] = np.pi
+                qout[2] = 0.0
+                qout[3] = 0.0
         else:
             qout[0] = np.log(q[0])
-            qout[1:] = 0.0
+            qout[1] = 0.0
+            qout[2] = 0.0
+            qout[3] = 0.0
     else:
         v = np.arctan2(b, q[0])
         f = v / b
         qout[0] = np.log(q[0] * q[0] + b * b) / 2.0
-        qout[1:] = f * q[1:]
+        qout[1] = f * q[1]
+        qout[2] = f * q[2]
+        qout[3] = f * q[3]
     qout *= s
     vnorm = np.sqrt(qout[1]**2 + qout[2]**2 + qout[3]**2)
     if vnorm > _quaternion_resolution:
@@ -153,7 +181,9 @@ def float_power(q, s, qout):
         qout[1:] *= e * np.sin(vnorm) / vnorm
     else:
         qout[0] = np.exp(qout[0])
-        qout[1:] = 0.0
+        qout[1] = 0.0
+        qout[2] = 0.0
+        qout[3] = 0.0
 
 
 @guvectorize([(float64[:], float64[:])], '(n)->()')
@@ -166,7 +196,9 @@ def absolute(q, qout):
 def conj(q, qout):
     """Return quaternion-conjugate of quaternion q̄"""
     qout[0] = +q[0]
-    qout[1:] = -q[1:]
+    qout[1] = -q[1]
+    qout[2] = -q[2]
+    qout[3] = -q[3]
 
 
 conjugate = conj
@@ -185,7 +217,9 @@ def exp(q, qout):
         qout[3] = e * s * q[3]
     else:
         qout[0] = np.exp(q[0])
-        qout[1:] = 0.0
+        qout[1] = 0.0
+        qout[2] = 0.0
+        qout[3] = 0.0
 
 
 @unary_guvectorize
@@ -197,18 +231,25 @@ def log(q, qout):
             if np.abs(q[0] + 1) > _quaternion_resolution:
                 qout[0] = np.log(-q[0])
                 qout[1] = np.pi
-                qout[2:] = 0.0
+                qout[2] = 0.0
+                qout[3] = 0.0
             else:
-                qout[:] = 0.0
+                qout[0] = 0.0
                 qout[1] = np.pi
+                qout[2] = 0.0
+                qout[3] = 0.0
         else:
             qout[0] = np.log(q[0])
-            qout[1:] = 0.0
+            qout[1] = 0.0
+            qout[2] = 0.0
+            qout[3] = 0.0
     else:
         v = np.arctan2(b, q[0])
         f = v / b
         qout[0] = np.log(q[0] * q[0] + b * b) / 2.0
-        qout[1:] = f * q[1:]
+        qout[1] = f * q[1]
+        qout[2] = f * q[2]
+        qout[3] = f * q[3]
 
 
 @unary_guvectorize
@@ -223,12 +264,16 @@ def sqrt(q, qout):
     # √Q = (a + Q) / √(2*a + 2*Q[0])
     a = np.sqrt(q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2)
     if np.abs(a + q[0]) < _quaternion_resolution * a:
-        qout[:] = 0.0
+        qout[0] = 0.0
         qout[1] = np.sqrt(a)
+        qout[2] = 0.0
+        qout[3] = 0.0
     else:
         c = np.sqrt(0.5 / (a + q[0]))
-        qout[:] = q[:] * c
-        qout[0] += a * c
+        qout[0] = (a + q[0]) * c
+        qout[1] = q[1] * c
+        qout[2] = q[2] * c
+        qout[3] = q[3] * c
 
 
 @unary_guvectorize
@@ -245,7 +290,9 @@ def reciprocal(q, qout):
     """Return reciprocal (inverse) of quaternion q.inverse"""
     norm = q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2
     qout[0] = qout[0] / norm
-    qout[1:] = -qout[1:] / norm
+    qout[1] = -qout[1] / norm
+    qout[2] = -qout[2] / norm
+    qout[3] = -qout[3] / norm
 
 
 @binary_guvectorize
@@ -263,8 +310,9 @@ def bitwise_or(q1, q2, qout):
 
     """
     qout[0] = q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3]
-    qout[1:] = 0.0
-
+    qout[1] = 0.0
+    qout[2] = 0.0
+    qout[3] = 0.0
 
 
 @binary_guvectorize
