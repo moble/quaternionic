@@ -154,13 +154,13 @@ def Rs():
 
 
 # Unary bool returners
-# def test_quaternion_nonzero(Qs):
-#     assert not Qs[q_0].nonzero()  # Do this one explicitly, to not use circular logic
-#     assert Qs[q_1].nonzero()  # Do this one explicitly, to not use circular logic
-#     for q in Qs[Qs_zero]:
-#         assert not q.nonzero()
-#     for q in Qs[Qs_nonzero]:
-#         assert q.nonzero()
+def test_quaternion_nonzero(Qs):
+    assert np.nonzero(Qs[q_0])[0].size == 0  # Do this one explicitly, to not use circular logic
+    assert np.nonzero(Qs[q_1])[0].size > 0  # Do this one explicitly, to not use circular logic
+    for q in Qs[Qs_zero]:
+        assert np.nonzero(q)[0].size == 0
+    for q in Qs[Qs_nonzero]:
+        assert np.nonzero(q)[0].size > 0
 
 
 def test_quaternion_isnan(Qs):
@@ -403,25 +403,17 @@ def test_contractions():
 
 def test_metrics(Rs):
     metric_precision = 4.e-15
+    one = quaternionic.array(1, 0, 0, 0)
     intrinsic_funcs = (quaternionic.distance.rotor.intrinsic, quaternionic.distance.rotation.intrinsic)
     chordal_funcs = (quaternionic.distance.rotor.chordal, quaternionic.distance.rotation.chordal)
     metric_funcs = intrinsic_funcs + chordal_funcs
     rotor_funcs = (quaternionic.distance.rotor.intrinsic, quaternionic.distance.rotor.chordal)
     rotation_funcs = (quaternionic.distance.rotation.intrinsic, quaternionic.distance.rotation.chordal)
-
-    # for R1 in Rs:
-    #     for R2 in Rs:
-    #         for f in metric_funcs:
-    #             print()
-    #             print(R1, R2, f)
-    #             print(f(R1, R2))
-
-
-    distance_dict = {func: func.outer(Rs, Rs) for func in metric_funcs}
+    distance_dict = {func: func(Rs, Rs[:, np.newaxis]) for func in metric_funcs}
 
     # Check non-negativity
     for mat in distance_dict.values():
-        assert np.all(mat.ndarray >= 0.)
+        assert np.all(mat >= 0.)
 
     # Check discernibility
     for func in metric_funcs:
@@ -461,9 +453,9 @@ def test_metrics(Rs):
     assert (quaternionic.distance.rotation.intrinsic(Rs, -Rs) < 5.e-16).all()
 
     # We expect the chordal distance to be smaller than the intrinsic distance (or equal, if the distance is zero)
-    assert np.logical_or(quaternionic.distance.rotor.chordal(quaternion.one, Rs)
-                           < quaternionic.distance.rotor.intrinsic(quaternion.one, Rs),
-                         Rs == quaternion.one).all()
+    assert np.logical_or(quaternionic.distance.rotor.chordal(one, Rs)
+                           < quaternionic.distance.rotor.intrinsic(one, Rs),
+                         Rs == one).all()
     # Check invariance under overall rotations: d(R1, R2) = d(R3*R1, R3*R2) = d(R1*R3, R2*R3)
     for func in quaternionic.distance.rotor.chordal, quaternionic.distance.rotation.intrinsic:
         rotations = Rs[:, np.newaxis] * Rs
@@ -523,18 +515,18 @@ def test_from_rotation_matrix(Rs):
             rot_mat_eps = 5*eps
         for i, R1 in enumerate(Rs):
             R2 = quaternionic.array.from_rotation_matrix(R1.to_rotation_matrix, nonorthogonal=nonorthogonal)
-            d = quaternionic.distance.c.rotation.intrinsic(R1, R2)
+            d = quaternionic.distance.rotation.intrinsic(R1, R2)
             assert d < rot_mat_eps, (i, R1, R2, d)  # Can't use allclose here; we don't care about rotor sign
 
         Rs2 = quaternionic.array.from_rotation_matrix(Rs.to_rotation_matrix, nonorthogonal=nonorthogonal)
         for R1, R2 in zip(Rs, Rs2):
-            d = quaternionic.distance.c.rotation.intrinsic(R1, R2)
+            d = quaternionic.distance.rotation.intrinsic(R1, R2)
             assert d < rot_mat_eps, (R1, R2, d)  # Can't use allclose here; we don't care about rotor sign
 
-        Rs3 = Rs.reshape((2, 5, 10))
+        Rs3 = Rs.reshape((2, 5, 10, 4))
         Rs4 = quaternionic.array.from_rotation_matrix(Rs3.to_rotation_matrix)
-        for R3, R4 in zip(Rs3.flatten(), Rs4.flatten()):
-            d = quaternionic.distance.c.rotation.intrinsic(R3, R4)
+        for R3, R4 in zip(Rs3.flattened, Rs4.flattened):
+            d = quaternionic.distance.rotation.intrinsic(R3, R4)
             assert d < rot_mat_eps, (R3, R4, d)  # Can't use allclose here; we don't care about rotor sign
 
 
@@ -558,106 +550,124 @@ def test_from_rotation_vector():
     quats[..., 1:] = vecs[...]
     quats = quaternionic.array(quats)
     quats = np.exp(quats/2)
-    quat_vecs = quaternionic.array.to_rotation_vector(quats)
+    quat_vecs = quats.to_rotation_vector
     quats2 = quaternionic.array.from_rotation_vector(quat_vecs)
     assert allclose(quats, quats2)
 
 
 def test_rotate_vectors(Rs):
+    one, x, y, z = tuple(quaternionic.array(np.eye(4)))
+    zero = 0.0 * one
+
     np.random.seed(1234)
     # Test (1)*(1)
     vecs = np.random.rand(3)
-    quats = quaternion.z
-    vecsprime = quaternion.rotate_vectors(quats, vecs)
+    quats = z
+    vecsprime = quats.rotate(vecs)
     assert np.allclose(vecsprime,
-                       (quats * quaternionic.array(*vecs) * quats.inverse).vector,
+                       (quats * quaternionic.array(0, *vecs) * quats.inverse).vector,
                        rtol=0.0, atol=0.0)
-    assert quats.shape + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
+    assert quats.shape[:-1] + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
     # Test (1)*(5)
     vecs = np.random.rand(5, 3)
-    quats = quaternion.z
-    vecsprime = quaternion.rotate_vectors(quats, vecs)
+    quats = z
+    vecsprime = quats.rotate(vecs)
     for i, vec in enumerate(vecs):
         assert np.allclose(vecsprime[i],
-                           (quats * quaternionic.array(*vec) * quats.inverse).vector,
+                           (quats * quaternionic.array(0, *vec) * quats.inverse).vector,
                            rtol=0.0, atol=0.0)
-    assert quats.shape + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
+    assert quats.shape[:-1] + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
     # Test (1)*(5) inner axis
     vecs = np.random.rand(3, 5)
-    quats = quaternion.z
-    vecsprime = quaternion.rotate_vectors(quats, vecs, axis=-2)
+    quats = z
+    vecsprime = quats.rotate(vecs, axis=-2)
     for i, vec in enumerate(vecs.T):
         assert np.allclose(vecsprime[:, i],
-                           (quats * quaternionic.array(*vec) * quats.inverse).vector,
+                           (quats * quaternionic.array(0, *vec) * quats.inverse).vector,
                            rtol=0.0, atol=0.0)
-    assert quats.shape + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
+    assert quats.shape[:-1] + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
     # Test (N)*(1)
     vecs = np.random.rand(3)
     quats = Rs
-    vecsprime = quaternion.rotate_vectors(quats, vecs)
+    vecsprime = quats.rotate(vecs)
     assert np.allclose(vecsprime,
-                       [vprime.vector for vprime in quats * quaternionic.array(*vecs) * ~quats],
+                       [vprime.vector for vprime in quats * quaternionic.array(0, *vecs) * ~quats],
                        rtol=1e-15, atol=1e-15)
-    assert quats.shape + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
+    assert quats.shape[:-1] + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
     # Test (N)*(5)
     vecs = np.random.rand(5, 3)
     quats = Rs
-    vecsprime = quaternion.rotate_vectors(quats, vecs)
+    vecsprime = quats.rotate(vecs)
     for i, vec in enumerate(vecs):
         assert np.allclose(vecsprime[:, i],
-                           [vprime.vector for vprime in quats * quaternionic.array(*vec) * ~quats],
+                           [vprime.vector for vprime in quats * quaternionic.array(0, *vec) * ~quats],
                            rtol=1e-15, atol=1e-15)
-    assert quats.shape + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
+    assert quats.shape[:-1] + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
     # Test (N)*(5) inner axis
     vecs = np.random.rand(3, 5)
     quats = Rs
-    vecsprime = quaternion.rotate_vectors(quats, vecs, axis=-2)
+    vecsprime = quats.rotate(vecs, axis=-2)
     for i, vec in enumerate(vecs.T):
         assert np.allclose(vecsprime[:, :, i],
-                           [vprime.vector for vprime in quats * quaternionic.array(*vec) * ~quats],
+                           [vprime.vector for vprime in quats * quaternionic.array(0, *vec) * ~quats],
                            rtol=1e-15, atol=1e-15)
-    assert quats.shape + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
+    assert quats.shape[:-1] + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
 
 
-def test_from_spherical_coords():
+def test_from_spherical_coordinates():
+    one, x, y, z = tuple(quaternionic.array(np.eye(4)))
+    zero = 0.0 * one
+
     np.random.seed(1843)
     random_angles = [[np.random.uniform(-np.pi, np.pi), np.random.uniform(-np.pi, np.pi)]
                      for i in range(5000)]
     for vartheta, varphi in random_angles:
-        q = quaternionic.from_spherical_coords(vartheta, varphi)
-        assert abs((np.quaternion(0, 0, 0, varphi / 2.).exp() * np.quaternion(0, 0, vartheta / 2., 0).exp())
+        q = quaternionic.array.from_spherical_coordinates(vartheta, varphi)
+        assert abs((np.exp(quaternionic.array(0, 0, 0, varphi / 2.)) * np.exp(quaternionic.array(0, 0, vartheta / 2., 0)))
                    - q) < 1.e-15
-        xprime = q * quaternion.x * q.inverse
-        yprime = q * quaternion.y * q.inverse
-        zprime = q * quaternion.z * q.inverse
-        nhat = np.quaternion(0.0, math.sin(vartheta)*math.cos(varphi), math.sin(vartheta)*math.sin(varphi),
-                             math.cos(vartheta))
-        thetahat = np.quaternion(0.0, math.cos(vartheta)*math.cos(varphi), math.cos(vartheta)*math.sin(varphi),
-                                 -math.sin(vartheta))
-        phihat = np.quaternion(0.0, -math.sin(varphi), math.cos(varphi), 0.0)
+        xprime = q * x * q.inverse
+        yprime = q * y * q.inverse
+        zprime = q * z * q.inverse
+        nhat = quaternionic.array(
+            0.0,
+            math.sin(vartheta)*math.cos(varphi),
+            math.sin(vartheta)*math.sin(varphi),
+            math.cos(vartheta)
+        )
+        thetahat = quaternionic.array(
+            0.0,
+            math.cos(vartheta)*math.cos(varphi),
+            math.cos(vartheta)*math.sin(varphi),
+            -math.sin(vartheta)
+        )
+        phihat = quaternionic.array(0.0, -math.sin(varphi), math.cos(varphi), 0.0)
         assert abs(xprime - thetahat) < 1.e-15
         assert abs(yprime - phihat) < 1.e-15
         assert abs(zprime - nhat) < 1.e-15
-    assert np.max(np.abs(quaternionic.from_spherical_coords(random_angles)
-                         - np.array([quaternionic.from_spherical_coords(vartheta, varphi)
-                                     for vartheta, varphi in random_angles]))) < 1.e-15
+    assert np.max(np.abs(
+        quaternionic.array.from_spherical_coordinates(random_angles)
+        - quaternionic.array([quaternionic.array.from_spherical_coordinates(vartheta, varphi) for vartheta, varphi in random_angles])
+    )) < 1.e-15
 
 
-def test_to_spherical_coords(Rs):
+def test_to_spherical_coordinates(Rs):
+    one, x, y, z = tuple(quaternionic.array(np.eye(4)))
+    zero = 0.0 * one
+
     np.random.seed(1843)
     # First test on rotors that are precisely spherical-coordinate rotors
     random_angles = [[np.random.uniform(0, np.pi), np.random.uniform(0, 2*np.pi)]
                      for i in range(5000)]
     for vartheta, varphi in random_angles:
-        vartheta2, varphi2 = quaternionic.to_spherical_coords(quaternionic.from_spherical_coords(vartheta, varphi))
+        vartheta2, varphi2 = (quaternionic.array.from_spherical_coordinates(vartheta, varphi)).to_spherical_coordinates
         varphi2 = (varphi2 + 2*np.pi) if varphi2 < 0 else varphi2
         assert abs(vartheta - vartheta2) < 1e-12, ((vartheta, varphi), (vartheta2, varphi2))
         assert abs(varphi - varphi2) < 1e-12, ((vartheta, varphi), (vartheta2, varphi2))
     # Now test that arbitrary rotors rotate z to the appropriate location
     for R in Rs:
-        vartheta, varphi = quaternionic.to_spherical_coords(R)
-        R2 = quaternionic.from_spherical_coords(vartheta, varphi)
-        assert (R*quaternion.z*R.inverse - R2*quaternion.z*R2.inverse).abs() < 4e-15, (R, R2, (vartheta, varphi))
+        vartheta, varphi = R.to_spherical_coordinates
+        R2 = quaternionic.array.from_spherical_coordinates(vartheta, varphi)
+        assert (R*z*R.inverse - R2*z*R2.inverse).abs < 4e-15, (R, R2, (vartheta, varphi))
 
 
 def test_from_euler_angles():
@@ -667,14 +677,14 @@ def test_from_euler_angles():
                       np.random.uniform(-np.pi, np.pi)]
                      for i in range(5000)]
     for alpha, beta, gamma in random_angles:
-        assert abs((np.quaternion(0, 0, 0, alpha / 2.).exp()
-                    * np.quaternion(0, 0, beta / 2., 0).exp()
-                    * np.quaternion(0, 0, 0, gamma / 2.).exp()
+        assert abs((np.exp(quaternionic.array(0, 0, 0, alpha / 2.))
+                    * np.exp(quaternionic.array(0, 0, beta / 2., 0))
+                    * np.exp(quaternionic.array(0, 0, 0, gamma / 2.))
                    )
-                   - quaternionic.from_euler_angles(alpha, beta, gamma)) < 1.e-15
-    assert np.max(np.abs(quaternionic.from_euler_angles(random_angles)
-                         - np.array([quaternionic.from_euler_angles(alpha, beta, gamma)
-                                     for alpha, beta, gamma in random_angles]))) < 1.e-15
+                   - quaternionic.array.from_euler_angles(alpha, beta, gamma)) < 1.e-15
+    assert np.max(np.abs(quaternionic.array.from_euler_angles(random_angles)
+                         - quaternionic.array([quaternionic.array.from_euler_angles(alpha, beta, gamma)
+                                               for alpha, beta, gamma in random_angles]))) < 1.e-15
 
 
 def test_to_euler_angles():
@@ -684,10 +694,10 @@ def test_to_euler_angles():
                       np.random.uniform(-np.pi, np.pi)]
                      for i in range(5000)]
     for alpha, beta, gamma in random_angles:
-        R1 = quaternionic.from_euler_angles(alpha, beta, gamma)
-        R2 = quaternionic.from_euler_angles(*list(quaternionic.to_euler_angles(R1)))
+        R1 = quaternionic.array.from_euler_angles(alpha, beta, gamma)
+        R2 = quaternionic.array.from_euler_angles(*list(R1.to_euler_angles))
         d = quaternionic.distance.rotation.intrinsic(R1, R2)
         assert d < 6e3*eps, ((alpha, beta, gamma), R1, R2, d)  # Can't use allclose here; we don't care about rotor sign
     q0 = quaternionic.array(0, 0.6, 0.8, 0)
-    assert q0.norm() == 1.0
-    assert abs(q0 - quaternionic.from_euler_angles(*list(quaternionic.to_euler_angles(q0)))) < 1.e-15
+    assert q0.norm == 1.0
+    assert abs(q0 - quaternionic.array.from_euler_angles(*list(q0.to_euler_angles))) < 1.e-15
