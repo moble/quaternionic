@@ -97,7 +97,7 @@ class array(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
             )
 
     def __array_ufunc__(self, ufunc, method, *args, out=None, **kwargs):
-        from . import algebra_gufuncs as algebra
+        from . import algebra_ufuncs as algebra
 
         # We will not be supporting any more ufunc keywords beyond `out`
         if kwargs:
