@@ -1,3 +1,7 @@
+# Copyright (c) 2020, Michael Boyle
+# See LICENSE file for details:
+# <https://github.com/moble/quaternionic/blob/master/LICENSE>
+
 import abc
 import numpy as np
 from . import jit

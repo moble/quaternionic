@@ -1,3 +1,7 @@
+# Copyright (c) 2020, Michael Boyle
+# See LICENSE file for details:
+# <https://github.com/moble/quaternionic/blob/master/LICENSE>
+
 import numpy as np
 
 from .properties import QuaternionPropertiesMixin
@@ -93,7 +97,7 @@ class array(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
             )
 
     def __array_ufunc__(self, ufunc, method, *args, out=None, **kwargs):
-        from . import algebra
+        from . import algebra_gufuncs as algebra
 
         # We will not be supporting any more ufunc keywords beyond `out`
         if kwargs:

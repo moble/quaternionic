@@ -1,12 +1,15 @@
+# Copyright (c) 2020, Michael Boyle
+# See LICENSE file for details:
+# <https://github.com/moble/quaternionic/blob/master/LICENSE>
+
 import numpy as np
 from numba import float64
-from . import jit, guvectorize
-from .algebra import _divide, _log, _absolute
+from . import jit, guvectorize, algebra
 from .utilities import ndarray_args
 
-_divide = jit(_divide)
-_log = jit(_log)
-_absolute = jit(_absolute)
+_divide = jit(algebra.divide)
+_log = jit(algebra.log)
+_absolute = jit(algebra.absolute)
 
 
 class rotor(object):
