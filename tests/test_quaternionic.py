@@ -13,11 +13,6 @@ eps = np.finfo(float).eps
 
 
 
-def test_version():
-    from quaternionic import __version__
-    assert __version__ == '0.0.1a'
-
-
 def test_getting_components():
     q = quaternionic.array([1, 2, 3, 4])  # Note the integer input
     assert q.w == 1.0
