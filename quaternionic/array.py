@@ -53,9 +53,14 @@ class array(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
 
     # https://numpy.org/doc/1.18/user/basics.subclassing.html
     def __new__(cls, input_array, *args, **kwargs):
-        if isinstance(input_array, int) and len(args) == 3:
-            input_array = [input_array, *args]
+        from numbers import Real
+        if isinstance(input_array, Real) and len(args) >= 3 and all(isinstance(a, Real) for a in args[:3]):
+            input_array = [input_array,] + list(args[:3])
         input_array = np.asanyarray(input_array, dtype=float)
+        if not hasattr(input_array, 'shape'):
+            raise ValueError("not hasattr(input_array, 'shape')")
+        if len(input_array.shape)==0:
+            raise ValueError("len(input_array.shape)==0")
         if input_array.shape[-1] != 4:
             raise ValueError(
                 f"\nInput array has shape {input_array.shape} when viewed as a float array.\n"
