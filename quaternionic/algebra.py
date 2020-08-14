@@ -43,109 +43,111 @@ unary_guvectorize = guvectorize([(float64[:], float64[:])], '(n)->(n)')
 binary_guvectorize = guvectorize([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 
 
-@binary_guvectorize
-def add(q1, q2, qout):
+def _add(q1, q2, qout):
     """Add two quaternions q1+q2"""
     qout[0] = q1[0] + q2[0]
     qout[1] = q1[1] + q2[1]
     qout[2] = q1[2] + q2[2]
     qout[3] = q1[3] + q2[3]
+add = binary_guvectorize(_add)
 
 
-@binary_guvectorize
-def subtract(q1, q2, qout):
+def _subtract(q1, q2, qout):
     """Subtract quaternion q1-q2"""
     qout[0] = q1[0] - q2[0]
     qout[1] = q1[1] - q2[1]
     qout[2] = q1[2] - q2[2]
     qout[3] = q1[3] - q2[3]
+subtract = binary_guvectorize(_subtract)
 
 
-@binary_guvectorize
-def multiply(q1, q2, qout):
+def _multiply(q1, q2, qout):
     """Multiply quaternions q1*q2"""
     qout[0] = q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3]
     qout[1] = q1[0]*q2[1] + q1[1]*q2[0] + q1[2]*q2[3] - q1[3]*q2[2]
     qout[2] = q1[0]*q2[2] - q1[1]*q2[3] + q1[2]*q2[0] + q1[3]*q2[1]
     qout[3] = q1[0]*q2[3] + q1[1]*q2[2] - q1[2]*q2[1] + q1[3]*q2[0]
+multiply = binary_guvectorize(_multiply)
 
 
-@binary_guvectorize
-def divide(q1, q2, qout):
+def _divide(q1, q2, qout):
     """Divide quaternions q1/q2 = q1 * q2.inverse"""
     q2norm = q2[0]**2 + q2[1]**2 + q2[2]**2 + q2[3]**2
     qout[0] = (+q1[0]*q2[0] + q1[1]*q2[1] + q1[2]*q2[2] + q1[3]*q2[3]) / q2norm
     qout[1] = (-q1[0]*q2[1] + q1[1]*q2[0] - q1[2]*q2[3] + q1[3]*q2[2]) / q2norm
     qout[2] = (-q1[0]*q2[2] + q1[1]*q2[3] + q1[2]*q2[0] - q1[3]*q2[1]) / q2norm
     qout[3] = (-q1[0]*q2[3] - q1[1]*q2[2] + q1[2]*q2[1] + q1[3]*q2[0]) / q2norm
+divide = binary_guvectorize(_divide)
 
 
+_true_divide = _divide
 true_divide = divide
 
 
-@guvectorize([(float64, float64[:], float64[:])], '(),(n)->(n)')
-def multiply_scalar(s, q, qout):
+def _multiply_scalar(s, q, qout):
     """Multiply scalar by quaternion s*q"""
     qout[0] = s * q[0]
     qout[1] = s * q[1]
     qout[2] = s * q[2]
     qout[3] = s * q[3]
+multiply_scalar = guvectorize([(float64, float64[:], float64[:])], '(),(n)->(n)')(_multiply_scalar)
 
 
-@guvectorize([(float64, float64[:], float64[:])], '(),(n)->(n)')
-def divide_scalar(s, q, qout):
+def _divide_scalar(s, q, qout):
     """Divide scalar by quaternion s/q = s * q.inverse"""
     qnorm = q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2
     qout[0] = s * q[0] / qnorm
     qout[1] = -s * q[1] / qnorm
     qout[2] = -s * q[2] / qnorm
     qout[3] = -s * q[3] / qnorm
+divide_scalar = guvectorize([(float64, float64[:], float64[:])], '(),(n)->(n)')(_divide_scalar)
 
 
+_true_divide_scalar = _divide_scalar
 true_divide_scalar = divide_scalar
 
 
-@guvectorize([(float64[:], float64, float64[:])], '(n),()->(n)')
-def scalar_multiply(q, s, qout):
+def _scalar_multiply(q, s, qout):
     """Multiply quaternion by scalar q*s"""
     qout[0] = q[0] * s
     qout[1] = q[1] * s
     qout[2] = q[2] * s
     qout[3] = q[3] * s
+scalar_multiply = guvectorize([(float64[:], float64, float64[:])], '(n),()->(n)')(_scalar_multiply)
 
 
-@guvectorize([(float64[:], float64, float64[:])], '(n),()->(n)')
-def scalar_divide(q, s, qout):
+def _scalar_divide(q, s, qout):
     """Divide quaternion by scalar q/s"""
     qout[0] = q[0] / s
     qout[1] = q[1] / s
     qout[2] = q[2] / s
     qout[3] = q[3] / s
+scalar_divide = guvectorize([(float64[:], float64, float64[:])], '(n),()->(n)')(_scalar_divide)
 
 
+_scalar_true_divide = _scalar_divide
 scalar_true_divide = scalar_divide
 
 
-@unary_guvectorize
-def negative(q, qout):
+def _negative(q, qout):
     """Return negative quaternion -q"""
     qout[0] = -q[0]
     qout[1] = -q[1]
     qout[2] = -q[2]
     qout[3] = -q[3]
+negative = unary_guvectorize(_negative)
 
 
-@unary_guvectorize
-def positive(q, qout):
+def _positive(q, qout):
     """Return input quaternion q"""
     qout[0] = q[0]
     qout[1] = q[1]
     qout[2] = q[2]
     qout[3] = q[3]
+positive = unary_guvectorize(_positive)
 
 
-@guvectorize([(float64[:], float64, float64[:])], '(n),()->(n)')
-def float_power(q, s, qout):
+def _float_power(q, s, qout):
     """Raise quaternion to scalar power exp(log(q)*s)"""
     b = np.sqrt(q[1]**2 + q[2]**2 + q[3]**2)
     if np.abs(b) <= _quaternion_resolution * np.abs(q[0]):
@@ -183,28 +185,29 @@ def float_power(q, s, qout):
         qout[1] = 0.0
         qout[2] = 0.0
         qout[3] = 0.0
+float_power = guvectorize([(float64[:], float64, float64[:])], '(n),()->(n)')(_float_power)
 
 
-@guvectorize([(float64[:], float64[:])], '(n)->()')
-def absolute(q, qout):
+def _absolute(q, qout):
     """Return absolute value of quaternion |q|"""
     qout[0] = np.sqrt(q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2)
+absolute = guvectorize([(float64[:], float64[:])], '(n)->()')(_absolute)
 
 
-@unary_guvectorize
-def conj(q, qout):
+def _conj(q, qout):
     """Return quaternion-conjugate of quaternion q̄"""
     qout[0] = +q[0]
     qout[1] = -q[1]
     qout[2] = -q[2]
     qout[3] = -q[3]
+conj = unary_guvectorize(_conj)
 
 
+_conjugate = _conj
 conjugate = conj
 
 
-@unary_guvectorize
-def exp(q, qout):
+def _exp(q, qout):
     """Return exponential of input quaternion exp(q)"""
     vnorm = np.sqrt(q[1]**2 + q[2]**2 + q[3]**2)
     if vnorm > _quaternion_resolution:
@@ -219,10 +222,10 @@ def exp(q, qout):
         qout[1] = 0.0
         qout[2] = 0.0
         qout[3] = 0.0
+exp = unary_guvectorize(_exp)
 
 
-@unary_guvectorize
-def log(q, qout):
+def _log(q, qout):
     """Return logarithm of input quaternion log(q)"""
     b = np.sqrt(q[1]**2 + q[2]**2 + q[3]**2)
     if np.abs(b) <= _quaternion_resolution * np.abs(q[0]):
@@ -249,10 +252,10 @@ def log(q, qout):
         qout[1] = f * q[1]
         qout[2] = f * q[2]
         qout[3] = f * q[3]
+log = unary_guvectorize(_log)
 
 
-@unary_guvectorize
-def sqrt(q, qout):
+def _sqrt(q, qout):
     """Return square-root of input quaternion √q
 
     The general formula is
@@ -273,29 +276,29 @@ def sqrt(q, qout):
         qout[1] = q[1] * c
         qout[2] = q[2] * c
         qout[3] = q[3] * c
+sqrt = unary_guvectorize(_sqrt)
 
 
-@unary_guvectorize
-def square(q, qout):
+def _square(q, qout):
     """Return square of quaternion q*q"""
     qout[0] = q[0]**2 - q[1]**2 - q[2]**2 - q[3]**2
     qout[1] = 2*q[0]*q[1]
     qout[2] = 2*q[0]*q[2]
     qout[3] = 2*q[0]*q[3]
+square = unary_guvectorize(_square)
 
 
-@unary_guvectorize
-def reciprocal(q, qout):
+def _reciprocal(q, qout):
     """Return reciprocal (inverse) of quaternion q.inverse"""
     norm = q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2
     qout[0] = q[0] / norm
     qout[1] = -q[1] / norm
     qout[2] = -q[2] / norm
     qout[3] = -q[3] / norm
+reciprocal = unary_guvectorize(_reciprocal)
 
 
-@binary_guvectorize
-def bitwise_or(q1, q2, qout):
+def _bitwise_or(q1, q2, qout):
     """Return scalar product of quaternions q1|q2
 
     If we denote by <a>ₛ the grade-s component of the general multivector `a`,
@@ -312,10 +315,10 @@ def bitwise_or(q1, q2, qout):
     qout[1] = 0.0
     qout[2] = 0.0
     qout[3] = 0.0
+bitwise_or = binary_guvectorize(_bitwise_or)
 
 
-@binary_guvectorize
-def bitwise_xor(q1, q2, qout):
+def _bitwise_xor(q1, q2, qout):
     """Return outer product of quaternions q1^q2
 
     This is the generalized outer product of geometric algebra.  If we denote
@@ -331,13 +334,14 @@ def bitwise_xor(q1, q2, qout):
     qout[1] = q1[0]*q2[1] + q1[1]*q2[0]
     qout[2] = q1[0]*q2[2] + q1[2]*q2[0]
     qout[3] = q1[0]*q2[3] + q1[3]*q2[0]
+bitwise_xor = binary_guvectorize(_bitwise_xor)
 
 
+_invert = _conj
 invert = conj  # reversion (= conjugate for quaternion algebra)
 
 
-@binary_guvectorize
-def left_shift(q1, q2, qout):
+def _left_shift(q1, q2, qout):
     """Return left-contraction of quaternions q1<<q2 = q1⌋q1
 
     For all quaternions a, b, c, we have
@@ -349,10 +353,10 @@ def left_shift(q1, q2, qout):
     qout[1] = q1[0]*q2[1]
     qout[2] = q1[0]*q2[2]
     qout[3] = q1[0]*q2[3]
+left_shift = binary_guvectorize(_left_shift)
 
 
-@binary_guvectorize
-def right_shift(q1, q2, qout):
+def _right_shift(q1, q2, qout):
     """Return right-contraction of quaternions q1>>q2 = q1⌊q2
 
     For all quaternions a, b, c, we have
@@ -364,38 +368,39 @@ def right_shift(q1, q2, qout):
     qout[1] = q1[1]*q2[0]
     qout[2] = q1[2]*q2[0]
     qout[3] = q1[3]*q2[0]
+right_shift = binary_guvectorize(_right_shift)
 
 
-@guvectorize([(float64[:], float64[:], boolean[:])], '(n),(n)->()')
-def not_equal(q1, q2, bout):
+def _not_equal(q1, q2, bout):
     bout[0] = np.any(q1[:] != q2[:])
+not_equal = guvectorize([(float64[:], float64[:], boolean[:])], '(n),(n)->()')(_not_equal)
 
 
-@guvectorize([(float64[:], float64[:], boolean[:])], '(n),(n)->()')
-def equal(q1, q2, bout):
+def _equal(q1, q2, bout):
     bout[0] = np.all(q1[:] == q2[:])
+equal = guvectorize([(float64[:], float64[:], boolean[:])], '(n),(n)->()')(_equal)
 
 
-@guvectorize([(float64[:], float64[:], boolean[:])], '(n),(n)->()')
-def logical_and(q1, q2, bout):
+def _logical_and(q1, q2, bout):
     bout[0] = np.any(q1[:]) and np.any(q2[:])
+logical_and = guvectorize([(float64[:], float64[:], boolean[:])], '(n),(n)->()')(_logical_and)
 
 
-@guvectorize([(float64[:], float64[:], boolean[:])], '(n),(n)->()')
-def logical_or(q1, q2, bout):
+def _logical_or(q1, q2, bout):
     bout[0] = np.any(q1[:]) or np.any(q2[:])
+logical_or = guvectorize([(float64[:], float64[:], boolean[:])], '(n),(n)->()')(_logical_or)
 
 
-@guvectorize([(float64[:], boolean[:])], '(n)->()')
-def isfinite(qin, bout):
+def _isfinite(qin, bout):
     bout[0] = np.isfinite(qin[0]) and np.isfinite(qin[1]) and np.isfinite(qin[2]) and np.isfinite(qin[3])
+isfinite = guvectorize([(float64[:], boolean[:])], '(n)->()')(_isfinite)
 
 
-@guvectorize([(float64[:], boolean[:])], '(n)->()')
-def isinf(qin, bout):
+def _isinf(qin, bout):
     bout[0] = np.isinf(qin[0]) or np.isinf(qin[1]) or np.isinf(qin[2]) or np.isinf(qin[3])
+isinf = guvectorize([(float64[:], boolean[:])], '(n)->()')(_isinf)
 
 
-@guvectorize([(float64[:], boolean[:])], '(n)->()')
-def isnan(qin, bout):
+def _isnan(qin, bout):
     bout[0] = np.isnan(qin[0]) or np.isnan(qin[1]) or np.isnan(qin[2]) or np.isnan(qin[3])
+isnan = guvectorize([(float64[:], boolean[:])], '(n)->()')(_isnan)
