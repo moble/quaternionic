@@ -94,10 +94,7 @@ class QuaternionConvertersMixin(abc.ABC):
             If any of the eigenvalue solutions does not converge
 
         """
-        try:
-            from scipy import linalg
-        except ImportError:
-            linalg = False
+        from scipy import linalg
 
         rot = np.array(rot, copy=False)
         shape = rot.shape[:-2]
