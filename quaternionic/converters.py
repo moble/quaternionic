@@ -315,12 +315,13 @@ class QuaternionConvertersMixin(abc.ABC):
             been using quaternions like a sensible person.
 
         """
-        s = self.flattened
-        alpha_beta_gamma = np.empty(s.shape[0] + (3,))
+        s = self.reshape((-1, 4))
+        alpha_beta_gamma = np.empty((s.shape[0], 3))
         for i in range(s.shape[0]):
-            alpha_beta_gamma[i, 0] = np.arctan2(q[i, 3], q[i, 0]) + np.arctan2(-q[i, 1], q[i, 2])
-            alpha_beta_gamma[i, 1] = 2*np.arccos(np.sqrt((q[i, 0]**2 + q[i, 3]**2) / n))
-            alpha_beta_gamma[i, 2] = np.arctan2(q[i, 3], q[i, 0]) - np.arctan2(-q[i, 1], q[i, 2])
+            n = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
+            alpha_beta_gamma[i, 0] = np.arctan2(s[i, 3], s[i, 0]) + np.arctan2(-s[i, 1], s[i, 2])
+            alpha_beta_gamma[i, 1] = 2*np.arccos(np.sqrt((s[i, 0]**2 + s[i, 3]**2) / n))
+            alpha_beta_gamma[i, 2] = np.arctan2(s[i, 3], s[i, 0]) - np.arctan2(-s[i, 1], s[i, 2])
         return alpha_beta_gamma.reshape(self.shape[:-1] + (3,))
 
     @classmethod
@@ -399,7 +400,7 @@ class QuaternionConvertersMixin(abc.ABC):
             rotation about `z`.
 
         """
-        return to_euler_angles(self)[..., 1::-1]
+        return self.to_euler_angles[..., 1::-1]
 
     @classmethod
     def from_spherical_coordinates(cls, theta_phi, phi=None):
