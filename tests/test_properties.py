@@ -49,6 +49,13 @@ def test_rotate_vectors(Rs):
     one, x, y, z = tuple(quaternionic.array(np.eye(4)))
     zero = 0.0 * one
 
+    with pytest.raises(ValueError):
+        one.rotate(np.array(3.14))
+    with pytest.raises(ValueError):
+        one.rotate(np.random.rand(17, 9, 4))
+    with pytest.raises(ValueError):
+        one.rotate(np.random.rand(17, 9, 3), axis=1)
+
     np.random.seed(1234)
     # Test (1)*(1)
     vecs = np.random.rand(3)

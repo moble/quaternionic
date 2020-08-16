@@ -175,16 +175,18 @@ def test_quaternion_log_exp(Qs, Q_names, Q_conditions):
 
 # Binary quat returners
 def test_quaternion_conjugate(Qs, Q_names, Q_conditions):
-    for conj_func in [np.conj, np.conjugate, lambda q: q.conj, lambda q: q.conjugate()]:
-        assert Qs[Q_names.Q].conjugate() == Qs[Q_names.Qbar]
+    for conj_func in [np.conj, np.conjugate, lambda q: q.conj(), lambda q: q.conjugate()]:
+        assert conj_func(Qs[Q_names.Q]) == Qs[Q_names.Qbar]
         for q in Qs[Q_conditions.nonnan]:
-            assert q.conjugate() == q.conj()
-            assert q.conjugate().conjugate() == q
-            c = q.conjugate()
+            assert conj_func(conj_func(q)) == q
+            c = conj_func(q)
             assert c.w == q.w
             assert c.x == -q.x
             assert c.y == -q.y
             assert c.z == -q.z
+    for q in Qs[Q_conditions.nonnan]:
+        assert q.conjugate() == q.conj()
+        assert np.conjugate(q) == np.conj(q)
 
 
 def test_xor():
