@@ -41,7 +41,7 @@ class QuaternionConvertersMixin(abc.ABC):
 
         """
         s = self.reshape((-1, 4))
-        m = np.empty(s.shape[:1] + (3, 3))
+        m = np.empty(s.shape[:1] + (3, 3), dtype=self.dtype)
         for i in range(s.shape[0]):
             n = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
             m[i, 0, 0] = 1.0 - 2*(s[i, 2]**2 + s[i, 3]**2) / n
@@ -103,36 +103,36 @@ class QuaternionConvertersMixin(abc.ABC):
         rot = np.array(rot, copy=False)
         shape = rot.shape[:-2]
 
-        if linalg and nonorthogonal:
+        if nonorthogonal:
             from operator import mul
             from functools import reduce
 
-            K3 = np.empty(shape+(4, 4))
-            K3[..., 0, 0] = (rot[..., 0, 0] - rot[..., 1, 1] - rot[..., 2, 2])/3.0
-            K3[..., 0, 1] = (rot[..., 1, 0] + rot[..., 0, 1])/3.0
-            K3[..., 0, 2] = (rot[..., 2, 0] + rot[..., 0, 2])/3.0
-            K3[..., 0, 3] = (rot[..., 1, 2] - rot[..., 2, 1])/3.0
+            K3 = np.empty(shape+(4, 4), dtype=rot.dtype)
+            K3[..., 0, 0] = (rot[..., 0, 0] - rot[..., 1, 1] - rot[..., 2, 2])/3
+            K3[..., 0, 1] = (rot[..., 1, 0] + rot[..., 0, 1])/3
+            K3[..., 0, 2] = (rot[..., 2, 0] + rot[..., 0, 2])/3
+            K3[..., 0, 3] = (rot[..., 1, 2] - rot[..., 2, 1])/3
             K3[..., 1, 0] = K3[..., 0, 1]
-            K3[..., 1, 1] = (rot[..., 1, 1] - rot[..., 0, 0] - rot[..., 2, 2])/3.0
-            K3[..., 1, 2] = (rot[..., 2, 1] + rot[..., 1, 2])/3.0
-            K3[..., 1, 3] = (rot[..., 2, 0] - rot[..., 0, 2])/3.0
+            K3[..., 1, 1] = (rot[..., 1, 1] - rot[..., 0, 0] - rot[..., 2, 2])/3
+            K3[..., 1, 2] = (rot[..., 2, 1] + rot[..., 1, 2])/3
+            K3[..., 1, 3] = (rot[..., 2, 0] - rot[..., 0, 2])/3
             K3[..., 2, 0] = K3[..., 0, 2]
             K3[..., 2, 1] = K3[..., 1, 2]
-            K3[..., 2, 2] = (rot[..., 2, 2] - rot[..., 0, 0] - rot[..., 1, 1])/3.0
-            K3[..., 2, 3] = (rot[..., 0, 1] - rot[..., 1, 0])/3.0
+            K3[..., 2, 2] = (rot[..., 2, 2] - rot[..., 0, 0] - rot[..., 1, 1])/3
+            K3[..., 2, 3] = (rot[..., 0, 1] - rot[..., 1, 0])/3
             K3[..., 3, 0] = K3[..., 0, 3]
             K3[..., 3, 1] = K3[..., 1, 3]
             K3[..., 3, 2] = K3[..., 2, 3]
-            K3[..., 3, 3] = (rot[..., 0, 0] + rot[..., 1, 1] + rot[..., 2, 2])/3.0
+            K3[..., 3, 3] = (rot[..., 0, 0] + rot[..., 1, 1] + rot[..., 2, 2])/3
 
             if not shape:
-                q = np.empty((4,))
+                q = np.empty((4,), dtype=rot.dtype)
                 eigvals, eigvecs = linalg.eigh(K3.T, eigvals=(3, 3))
                 q[0] = eigvecs[-1]
                 q[1:] = -eigvecs[:-1].flatten()
                 return cls(q)
             else:
-                q = np.empty(shape+(4,))
+                q = np.empty(shape+(4,), dtype=rot.dtype)
                 for flat_index in range(reduce(mul, shape)):
                     multi_index = np.unravel_index(flat_index, shape)
                     eigvals, eigvecs = linalg.eigh(K3[multi_index], eigvals=(3, 3))
@@ -140,8 +140,8 @@ class QuaternionConvertersMixin(abc.ABC):
                     q[multi_index+(slice(1,None),)] = -eigvecs[:-1].flatten()
                 return cls(q)
 
-        else:  # No scipy.linalg or not `nonorthogonal`
-            diagonals = np.empty(shape+(4,))
+        else:  # Not `nonorthogonal`
+            diagonals = np.empty(shape+(4,), dtype=rot.dtype)
             diagonals[..., 0] = rot[..., 0, 0]
             diagonals[..., 1] = rot[..., 1, 1]
             diagonals[..., 2] = rot[..., 2, 2]
@@ -221,7 +221,7 @@ class QuaternionConvertersMixin(abc.ABC):
 
         """
         s = self.reshape((-1, 4))
-        m = np.zeros(s.shape[0] + (4, 4))
+        m = np.zeros(s.shape[0] + (4, 4), dtype=self.dtype)
         for i in range(s.shape[0]):
             m[i, 0, 0] = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
             m[i, 1, 1] = s[i, 0]**2 + s[i, 1]**2 - s[i, 2]**2 - s[i, 3]**2
@@ -272,7 +272,7 @@ class QuaternionConvertersMixin(abc.ABC):
 
         """
         vec = np.asarray(vec)
-        quats = np.zeros(vec.shape[:-1] + (4,))
+        quats = np.zeros(vec.shape[:-1] + (4,), dtype=vec.dtype)
         quats[..., 1:] = vec[...] / 2
         return np.exp(cls(quats))
 
@@ -317,7 +317,7 @@ class QuaternionConvertersMixin(abc.ABC):
 
         """
         s = self.reshape((-1, 4))
-        alpha_beta_gamma = np.empty((s.shape[0], 3))
+        alpha_beta_gamma = np.empty((s.shape[0], 3), dtype=self.dtype)
         for i in range(s.shape[0]):
             n = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
             alpha_beta_gamma[i, 0] = np.arctan2(s[i, 3], s[i, 0]) + np.arctan2(-s[i, 1], s[i, 2])
@@ -363,17 +363,17 @@ class QuaternionConvertersMixin(abc.ABC):
         """
         # Figure out the input angles from either type of input
         if gamma is None:
-            alpha_beta_gamma = np.asarray(alpha_beta_gamma, dtype=float)
+            alpha_beta_gamma = np.asarray(alpha_beta_gamma)
             alpha = alpha_beta_gamma[..., 0]
             beta  = alpha_beta_gamma[..., 1]
             gamma = alpha_beta_gamma[..., 2]
         else:
-            alpha = np.asarray(alpha_beta_gamma, dtype=float)
-            beta  = np.asarray(beta, dtype=float)
-            gamma = np.asarray(gamma, dtype=float)
+            alpha = np.asarray(alpha_beta_gamma)
+            beta  = np.asarray(beta)
+            gamma = np.asarray(gamma)
 
         # Set up the output array
-        R = np.empty(np.broadcast(alpha, beta, gamma).shape + (4,))
+        R = np.empty(np.broadcast(alpha, beta, gamma).shape + (4,), dtype=alpha.dtype)
 
         # Compute the actual values of the quaternion components
         R[..., 0] =  np.cos(beta/2)*np.cos((alpha+gamma)/2)  # scalar quaternion components
@@ -440,15 +440,15 @@ class QuaternionConvertersMixin(abc.ABC):
         """
         # Figure out the input angles from either type of input
         if phi is None:
-            theta_phi = np.asarray(theta_phi, dtype=float)
+            theta_phi = np.asarray(theta_phi)
             theta = theta_phi[..., 0]
             phi  = theta_phi[..., 1]
         else:
-            theta = np.asarray(theta_phi, dtype=float)
-            phi = np.asarray(phi, dtype=float)
+            theta = np.asarray(theta_phi)
+            phi = np.asarray(phi)
 
         # Set up the output array
-        R = np.empty(np.broadcast(theta, phi).shape + (4,))
+        R = np.empty(np.broadcast(theta, phi).shape + (4,), dtype=theta.dtype)
 
         # Compute the actual values of the quaternion components
         R[..., 0] =  np.cos(phi/2)*np.cos(theta/2)  # scalar quaternion components

@@ -223,7 +223,7 @@ class QuaternionPropertiesMixin(abc.ABC):
             The rotated vectors.  This array has shape self.shape+v.shape.
 
         """
-        v = np.asarray(v, dtype=float)
+        v = np.asarray(v, dtype=self.dtype)
         if v.ndim < 1 or 3 not in v.shape:
             raise ValueError("Input `v` does not have at least one dimension of length 3")
         if v.shape[axis] != 3:
