@@ -98,7 +98,7 @@ class QuaternionPropertiesMixin(abc.ABC):
 
         """
         s = self.reshape((-1, 4))
-        n = np.empty(s.shape[0])
+        n = np.empty(s.shape[0], dtype=self.dtype)
         for i in range(s.shape[0]):
             n[i] = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
         return n.reshape(self.shape[:-1])
@@ -116,7 +116,7 @@ class QuaternionPropertiesMixin(abc.ABC):
 
         """
         s = self.reshape((-1, 4))
-        n = np.empty(s.shape[0])
+        n = np.empty(s.shape[0], dtype=self.dtype)
         for i in range(s.shape[0]):
             n[i] = np.sqrt(s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2)
         return n.reshape(self.shape[:-1])
@@ -133,7 +133,7 @@ class QuaternionPropertiesMixin(abc.ABC):
     def inverse(self):
         """The multiplicative inverse of this quaternion"""
         s = self.reshape((-1, 4))
-        inv = np.empty(s.shape)
+        inv = np.empty(s.shape, dtype=self.dtype)
         for i in range(s.shape[0]):
             n = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
             inv[i, 0] = s[i, 0] / n
