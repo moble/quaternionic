@@ -4,15 +4,15 @@
 
 try:
     import importlib.metadata as importlib_metadata
-except ModuleNotFoundError:
+except ModuleNotFoundError:  # pragma: no cover
     import importlib_metadata
 
 __version__ = importlib_metadata.version(__name__)
 
 from .utilities import jit, guvectorize
-from . import algebra, distance, utilities
+from . import algebra, properties, converters, distance, utilities
 
-algebra_ufuncs = type('algebra_gufuncs', (object,), dict())()
+algebra_ufuncs = type('AlgebraUfuncs', (object,), dict())()
 utilities.guvectorize_module_functions(algebra, algebra_ufuncs)
 
 from .array import array
