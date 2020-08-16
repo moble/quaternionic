@@ -16,6 +16,7 @@ importlib-metadata = {version = "^1.0", python = "<3.8"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.0"
+pytest-cov = "^2.10.1"
 
 [tool.black]
 line-length = 120
@@ -24,7 +25,7 @@ target-version = ['py36']
 [tool.pytest.ini_options]
 minversion = "6.0"
 norecursedirs = ".* build dist *.egg-info install ENV"
-addopts = "-v --tb=short --doctest-glob=''"
+addopts = "-v --tb=short --doctest-glob='' --cov --cov-branch --cov-report html"
 
 [build-system]
 requires = ["poetry>=0.12"]
