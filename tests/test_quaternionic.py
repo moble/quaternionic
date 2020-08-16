@@ -12,7 +12,6 @@ on_windows = ('win' in platform.lower() and not 'darwin' in platform.lower())
 eps = np.finfo(float).eps
 
 
-
 def test_getting_components():
     q = quaternionic.array([1, 2, 3, 4])  # Note the integer input
     assert q.w == 1.0
@@ -221,7 +220,7 @@ def test_quaternion_absolute(Qs):
         for q in Qs[Qs_nan]:
             assert np.isnan(norm(q))
         for q in Qs[Qs_inf]:
-            if on_windows:
+            if on_windows:  # pragma: no cover
                 assert np.isinf(norm(q)) or np.isnan(norm(q))
             else:
                 assert np.isinf(norm(q))
@@ -235,7 +234,7 @@ def test_quaternion_norm(Qs):
     for q in Qs[Qs_nan]:
         assert np.isnan(q.norm)
     for q in Qs[Qs_inf]:
-        if on_windows:
+        if on_windows:  # pragma: no cover
             assert np.isinf(q.norm) or np.isnan(q.norm)
         else:
             assert np.isinf(q.norm)
@@ -497,14 +496,10 @@ def test_to_rotation_matrix(Rs):
 
 
 def test_from_rotation_matrix(Rs):
-    try:
-        from scipy import linalg
-        have_linalg = True
-    except ImportError:
-        have_linalg = False
+    from scipy import linalg
 
     for nonorthogonal in [True, False]:
-        if nonorthogonal and have_linalg:
+        if nonorthogonal:
             rot_mat_eps = 10*eps
         else:
             rot_mat_eps = 5*eps
@@ -696,3 +691,29 @@ def test_to_euler_angles():
     q0 = quaternionic.array(0, 0.6, 0.8, 0)
     assert q0.norm == 1.0
     assert abs(q0 - quaternionic.array.from_euler_angles(*list(q0.to_euler_angles))) < 1.e-15
+
+
+def test_types_to_ftylist():
+    import numba
+    types_to_ftylist = quaternionic.utilities.convert_numpy_ufunc_type_to_numba_ftylist
+    types = '?bhilqpBHILQPfdgF->D'
+    ftylist = numba.complex128(
+        numba.boolean,
+        numba.byte,
+        numba.short,
+        numba.intc,
+        numba.int_,
+        numba.longlong,
+        numba.intp,
+        numba.char,
+        numba.ushort,
+        numba.uintc,
+        numba.uint,
+        numba.ulonglong,
+        numba.uintp,
+        numba.float32,
+        numba.float_,
+        numba.double,
+        numba.complex64,
+    )
+    assert types_to_ftylist([types]) == [ftylist]
