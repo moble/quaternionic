@@ -168,7 +168,6 @@ class QuaternionPropertiesMixin(abc.ABC):
         return self.view(np.ndarray)
 
     @property
-    @jit
     def flattened(self):
         """A view of this array with all but the last dimension combined into one"""
         return self.reshape((-1, 4))

@@ -45,6 +45,13 @@ def test_setting_components():
     assert np.array_equal(q.ndarray, [1.0, 2.0, 3.0, 4.0])
 
 
+def test_iterator():
+    a = np.arange(17*3*4).reshape((17, 3, 4))
+    q = quaternionic.array(a)
+    for i, qi in enumerate(q.iterator):
+        assert np.array_equal(qi, np.arange(4)+4.0*i)
+
+
 def test_rotate_vectors(Rs):
     one, x, y, z = tuple(quaternionic.array(np.eye(4)))
     zero = 0.0 * one
