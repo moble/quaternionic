@@ -61,10 +61,8 @@ class array(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
         if isinstance(input_array, Real) and len(args) >= 3 and all(isinstance(a, Real) for a in args[:3]):
             input_array = [input_array,] + list(args[:3])
         input_array = np.asanyarray(input_array, dtype=float)
-        if not hasattr(input_array, 'shape'):
-            raise ValueError("not hasattr(input_array, 'shape')")
-        if len(input_array.shape)==0:
-            raise ValueError("len(input_array.shape)==0")
+        if len(input_array.shape) == 0:
+            raise ValueError("len(input_array.shape) == 0")
         if input_array.shape[-1] != 4:
             raise ValueError(
                 f"\nInput array has shape {input_array.shape} when viewed as a float array.\n"
@@ -79,10 +77,7 @@ class array(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
         # not always be true, but there's no simple way to decide more
         # correctly.
         r = super().__getitem__(i)
-        if hasattr(r, 'shape') and len(r.shape)>0 and r.shape[-1] == 4:
-            return type(self)(r)
-        else:
-            return r
+        return type(self)(r)
 
     def __array_finalize__(self, obj):
         if self.shape[-1] != 4:
@@ -96,12 +91,17 @@ class array(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
                 "arrays of individual components, and `q.vector` to return the \"vector\" part."
             )
 
-    def __array_ufunc__(self, ufunc, method, *args, out=None, **kwargs):
+    def __array_ufunc__(self, ufunc, method, *args, **kwargs):
         from . import algebra_ufuncs as algebra
+
+        out = kwargs.pop('out', None)
 
         # We will not be supporting any more ufunc keywords beyond `out`
         if kwargs:
             raise NotImplementedError(f"Unrecognized arguments to {type(self).__name__}.__array_ufunc__: {kwargs}")
+
+        if method in ["reduce", "accumulate", "reduceat", "outer", "at"]:
+            raise NotImplementedError(f"Only __call__ method works for quaternionic arrays")
 
         this_type = lambda o: isinstance(o, type(self))
 
@@ -159,32 +159,44 @@ class array(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
             np.exp, np.log, np.sqrt, np.square, np.reciprocal,
         ]:
             if this_type(args[0]):
-                qout = np.empty(args[0].shape) if out is None else out[0]
-                getattr(algebra, ufunc.__name__)(args[0].ndarray, qout)
-                result = type(self)(qout)
+                a1 = args[0]
+                result = out or np.zeros(a1.shape)
+                if isinstance(result, tuple):
+                    result = result[0]
+                if isinstance(result, type(self)):
+                    result = result.view(np.ndarray)
+                getattr(algebra, ufunc.__name__)(a1.ndarray, result)
+                result = type(self)(result)
             else:
                 return NotImplemented
 
         # float64[4](float64[4], float64)
         elif ufunc in [np.float_power]:
-            a1, a2 = args[:2]
-            b1 = a1.ndarray[..., 0]
-            b2 = a2
-            shape = np.broadcast(b1, b2).shape + (4,)
-            result = out or np.zeros(shape)
-            if isinstance(result, tuple):
-                result = result[0]
-            if isinstance(result, type(self)):
-                result = result.view(np.ndarray)
-            algebra.float_power(a1.ndarray, a2, result)
-            result = type(self)(result)
+            if this_type(args[0]) and not this_type(args[1]):
+                a1, a2 = args[:2]
+                b1 = a1.ndarray[..., 0]
+                b2 = a2
+                shape = np.broadcast(b1, b2).shape + (4,)
+                result = out or np.zeros(shape)
+                if isinstance(result, tuple):
+                    result = result[0]
+                if isinstance(result, type(self)):
+                    result = result.view(np.ndarray)
+                algebra.float_power(a1.ndarray, a2, result)
+                result = type(self)(result)
+            else:
+                return NotImplemented
 
         # float64(float64[4])
         elif ufunc in [np.absolute]:
             if this_type(args[0]):
-                qout = np.empty(args[0].shape[:-1]) if out is None else out[0]
-                algebra.absolute(args[0].ndarray, qout)
-                result = qout
+                a1 = args[0]
+                result = out or np.zeros(a1.shape[:-1])
+                if isinstance(result, tuple):
+                    result = result[0]
+                if isinstance(result, type(self)):
+                    result = result.view(np.ndarray)
+                getattr(algebra, ufunc.__name__)(a1.ndarray, result)
             else:
                 return NotImplemented
 
@@ -192,33 +204,40 @@ class array(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
         elif ufunc in [np.not_equal, np.equal, np.logical_and, np.logical_or]:
             # Note that these ufuncs are used in numerous unexpected places
             # throughout numpy, so we really need them for basic things to work
-            a1, a2 = args[:2]
-            b1 = a1.ndarray[..., 0]
-            b2 = a2.ndarray[..., 0]
-            shape = np.broadcast(b1, b2).shape
-            result = out or np.zeros(shape, dtype=bool)
-            if isinstance(result, tuple):
-                result = result[0]
-            if isinstance(result, type(self)):
-                result = result.view(np.ndarray)
-            getattr(algebra, ufunc.__name__)(a1.ndarray, a2.ndarray, result)
+            if this_type(args[0]) and this_type(args[1]):
+                a1, a2 = args[:2]
+                b1 = a1.ndarray[..., 0]
+                b2 = a2.ndarray[..., 0]
+                shape = np.broadcast(b1, b2).shape
+                result = out or np.zeros(shape, dtype=bool)
+                if isinstance(result, tuple):
+                    result = result[0]
+                if isinstance(result, type(self)):
+                    result = result.view(np.ndarray)
+                getattr(algebra, ufunc.__name__)(a1.ndarray, a2.ndarray, result)
+            else:
+                return NotImplemented
 
         # bool(float64[4])
         elif ufunc in [np.isfinite, np.isinf, np.isnan]:
             if this_type(args[0]):
-                bout = np.empty(args[0].shape[:-1], dtype=bool) if out is None else out[0]
-                getattr(algebra, ufunc.__name__)(args[0].ndarray, bout)
-                result = bout
+                a1 = args[0]
+                result = out or np.zeros(a1.shape[:-1], dtype=bool)
+                if isinstance(result, tuple):
+                    result = result[0]
+                if isinstance(result, type(self)):
+                    result = result.view(np.ndarray)
+                getattr(algebra, ufunc.__name__)(a1.ndarray, result)
             else:
                 return NotImplemented
 
         else:
             return NotImplemented
 
-        if result is NotImplemented:
-            return NotImplemented
-
-        if method == 'at':
-            return
-
         return result
+
+    def __repr__(self):
+        return repr(self.ndarray)
+
+    def __str__(self):
+        return str(self.ndarray)

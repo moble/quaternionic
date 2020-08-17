@@ -4,6 +4,212 @@ import quaternionic
 import pytest
 
 
+# Array methods
+def test_new():
+    array = quaternionic.array
+    q = array(1, 2, 3, 4)
+    assert q.dtype == np.float
+    assert q.shape == (4,)
+    assert q.w == 1.0 and q.x == 2.0 and q.y == 3.0 and q.z == 4.0
+    q = array([1, 2, 3, 4])
+    assert q.dtype == np.float
+    assert q.shape == (4,)
+    assert q.w == 1.0 and q.x == 2.0 and q.y == 3.0 and q.z == 4.0
+    q = array([[1, 2, 3, 4]])
+    assert q.dtype == np.float
+    assert q.shape == (1, 4)
+    assert q.w == 1.0 and q.x == 2.0 and q.y == 3.0 and q.z == 4.0
+    with pytest.raises(ValueError):
+        array(np.array(3.14))
+    with pytest.raises(ValueError):
+        array(np.array([]))
+    with pytest.raises(ValueError):
+        array(np.random.rand(4, 3))
+
+
+def test_getitem():
+    q = quaternionic.array(np.random.rand(17, 3, 4))
+    p = q[1:-1]
+    assert isinstance(p, quaternionic.array)
+    assert p.shape == (q.shape[0]-2,) + q.shape[1:]
+    assert np.array_equal(p.ndarray, q.ndarray[1:-1])
+    with pytest.raises(ValueError):
+        q[..., 1:3]
+
+
+def test_array_finalize():
+    q = quaternionic.array([1, 2, 3, 4])
+    with pytest.raises(ValueError):
+        q[1:3]
+
+
+def test_array_ufunc():
+    np.random.seed(1234)
+
+    q = quaternionic.array(np.random.rand(1, 3, 4))
+    with pytest.raises(NotImplementedError):
+        np.exp(q, extra_arg=True)
+
+    with pytest.raises(NotImplementedError):
+        np.negative.at(q, [0, 1])
+
+    p = quaternionic.array(np.random.rand(17, 3, 4))
+    q = quaternionic.array(np.random.rand(1, 3, 4))
+    pq1 = np.add(p, q)
+    assert isinstance(pq1, quaternionic.array)
+    assert pq1.shape == (17, 3, 4)
+    assert np.array_equal(np.add(p.ndarray, q.ndarray), pq1.ndarray)
+    pq2 = quaternionic.array(np.empty((17, 3, 4)))
+    np.add(p, q, out=pq2)
+    assert np.array_equal(pq1, pq2)
+    assert isinstance(pq2, quaternionic.array)
+
+    p = quaternionic.array(np.random.rand(17, 3, 4))
+    q = np.random.rand(1, 3)
+    pq1 = np.multiply(p, q)
+    assert isinstance(pq1, quaternionic.array)
+    assert pq1.shape == (17, 3, 4)
+    pq2 = quaternionic.array(np.empty((17, 3, 4)))
+    np.multiply(p, q, out=pq2)
+    assert np.array_equal(pq1, pq2)
+    assert isinstance(pq2, quaternionic.array)
+
+    p = np.random.rand(1, 3)
+    q = quaternionic.array(np.random.rand(17, 3, 4))
+    pq1 = np.multiply(p, q)
+    assert isinstance(pq1, quaternionic.array)
+    assert pq1.shape == (17, 3, 4)
+    pq2 = quaternionic.array(np.empty((17, 3, 4)))
+    np.multiply(p, q, out=pq2)
+    assert np.array_equal(pq1, pq2)
+    assert isinstance(pq2, quaternionic.array)
+
+    p = np.random.rand(1, 3)
+    q = np.random.rand(17, 3, 4)
+    s = np.random.rand(17, 3)
+    pq1 = quaternionic.array(q).__array_ufunc__(np.multiply, "__call__", p, q)
+    assert pq1 == NotImplemented
+    qneg = quaternionic.array(q).__array_ufunc__(np.negative, "__call__", q)
+    assert qneg == NotImplemented
+    qabs = quaternionic.array(q).__array_ufunc__(np.absolute, "__call__", q)
+    assert qabs == NotImplemented
+    qs = quaternionic.array(q).__array_ufunc__(np.float_power, "__call__", q, s)
+    assert qs == NotImplemented
+    pq1 = quaternionic.array(q).__array_ufunc__(np.equal, "__call__", p, q)
+    assert pq1 == NotImplemented
+    qfin = quaternionic.array(q).__array_ufunc__(np.isfinite, "__call__", q)
+    assert qfin == NotImplemented
+
+    q = quaternionic.array(np.random.rand(17, 3, 4))
+    qneg = np.negative(q)
+    assert isinstance(qneg, quaternionic.array)
+    assert qneg.shape == q.shape
+    assert np.array_equal(np.negative(q.ndarray), qneg.ndarray)
+    qneg2 = np.empty(q.shape)
+    np.negative(q, out=qneg2)
+    assert np.array_equal(qneg, qneg2)
+    assert isinstance(qneg2, np.ndarray)
+    qneg2 = quaternionic.array(np.empty(q.shape))
+    np.negative(q, out=qneg2.ndarray)
+    assert np.array_equal(qneg, qneg2)
+    assert isinstance(qneg2, quaternionic.array)
+    qneg2 = quaternionic.array(np.empty(q.shape))
+    np.negative(q, out=qneg2)
+    assert np.array_equal(qneg, qneg2)
+    assert isinstance(qneg2, quaternionic.array)
+
+    p = np.random.rand(1, 3)
+    q = quaternionic.array(np.random.rand(17, 3, 4))
+    qp1 = np.float_power(q, p)
+    assert isinstance(qp1, quaternionic.array)
+    assert qp1.shape == (17, 3, 4)
+    qp2 = quaternionic.array(np.empty((17, 3, 4)))
+    np.float_power(q, p, out=qp2)
+    assert np.array_equal(qp1, qp2)
+    assert isinstance(qp2, quaternionic.array)
+
+    q = quaternionic.array(np.random.rand(17, 3, 4))
+    qabs = np.absolute(q)
+    assert isinstance(qabs, np.ndarray) and not isinstance(qabs, quaternionic.array)
+    assert qabs.shape == (17, 3)
+    qabs2 = np.empty((17, 3))
+    np.absolute(q, out=qabs2)
+    assert np.array_equal(qabs, qabs2)
+    assert isinstance(qabs2, np.ndarray) and not isinstance(qabs, quaternionic.array)
+    q = quaternionic.array(np.random.rand(17, 3, 4, 4))
+    qabs = quaternionic.array(np.empty((17, 3, 4)))
+    np.absolute(q, out=qabs)
+    assert np.array_equal(qabs, np.absolute(q))
+    assert isinstance(qabs2, np.ndarray) and isinstance(qabs, quaternionic.array)
+
+    p = quaternionic.array(np.random.rand(17, 3, 4))
+    q = quaternionic.array(np.random.rand(1, 3, 4))
+    pq1 = np.equal(p, q)
+    assert isinstance(pq1, np.ndarray) and not isinstance(pq1, quaternionic.array)
+    assert pq1.shape == (17, 3)
+    assert np.array_equal(np.all(np.equal(p.ndarray, q.ndarray), axis=-1), pq1)
+    pq2 = np.empty((17, 3), dtype=bool)
+    np.equal(p, q, out=pq2)
+    assert np.array_equal(pq1, pq2)
+    assert isinstance(pq2, np.ndarray) and not isinstance(pq2, quaternionic.array)
+    assert pq2.shape == (17, 3)
+    p = quaternionic.array(np.random.rand(17, 3, 4, 4))
+    q = quaternionic.array(np.random.rand(17, 3, 4, 4))
+    pq = quaternionic.array(np.empty((17, 3, 4)))
+    np.equal(p, q, out=pq)
+    assert isinstance(pq, np.ndarray) and isinstance(pq, quaternionic.array)
+
+    q = quaternionic.array(np.random.rand(17, 3, 4))
+    qfin = np.isfinite(q)
+    assert isinstance(qfin, np.ndarray) and not isinstance(qfin, quaternionic.array)
+    assert qfin.shape == (17, 3)
+    assert np.array_equal(np.all(np.isfinite(q.ndarray), axis=-1), qfin)
+    qfin2 = np.empty((17, 3), dtype=bool)
+    np.isfinite(q, out=qfin2)
+    assert np.array_equal(qfin, qfin2)
+    assert isinstance(qfin2, np.ndarray) and not isinstance(qfin2, quaternionic.array)
+    assert qfin2.shape == (17, 3)
+    q = quaternionic.array(np.random.rand(17, 3, 4, 4))
+    qfin = quaternionic.array(np.empty((17, 3, 4)))
+    np.isfinite(q, out=qfin)
+    assert isinstance(qfin, np.ndarray) and isinstance(qfin, quaternionic.array)
+
+    # Test the NotImplemented ufuncs
+    for binary_ufunc in [
+        np.matmul, np.logaddexp, np.logaddexp2, np.floor_divide, np.power,
+        np.remainder, np.mod, np.fmod, np.divmod, np.heaviside, np.gcd, np.lcm,
+        np.arctan2, np.hypot, np.bitwise_and, np.greater, np.greater_equal,
+        np.less, np.less_equal, np.logical_xor, np.maximum, np.minimum, np.fmax,
+        np.fmin, np.copysign, np.nextafter, np.ldexp, np.fmod,
+    ]:
+        with pytest.raises(TypeError):
+            p = quaternionic.array(np.random.rand(17, 3, 4))
+            q = quaternionic.array(np.random.rand(17, 3, 4))
+            u = binary_ufunc(p, q)
+
+    for unary_ufunc in [
+        np.fabs, np.rint, np.sign, np.exp2, np.log2, np.log10, np.expm1,
+        np.log1p, np.cbrt, np.sin, np.cos, np.tan, np.arcsin, np.arccos,
+        np.arctan, np.sinh, np.cosh, np.tanh, np.arcsinh, np.arccosh,
+        np.arctanh, np.degrees, np.radians, np.deg2rad, np.rad2deg, np.isnat,
+        np.fabs, np.signbit, np.spacing, np.modf, np.frexp, np.floor, np.ceil,
+        np.trunc, np.logical_not,
+    ]:
+        with pytest.raises(TypeError):
+            q = quaternionic.array(np.random.rand(17, 3, 4))
+            u = unary_ufunc(q)
+
+
+def test_repr():
+    q = quaternionic.array(np.random.rand(17, 3, 4))
+    assert repr(q) == repr(q.ndarray)
+
+
+def test_str():
+    q = quaternionic.array(np.random.rand(17, 3, 4))
+    assert str(q) == str(q.ndarray)
+
+
 # Unary bool returners
 def test_quaternion_nonzero(Qs, Q_names, Q_conditions):
     assert np.nonzero(Qs[Q_names.q_0])[0].size == 0  # Do this one explicitly, to not use circular logic
