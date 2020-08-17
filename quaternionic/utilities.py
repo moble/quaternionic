@@ -136,14 +136,14 @@ def pyguvectorize(f):
     import numba as nb
     inputs, output = f.signature.split('->')
     inputs = inputs.split(',')
-    slice_a = slice(None) if inputs[0]=='()' else slice(None, 1)
+    slice_a = slice(None) if inputs[0]=='()' else 0
     pad_a = np.newaxis if inputs[0]=='()' else slice(None)
     last_dim_a = slice(None, 1) if inputs[0]=='()' else slice(None)
     if len(inputs) > 1:
-        slice_b = slice(None) if inputs[1]=='()' else slice(None, 1)
+        slice_b = slice(None) if inputs[1]=='()' else 0
         pad_b = np.newaxis if inputs[1]=='()' else slice(None)
         last_dim_b = slice(None, 1) if inputs[1]=='()' else  slice(None)
-    slice_c = slice(None) if output=='()' else slice(None, 1)
+    #slice_c = slice(None) if output=='()' else 0
     pad_c = slice(None)# np.newaxis if output=='()' else slice(None)
     last_dim_c = slice(None, 1) if output=='()' else  slice(None)
     last_axis_c = tuple() if output=='()' else (4,)
@@ -151,7 +151,7 @@ def pyguvectorize(f):
     if len(inputs) == 1:
         @functools.wraps(f)
         def f_wrapped(a):
-            shape_c = a[..., slice_a].shape[:-1] + last_axis_c
+            shape_c = a[..., slice_a].shape + last_axis_c
             c = np.empty(shape_c, dtype=dtype_c)
             if not last_axis_c:
                 c = c[..., np.newaxis]
@@ -165,7 +165,7 @@ def pyguvectorize(f):
     else:
         @functools.wraps(f)
         def f_wrapped(a, b):
-            shape_c = np.broadcast(a[..., slice_a], b[..., slice_b]).shape[:-1] + last_axis_c
+            shape_c = np.broadcast(a[..., slice_a], b[..., slice_b]).shape + last_axis_c
             c = np.empty(shape_c, dtype=dtype_c)
             if not last_axis_c:
                 c = c[..., np.newaxis]

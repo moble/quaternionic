@@ -93,9 +93,14 @@ def test_types_to_ftylist():
 
 
 def test_pyguvectorize():
+    _quaternion_resolution = 10 * np.finfo(float).resolution
+    np.random.seed(1234)
+    one = quaternionic.array(1, 0, 0, 0)
     x = quaternionic.array(np.random.rand(7, 13, 4))
     y = quaternionic.array(np.random.rand(13, 4))
     z = np.random.rand(13)
+
+    arg0s = [one, -(1+2*_quaternion_resolution)*one, -one, x]
 
     for k in dir(quaternionic.algebra_ufuncs):
         if not k.startswith('__'):
@@ -103,7 +108,8 @@ def test_pyguvectorize():
             f2 = getattr(quaternionic.algebra, k)
             sig = f2.signature
             inputs = sig.split('->')[0].split(',')
-            args = [x.ndarray] if inputs[0] == '(n)' else [z,]
-            if len(inputs) > 1:
-                args.append(y.ndarray if inputs[1] == '(n)' else z)
-            assert np.array_equal(quaternionic.utilities.pyguvectorize(f2)(*args), f1(*args))
+            for arg0 in arg0s:
+                args = [arg0.ndarray] if inputs[0] == '(n)' else [z,]
+                if len(inputs) > 1:
+                    args.append(y.ndarray if inputs[1] == '(n)' else z)
+                assert np.array_equal(quaternionic.utilities.pyguvectorize(f2)(*args), f1(*args))
