@@ -1,3 +1,5 @@
+[![Documentation Status](https://readthedocs.org/projects/quaternionic/badge/?version=latest)](https://quaternionic.readthedocs.io/en/latest/?badge=latest)
+
 # Quaternions by way of numpy arrays
 
 This module subclasses numpy's array type, interpreting the array as an array of quaternions, and
