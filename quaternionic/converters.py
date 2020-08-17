@@ -221,7 +221,7 @@ class QuaternionConvertersMixin(abc.ABC):
 
         """
         s = self.reshape((-1, 4))
-        m = np.zeros(s.shape[0] + (4, 4), dtype=self.dtype)
+        m = np.zeros(s.shape[:1] + (4, 4), dtype=self.dtype)
         for i in range(s.shape[0]):
             m[i, 0, 0] = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
             m[i, 1, 1] = s[i, 0]**2 + s[i, 1]**2 - s[i, 2]**2 - s[i, 3]**2
