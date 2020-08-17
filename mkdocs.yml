@@ -1,7 +1,5 @@
 site_name: quaternionic
 
-docs_dir: .
-
 repo_name: 'moble/quaternionic'
 repo_url: https://github.com/moble/quaternionic
 
