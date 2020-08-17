@@ -175,39 +175,39 @@ def test_array_ufunc():
     assert isinstance(qfin, np.ndarray) and isinstance(qfin, quaternionic.array)
 
     # Test the NotImplemented ufuncs
-    for binary_ufunc in [
-        np.matmul, np.logaddexp, np.logaddexp2, np.floor_divide, np.power,
-        np.remainder, np.mod, np.fmod, np.divmod, np.heaviside, np.gcd, np.lcm,
-        np.arctan2, np.hypot, np.bitwise_and, np.greater, np.greater_equal,
-        np.less, np.less_equal, np.logical_xor, np.maximum, np.minimum, np.fmax,
-        np.fmin, np.copysign, np.nextafter, np.ldexp, np.fmod,
-    ]:
-        with pytest.raises(TypeError):
+    implemented_ufuncs = [
+        np.add, np.subtract, np.multiply, np.divide, np.true_divide,
+        np.bitwise_or, np.bitwise_xor, np.right_shift, np.left_shift,
+        np.negative, np.positive, np.conj, np.conjugate, np.invert,
+        np.exp, np.log, np.sqrt, np.square, np.reciprocal,
+        np.float_power,
+        np.absolute,
+        np.not_equal, np.equal, np.logical_and, np.logical_or,
+        np.isfinite, np.isinf, np.isnan,
+    ]
+    for k in dir(np):
+        attr = getattr(np, k)
+        if isinstance(attr, np.ufunc) and attr not in implemented_ufuncs:
             p = quaternionic.array(np.random.rand(17, 3, 4))
-            q = quaternionic.array(np.random.rand(17, 3, 4))
-            u = binary_ufunc(p, q)
-
-    for unary_ufunc in [
-        np.fabs, np.rint, np.sign, np.exp2, np.log2, np.log10, np.expm1,
-        np.log1p, np.cbrt, np.sin, np.cos, np.tan, np.arcsin, np.arccos,
-        np.arctan, np.sinh, np.cosh, np.tanh, np.arcsinh, np.arccosh,
-        np.arctanh, np.degrees, np.radians, np.deg2rad, np.rad2deg, np.isnat,
-        np.fabs, np.signbit, np.spacing, np.modf, np.frexp, np.floor, np.ceil,
-        np.trunc, np.logical_not,
-    ]:
-        with pytest.raises(TypeError):
-            q = quaternionic.array(np.random.rand(17, 3, 4))
-            u = unary_ufunc(q)
+            if attr.nin == 1:
+                with pytest.raises(TypeError):
+                    attr(p)
+            elif attr.nin == 2:
+                q = quaternionic.array(np.random.rand(17, 3, 4))
+                with pytest.raises(TypeError):
+                    attr(p, q)
+            else:  # pragma: no cover
+                raise ValueError(f"Unexpected number of input arguments for {k}")
 
 
 def test_repr():
     q = quaternionic.array(np.random.rand(17, 3, 4))
-    assert repr(q) == repr(q.ndarray)
+    assert repr(q) == 'quaternionic.' + repr(q.ndarray)
 
 
 def test_str():
     q = quaternionic.array(np.random.rand(17, 3, 4))
-    assert str(q) == str(q.ndarray)
+    assert str(q) == 'quaternionic.' + str(q.ndarray)
 
 
 # Unary bool returners
@@ -354,6 +354,13 @@ def test_quaternion_sqrt(Qs, Q_names, Q_conditions):
     np.random.seed(1234)
     a = quaternionic.array(np.random.uniform(-10, 10, size=10_000*4).reshape((-1, 4)))
     assert np.allclose(a, np.square(np.sqrt(a)), rtol=10*sqrt_precision, atol=0)
+    # Test some edge cases
+    _quaternion_resolution = 10 * np.finfo(float).resolution
+    for s in [-0.1, -1, -2, -3.4]:
+        q = np.sqrt(one * s)
+        assert np.array_equal(q, np.sqrt(-s)*i)
+        q = np.sqrt(one * s + quaternionic.array(0, *(0.05*np.sqrt(-s*_quaternion_resolution)*np.random.rand(3))))
+        assert np.array_equal(q, np.sqrt(-s)*i)
 
 
 def test_quaternion_square(Qs, Q_names, Q_conditions):

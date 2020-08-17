@@ -237,7 +237,7 @@ class array(QuaternionPropertiesMixin, QuaternionConvertersMixin, np.ndarray):
         return result
 
     def __repr__(self):
-        return repr(self.ndarray)
+        return 'quaternionic.' + repr(self.ndarray)
 
     def __str__(self):
-        return str(self.ndarray)
+        return 'quaternionic.' + str(self.ndarray)
