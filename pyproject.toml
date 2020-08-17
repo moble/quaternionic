@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "quaternionic"
 version = "0.1.0-alpha.0"
-description = "Interpret numpy arrays as quaternion arrays with numba acceleration"
+description = "Interpret numpy arrays as quaternionic arrays with numba acceleration"
 readme = "README.md"
 license = "MIT"
 authors = ["Michael Boyle <michael.oliver.boyle@gmail.com>"]
