@@ -167,10 +167,11 @@ Finally, there are also capabilities related to interpolation
 
 
 
-# Similar packages
+# Related packages
 
-Packages with similar features available on pypi include
-  * numpy-quaternion (aka quaternion, but renamed on pypi)
+Packages with some quaternion features available on pypi include
+
+  * numpy-quaternion (a.k.a. quaternion, but renamed on pypi)
   * clifford (very powerful; more general geometric algebras)
   * pyquaternion (many features; pure python; no acceleration)
   * quaternions (basic pure python package; no acceleration; specialized for rotations only)
@@ -180,6 +181,7 @@ Packages with similar features available on pypi include
   * mathutils (a Blender package with python bindings)
 
 Also note that there is some capability to do symbolic manipulations of quaternions in these packages:
+
   * galgebra
   * sympy.algebras.quaternion
 
