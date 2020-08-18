@@ -38,5 +38,5 @@ junit_family="xunit2"
 addopts = "-v --tb=short --doctest-glob='' --cov --cov-branch --cov-report html"
 
 [build-system]
-requires = ["setuptools", "poetry>=1.0.10"]
+requires = ["poetry>=1.0.10"]
 build-backend = "poetry.masonry.api"
