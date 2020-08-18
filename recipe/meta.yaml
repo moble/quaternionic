@@ -13,7 +13,7 @@ build:
   noarch: python
   number: {{ build_number }}
   string: {{ [build_number, ('h' + PKG_HASH), environ.get('GIT_DESCRIBE_HASH', '')]|join('_') }}
-  script: "{{ PYTHON }} -m pip install . -vv"
+  script: "poetry install -v"
   skip: True  # [py<36]
 
 requirements:
@@ -33,7 +33,7 @@ test:
   imports:
     - quaternionic
   commands:
-    - pytest --cov --cov-report html
+    - poetry run pytest --cov --cov-report html
   requires:
     - poetry
     - pytest
