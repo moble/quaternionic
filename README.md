@@ -34,17 +34,22 @@ top-level directory, run `poetry install` or just `poetry run <some command>`.
 
 # Usage
 
-Any numpy array `a` with a last axis of size 4 (and float dtype) can be reinterpreted as a
+## Basic construction
+
+Any numpy array `a` with a last axis of size 4 (and dtype=float) can be reinterpreted as a
 quaternionic array with `quaternionic.array(a)`:
 
 ```python
 import numpy as np
 import quaternionic
 
-a = 1.0 - np.random.rand(17, 3, 4)  # Just some random numbers; last dimension is 4
+a = 1.0 - np.random.rand(17, 11, 4)  # Just some random numbers; last dimension is 4
 q1 = quaternionic.array(a)  # Reinterpret an existing array
 q2 = quaternionic.array([1.2, 2.3, 3.4, 4.5])  # Create a new array
 ```
+
+In this example, `q1` is an array of 187 (17*11) quaternions, just to demonstrate that any number of
+dimensions may be used, as long as the final dimension has size 4.
 
 Here, the original array `a` will still exist just as it was, and will behave just as a normal numpy
 array — including changing its values (which will change the values in `q1`), slicing, math, etc.
@@ -56,6 +61,8 @@ Similarly, if you multiply two quaternionic arrays, their product will be comput
 quaternion multiplication, rather than element-wise multiplication of floats as numpy usually
 performs.
 
+## Algebra
+
 All the usual quaternion operations are available, including
 
   * Addition `q1 + q2`
@@ -64,13 +71,18 @@ All the usual quaternion operations are available, including
   * Division `q1 / q2`
   * Scalar multiplication `q1 * s == s * q1`
   * Scalar division `q1 / s != s / q1`
+  * Reciprocal `np.reciprocal(q1) == 1/q1`
   * Exponential `np.exp(q1)`
   * Logarithm `np.log(q1)`
   * Square-root `np.sqrt(q1)`
+  * Conjugate `np.conjugate(q1) == np.conj(q1)`
 
 All numpy [ufuncs](https://numpy.org/doc/stable/reference/ufuncs.html) that make sense for
 quaternions are supported.  When the arrays have different shapes, the usual numpy
 [broadcasting](https://numpy.org/doc/stable/user/basics.broadcasting.html) rules take effect.
+
+
+## Attributes
 
 In addition to the basic numpy array features, we also have a number of extra properties that are
 particularly useful for quaternions, including
@@ -86,7 +98,6 @@ particularly useful for quaternions, including
     * modulus, magnitude (equal to abs)
     * absolute\_square, abs2, mag2, squared_norm (equal to norm)
     * normalized
-    * conjugate, conj
     * inverse
   * Methods related to array infrastructure
     * ndarray (the numpy array underlying the quaternionic array)
@@ -103,13 +114,17 @@ numbers](http://www.cplusplus.com/reference/complex/norm/).  Because this may be
 of aliases are also provided that may be less confusing.  For example, some people find the pair
 `abs` and `abs2` to be more sensible.
 
-This package does not specialize to *unit* quaternions, since it is usually better for numerical
-purposes not to do so.  For example, whereas rotation of a vector `v` by a quaternion is usually
-implemented as `R * v * np.conjugate(R)`, it is usually better to drop the assumption that the
-quaternion has unit magnitude and implement rotation as `R * v * np.reciprocal(R)`.  That is what
-this package does by default whenever rotations are involved.
 
-Although this package does not specialize to unit quaternions, there are several converters to and
+## Rotations
+
+The most common application of quaternions is to representing rotations by means of unit
+quaternions.  Note that this package does not *restrict* quaternions to have unit norms, since it is
+usually better for numerical purposes not to do so.  For example, whereas rotation of a vector `v`
+by a quaternion is usually implemented as `R * v * np.conjugate(R)`, it is generally better to drop
+the assumption that the quaternion has unit magnitude and implement rotation as `R * v *
+np.reciprocal(R)`.  That is what this package does by default whenever rotations are involved.
+
+Although this package does not restrict to unit quaternions, there are several converters to and
 from other representations of rotations, including
 
    * to/from\_rotation\_matrix
@@ -140,9 +155,9 @@ quaternionic array from some matrix `m`, we would write
 q2 = quaternionic.array.from_rotation_matrix(m)
 ```
 
-Also note that, because the quaternions form a "double cover" of the rotation group (meaning that
-quaternions `R` and `-R` represent the same rotation), these functions are not perfect inverses of
-each other.  In this case, for example, `q1` and `q2` may have opposite signs.  We can, however,
+Also note that, because the unit quaternions form a "double cover" of the rotation group (meaning
+that quaternions `q` and `-q` represent the same rotation), these functions are not perfect inverses
+of each other.  In this case, for example, `q1` and `q2` may have opposite signs.  We can, however,
 prove that these quaternions represent the same rotations by measuring the "distance" between the
 quaternions as rotations:
 
@@ -150,20 +165,41 @@ quaternions as rotations:
 np.max(quaternionic.distance.rotation.intrinsic(q1, q2))  # Typically around 1e-15
 ```
 
-There are four types of distance measures:
 
-  * `quaternionic.distance.rotor.intrinsic`
-  * `quaternionic.distance.rotor.chordal`
-  * `quaternionic.distance.rotation.intrinsic`
-  * `quaternionic.distance.rotation.chordal`
+## Distance functions
+
+The `quaternionic.distance` contains four distance functions:
+
+  * `rotor.intrinsic`
+  * `rotor.chordal`
+  * `rotation.intrinsic`
+  * `rotation.chordal`
 
 The "rotor" distances do not account for possible differences in signs, meaning that rotor distances
 can be large even when they represent identical rotations; the "rotation" functions just return the
-smaller of the distance between `q1` and `q2` or the distance between `q1` and `-q2`.  The
-"intrinsic" functions measure the geodesic distance within the manifold of *unit* quaternions, and
-is somewhat slower but may be more meaningful; the "chordal" functions measure the Euclidean
-distance in the (linear) space of all quaternions, and is faster but its precise value is not
-necessarily as meaningful.
+smaller of the distance between `q1` and `q2` or the distance between `q1` and `-q2`.  So, for
+example, either "rotation" distance between `q` and `-q` is always zero, whereas neither "rotor"
+distance between `q` and `-q` will ever be zero (unless `q=0`).  The "intrinsic" functions measure
+the geodesic distance within the manifold of *unit* quaternions, and is somewhat slower but may be
+more meaningful; the "chordal" functions measure the Euclidean distance in the (linear) space of all
+quaternions, and is faster but its precise value is not necessarily as meaningful.
+
+These functions satisfy some important conditions.  For each of these functions `d`, and for any
+nonzero quaternions `q1`, `q2`, `a`, and `b`, we have
+
+  * symmetry: `d(q1, q2) = d(q2, q1)`
+  * invariance: `d(a*q1, a*q2) = d(q1, q2) = d(q1*b, q2*b)`
+  * identity: `d(q1, q1) = 0`
+  * positive-definiteness:
+    * For rotor functions `d(q1, q2) > 0` whenever `q1 ≠ q2`
+    * For rotation functions `d(q1, q2) > 0` whenever `q1 ≠ q2` and `q1 ≠ -q2`
+
+Note that the rotation functions also satisfy `d(q1, -q1) = 0`.
+
+See [Moakher (2002)](https://doi.org/10.1137/S0895479801383877) for a nice general discussion.
+
+
+## Interpolation
 
 Finally, there are also capabilities related to interpolation
 
@@ -171,22 +207,22 @@ Finally, there are also capabilities related to interpolation
   * squad (spherical quadratic interpolation)
 
 
-
 # Related packages
 
-Packages with some quaternion features available on pypi include
+Packages with some quaternion features include
 
-  * numpy-quaternion (a.k.a. quaternion, but renamed on pypi)
-  * clifford (very powerful; more general geometric algebras)
-  * pyquaternion (many features; pure python; no acceleration)
-  * quaternions (basic pure python package; no acceleration; specialized for rotations only)
-  * rowan (similar approach to this package, but no acceleration or overloading)
-  * Quaternion (minimal capabilities)
-  * scipy.spatial.transform.Rotation.as_quat (quaternion output for Rotation object)
-  * mathutils (a Blender package with python bindings)
+  * [quaternion](https://github.com/moble/quaternion/) (renamed
+    [numpy-quaternion](https://pypi.org/project/numpy-quaternion/) on pypi due to name conflict)
+  * [clifford](https://github.com/pygae/clifford) (very powerful; more general geometric algebras)
+  * [pyquaternion](http://kieranwynn.github.io/pyquaternion/) (many features; pure python; no acceleration)
+  * [quaternions](https://github.com/mjsobrep/quaternions) (basic pure python package; no acceleration; specialized for rotations only)
+  * [rowan](https://github.com/glotzerlab/rowan) (similar approach to this package, but no acceleration or overloading)
+  * [Quaternion](https://pypi.org/project/Quaternion/) (minimal capabilities; unmaintained)
+  * [scipy.spatial.transform.Rotation.as_quat](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.as_quat.html)
+    (quaternion output for Rotation object)
+  * [mathutils](https://gitlab.com/ideasman42/blender-mathutils) (a Blender package with python bindings)
 
 Also note that there is some capability to do symbolic manipulations of quaternions in these packages:
 
-  * galgebra
-  * sympy.algebras.quaternion
-
+  * [galgebra](https://github.com/pygae/galgebra)
+  * [sympy.algebras.quaternion](https://docs.sympy.org/latest/modules/algebras.html)
