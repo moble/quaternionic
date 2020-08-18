@@ -13,12 +13,13 @@ build:
   noarch: python
   number: {{ build_number }}
   string: {{ [build_number, ('h' + PKG_HASH), environ.get('GIT_DESCRIBE_HASH', '')]|join('_') }}
-  script: "poetry install -v"
+  script: "{{ PYTHON }} -m pip install . -vv"
   skip: True  # [py<36]
 
 requirements:
   build:
-    - poetry
+    - python
+    - pip
   host:
     - python
     - pip
