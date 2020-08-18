@@ -4,6 +4,15 @@ import quaternionic
 import pytest
 
 
+def pytest_generate_tests(metafunc):
+    if "array" in metafunc.fixturenames:
+        metafunc.parametrize(
+            "array",
+            [quaternionic.QuaternionicArray(), quaternionic.QuaternionicArray(jit=lambda f: f)],
+            ids=["jit", "no jit"],
+        )
+
+
 @pytest.fixture
 def on_windows():
     from sys import platform

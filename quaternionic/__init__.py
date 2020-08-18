@@ -15,4 +15,4 @@ from . import algebra, properties, converters, distance, utilities
 algebra_ufuncs = type('AlgebraUfuncs', (object,), dict())()
 utilities.guvectorize_module_functions(algebra, algebra_ufuncs)
 
-from .array import array
+from .arrays import QuaternionicArray, array

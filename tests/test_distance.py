@@ -4,9 +4,11 @@ import quaternionic
 import pytest
 
 
-def test_metrics(Rs):
+def test_metrics(Rs, array):
     metric_precision = 4.e-15
-    one = quaternionic.array(1, 0, 0, 0)
+    Rs = array(Rs.ndarray)
+    one = array(1, 0, 0, 0)
+
     intrinsic_funcs = (quaternionic.distance.rotor.intrinsic, quaternionic.distance.rotation.intrinsic)
     chordal_funcs = (quaternionic.distance.rotor.chordal, quaternionic.distance.rotation.chordal)
     metric_funcs = intrinsic_funcs + chordal_funcs

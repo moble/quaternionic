@@ -5,20 +5,21 @@ import quaternionic
 import pytest
 
 
-def test_to_rotation_matrix(Rs, eps):
-    one, x, y, z = tuple(quaternionic.array(np.eye(4)))
+def test_to_rotation_matrix(Rs, eps, array):
+    one, x, y, z = tuple(array(np.eye(4)))
     zero = 0.0 * one
+    Rs = array(Rs.ndarray)
 
     def quat_mat(quat):
         return np.array([(quat * v * quat.inverse).vector for v in [x, y, z]]).T
 
     def quat_mat_vec(quats):
-        mat_vec = np.array([(quats * v * np.reciprocal(quats)).vector
-                            for v in [x, y, z]])
+        mat_vec = np.array([(quats * v * np.reciprocal(quats)).vector for v in [x, y, z]])
         return np.transpose(mat_vec, tuple(range(mat_vec.ndim))[1:-1]+(-1, 0))
 
-    with pytest.raises(ZeroDivisionError):
-        zero.to_rotation_matrix
+    with np.errstate(invalid='raise'):
+        with pytest.raises((FloatingPointError, ZeroDivisionError)):
+            zero.to_rotation_matrix
 
     for R in Rs:
         # Test correctly normalized rotors:
@@ -28,11 +29,11 @@ def test_to_rotation_matrix(Rs, eps):
 
     Rs0 = Rs.copy()
     Rs0[Rs.shape[0]//2] = zero
-    with pytest.raises(ZeroDivisionError):
-        Rs0.to_rotation_matrix
+    with np.errstate(invalid='raise'):
+        with pytest.raises((FloatingPointError, ZeroDivisionError)):
+            Rs0.to_rotation_matrix
 
     # Test correctly normalized rotors:
-
     assert np.allclose(quat_mat_vec(Rs), Rs.to_rotation_matrix, atol=2*eps)
     # Test incorrectly normalized rotors:
     assert np.allclose(quat_mat_vec(Rs), (1.1*Rs).to_rotation_matrix, atol=2*eps)
@@ -64,6 +65,37 @@ def test_from_rotation_matrix(Rs, eps):
         for R3, R4 in zip(Rs3.flattened, Rs4.flattened):
             d = quaternionic.distance.rotation.intrinsic(R3, R4)
             assert d < rot_mat_eps, (R3, R4, d)  # Can't use allclose here; we don't care about rotor sign
+
+
+def test_to_transformation_matrix(Rs, eps, array):
+    one, x, y, z = tuple(array(np.eye(4)))
+    zero = 0.0 * one
+    Rs = array(Rs.ndarray)
+
+    def quat_mat(quat):
+        return np.array([(quat * v * np.conjugate(quat)).ndarray for v in [one, x, y, z]]).T
+
+    def quat_mat_vec(quats):
+        mat_vec = np.array([(quats * v * np.conjugate(quats)).ndarray for v in [one, x, y, z]])
+        return np.transpose(mat_vec, tuple(range(mat_vec.ndim))[1:-1]+(-1, 0))
+
+    # Test individual quaternions
+    for R in Rs:
+        # Test correctly normalized rotors:
+        assert np.allclose(quat_mat(R), R.to_transformation_matrix, atol=2*eps)
+        # Test incorrectly normalized rotors:
+        for scale in [0.0, 0.123, 0.5, 1.1, 2.3]:
+            assert np.allclose(scale**2*quat_mat(R), (scale*R).to_transformation_matrix, atol=2*eps)
+
+    # Test vectorized quaternions
+    # Test correctly normalized rotors:
+    assert np.allclose(quat_mat_vec(Rs), Rs.to_transformation_matrix, atol=2*eps)
+    # Test incorrectly normalized rotors:
+    for scale in [0.0, 0.123, 0.5, 1.1, 2.3]:
+        assert np.allclose(scale**2*quat_mat_vec(Rs), (scale*Rs).to_transformation_matrix, atol=2*eps)
+
+    # Simply test that this function succeeds and returns the right shape
+    assert (Rs.reshape((2, 5, 10, 4))).to_transformation_matrix.shape == (2, 5, 10, 4, 4)
 
 
 def test_to_rotation_vector():
@@ -164,17 +196,17 @@ def test_from_euler_angles():
                                                for alpha, beta, gamma in random_angles]))) < 1.e-15
 
 
-def test_to_euler_angles(eps):
+def test_to_euler_angles(eps, array):
     np.random.seed(1843)
     random_angles = [[np.random.uniform(-np.pi, np.pi),
                       np.random.uniform(-np.pi, np.pi),
                       np.random.uniform(-np.pi, np.pi)]
                      for i in range(5000)]
     for alpha, beta, gamma in random_angles:
-        R1 = quaternionic.array.from_euler_angles(alpha, beta, gamma)
-        R2 = quaternionic.array.from_euler_angles(*list(R1.to_euler_angles))
+        R1 = array.from_euler_angles(alpha, beta, gamma)
+        R2 = array.from_euler_angles(*list(R1.to_euler_angles))
         d = quaternionic.distance.rotation.intrinsic(R1, R2)
         assert d < 6e3*eps, ((alpha, beta, gamma), R1, R2, d)  # Can't use allclose here; we don't care about rotor sign
-    q0 = quaternionic.array(0, 0.6, 0.8, 0)
+    q0 = array(0, 0.6, 0.8, 0)
     assert q0.norm == 1.0
-    assert abs(q0 - quaternionic.array.from_euler_angles(*list(q0.to_euler_angles))) < 1.e-15
+    assert abs(q0 - array.from_euler_angles(*list(q0.to_euler_angles))) < 1.e-15
