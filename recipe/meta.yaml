@@ -20,7 +20,6 @@ requirements:
   build:
     - python
     - pip
-    - poetry
   host:
     - python
     - pip
