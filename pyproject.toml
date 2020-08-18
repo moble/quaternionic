@@ -34,6 +34,7 @@ target-version = ['py36']
 [tool.pytest.ini_options]
 minversion = "6.0"
 norecursedirs = ".* build dist *.egg-info install ENV"
+junit_family="xunit2"
 addopts = "-v --tb=short --doctest-glob='' --cov --cov-branch --cov-report html"
 
 [build-system]
