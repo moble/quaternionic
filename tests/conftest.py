@@ -9,7 +9,7 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize(
             "array",
             [quaternionic.QuaternionicArray(), quaternionic.QuaternionicArray(jit=lambda f: f)],
-            ids=["jit", "no jit"],
+            ids=["jit array", "non-jit array"],
         )
 
 

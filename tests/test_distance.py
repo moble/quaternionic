@@ -4,16 +4,20 @@ import quaternionic
 import pytest
 
 
-def test_metrics(Rs, array):
+@pytest.mark.parametrize("rotor,rotation,slow", [  # pragma: no branch
+    (quaternionic.distance.rotor, quaternionic.distance.rotation, True),
+    quaternionic.distance.CreateMetrics(lambda f: f, quaternionic.utilities.pyguvectorize) + (False,)
+], ids=["jit metrics", "non-jit metrics"])
+def test_metrics(Rs, array, rotor, rotation, slow):
     metric_precision = 4.e-15
     Rs = array(Rs.ndarray)
     one = array(1, 0, 0, 0)
 
-    intrinsic_funcs = (quaternionic.distance.rotor.intrinsic, quaternionic.distance.rotation.intrinsic)
-    chordal_funcs = (quaternionic.distance.rotor.chordal, quaternionic.distance.rotation.chordal)
+    intrinsic_funcs = (rotor.intrinsic, rotation.intrinsic)
+    chordal_funcs = (rotor.chordal, rotation.chordal)
     metric_funcs = intrinsic_funcs + chordal_funcs
-    rotor_funcs = (quaternionic.distance.rotor.intrinsic, quaternionic.distance.rotor.chordal)
-    rotation_funcs = (quaternionic.distance.rotation.intrinsic, quaternionic.distance.rotation.chordal)
+    rotor_funcs = (rotor.intrinsic, rotor.chordal)
+    rotation_funcs = (rotation.intrinsic, rotation.chordal)
     distance_dict = {func: func(Rs, Rs[:, np.newaxis]) for func in metric_funcs}
 
     # Check non-negativity
@@ -50,21 +54,21 @@ def test_metrics(Rs, array):
         assert (np.diag(distance_dict[func]) <= eps).all()
 
     # Chordal rotor distance from -self should be 2
-    assert (abs(quaternionic.distance.rotor.chordal(Rs, -Rs) - 2.0) < metric_precision).all()
+    assert (abs(rotor.chordal(Rs, -Rs) - 2.0) < metric_precision).all()
     # Intrinsic rotor distance from -self should be 2pi
-    assert (abs(quaternionic.distance.rotor.intrinsic(Rs, -Rs) - 2.0 * np.pi) < metric_precision).all()
+    assert (abs(rotor.intrinsic(Rs, -Rs) - 2.0 * np.pi) < metric_precision).all()
     # Rotation distances from -self should be 0
-    assert (quaternionic.distance.rotation.chordal(Rs, -Rs) == 0.0).all()
-    assert (quaternionic.distance.rotation.intrinsic(Rs, -Rs) < 5.e-16).all()
+    assert (rotation.chordal(Rs, -Rs) == 0.0).all()
+    assert (rotation.intrinsic(Rs, -Rs) < 5.e-16).all()
 
     # We expect the chordal distance to be smaller than the intrinsic distance (or equal, if the distance is zero)
-    assert np.logical_or(quaternionic.distance.rotor.chordal(one, Rs)
-                           < quaternionic.distance.rotor.intrinsic(one, Rs),
-                         Rs == one).all()
-    # Check invariance under overall rotations: d(R1, R2) = d(R3*R1, R3*R2) = d(R1*R3, R2*R3)
-    for func in quaternionic.distance.rotor.chordal, quaternionic.distance.rotation.intrinsic:
-        rotations = Rs[:, np.newaxis] * Rs
-        right_distances = func(rotations, rotations[:, np.newaxis])
-        assert (abs(distance_dict[func][:, :, np.newaxis] - right_distances) < metric_precision).all()
-        left_distances = func(rotations[:, :, np.newaxis], rotations[:, np.newaxis])
-        assert (abs(distance_dict[func] - left_distances) < metric_precision).all()
+    assert np.logical_or(rotor.chordal(one, Rs) < rotor.intrinsic(one, Rs), Rs == one).all()
+
+    if slow:
+        # Check invariance under overall rotations: d(R1, R2) = d(R3*R1, R3*R2) = d(R1*R3, R2*R3)
+        for func in rotor.chordal, rotation.intrinsic:
+            rotations = Rs[:, np.newaxis] * Rs
+            right_distances = func(rotations, rotations[:, np.newaxis])
+            assert (abs(distance_dict[func][:, :, np.newaxis] - right_distances) < metric_precision).all()
+            left_distances = func(rotations[:, :, np.newaxis], rotations[:, np.newaxis])
+            assert (abs(distance_dict[func] - left_distances) < metric_precision).all()

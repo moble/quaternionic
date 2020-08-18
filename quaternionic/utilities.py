@@ -116,7 +116,7 @@ def guvectorize_module_functions(module, obj):
             setattr(obj, k, v_ufunc)
 
 
-def pyguvectorize(f):
+def pyguvectorize(types, signature):
     """Test function to convert functions to general universal functions
 
     Note that this is almost certainly only useful for functions defined in
@@ -134,7 +134,7 @@ def pyguvectorize(f):
     import functools
     import numpy as np
     import numba as nb
-    inputs, output = f.signature.split('->')
+    inputs, output = signature.split('->')
     inputs = inputs.split(',')
     slice_a = slice(None) if inputs[0]=='()' else 0
     pad_a = np.newaxis if inputs[0]=='()' else slice(None)
@@ -147,37 +147,41 @@ def pyguvectorize(f):
     pad_c = slice(None)# np.newaxis if output=='()' else slice(None)
     last_dim_c = slice(None, 1) if output=='()' else  slice(None)
     last_axis_c = tuple() if output=='()' else (4,)
-    dtype_c = np.dtype(f.types[0][-1].dtype.name)
+    dtype_c = np.dtype(types[0][-1].dtype.name)
     if len(inputs) == 1:
-        @functools.wraps(f)
-        def f_wrapped(a):
-            shape_c = a[..., slice_a].shape + last_axis_c
-            c = np.empty(shape_c, dtype=dtype_c)
-            if not last_axis_c:
-                c = c[..., np.newaxis]
-            a, ctmp = np.broadcast_arrays(a[..., pad_a], c[..., pad_c])
-            a = a.reshape((-1, 4))
-            ctmp.flags.writeable = True
-            ctmp = ctmp.reshape((-1, 4))
-            for a_i, c_i in zip(a, ctmp):
-                f(a_i, c_i)
-            return c.reshape(shape_c)
+        def wrapper(f):
+            @functools.wraps(f)
+            def f_wrapped(a):
+                shape_c = a[..., slice_a].shape + last_axis_c
+                c = np.empty(shape_c, dtype=dtype_c)
+                if not last_axis_c:
+                    c = c[..., np.newaxis]
+                a, ctmp = np.broadcast_arrays(a[..., pad_a], c[..., pad_c])
+                a = a.reshape((-1, 4))
+                ctmp.flags.writeable = True
+                ctmp = ctmp.reshape((-1, 4))
+                for a_i, c_i in zip(a, ctmp):
+                    f(a_i, c_i)
+                return c.reshape(shape_c)
+            return f_wrapped
     else:
-        @functools.wraps(f)
-        def f_wrapped(a, b):
-            shape_c = np.broadcast(a[..., slice_a], b[..., slice_b]).shape + last_axis_c
-            c = np.empty(shape_c, dtype=dtype_c)
-            if not last_axis_c:
-                c = c[..., np.newaxis]
-            a, b, ctmp = np.broadcast_arrays(a[..., pad_a], b[..., pad_b], c[..., pad_c])
-            a = a.reshape((-1, 4))
-            b = b.reshape((-1, 4))
-            ctmp = ctmp.reshape((-1, 4))
-            ctmp.flags.writeable = True
-            for a_i, b_i, c_i in zip(a, b, ctmp):
-                f(a_i[last_dim_a], b_i[last_dim_b], c_i[last_dim_c])
-            return c.reshape(shape_c)
-    return f_wrapped
+        def wrapper(f):
+            @functools.wraps(f)
+            def f_wrapped(a, b):
+                shape_c = np.broadcast(a[..., slice_a], b[..., slice_b]).shape + last_axis_c
+                c = np.empty(shape_c, dtype=dtype_c)
+                if not last_axis_c:
+                    c = c[..., np.newaxis]
+                a, b, ctmp = np.broadcast_arrays(a[..., pad_a], b[..., pad_b], c[..., pad_c])
+                a = a.reshape((-1, 4))
+                b = b.reshape((-1, 4))
+                ctmp = ctmp.reshape((-1, 4))
+                ctmp.flags.writeable = True
+                for a_i, b_i, c_i in zip(a, b, ctmp):
+                    f(a_i[last_dim_a], b_i[last_dim_b], c_i[last_dim_c])
+                return c.reshape(shape_c)
+            return f_wrapped
+    return wrapper
 
 
 def pyguvectorize_module_functions(module, obj):
@@ -190,5 +194,5 @@ def pyguvectorize_module_functions(module, obj):
     import types
     for k, v in module.__dict__.items():
         if isinstance(v, types.FunctionType) and hasattr(v, 'types') and hasattr(v, 'signature'):
-            v_ufunc = pyguvectorize(v)
+            v_ufunc = pyguvectorize(v.types, v.signature)(v)
             setattr(obj, k, v_ufunc)
