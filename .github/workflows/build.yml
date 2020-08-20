@@ -1,0 +1,42 @@
+name: Python package
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build and test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.6, 3.7, 3.8]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    # - name: Install poetry
+    #   shell: bash -l {0}
+    #   run: |
+    #     curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+
+    - name: Install poetry
+      shell: bash -l {0}
+      run: |
+        python --version
+        python -m pip install --upgrade pip
+        #pip install poetry  # Probably okay; the reasons for the other installation method don't apply
+        pip install --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
+
+    - name: Run poetry
+      shell: bash -l {0}
+      run: |
+        python -m poetry build
+        python -m poetry install
+        python -m poetry run pytest
