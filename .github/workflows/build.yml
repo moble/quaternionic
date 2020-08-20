@@ -7,6 +7,7 @@ jobs:
     name: Build and test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.6, 3.7, 3.8]
@@ -27,8 +28,10 @@ jobs:
     - name: Install poetry
       shell: bash -l {0}
       run: |
+        python --version
         python -m pip install --upgrade pip
         #pip install poetry  # Probably okay; the reasons for the other installation method don't apply
+        export PATH="/home/runner/.local/bin:${PATH}"
         pip install --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
 
     - name: Run poetry
