@@ -31,12 +31,11 @@ jobs:
         python --version
         python -m pip install --upgrade pip
         #pip install poetry  # Probably okay; the reasons for the other installation method don't apply
-        export PATH="/home/runner/.local/bin:${PATH}"
         pip install --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
 
     - name: Run poetry
       shell: bash -l {0}
       run: |
-        poetry build
-        poetry install
-        poetry run pytest
+        python -m poetry build
+        python -m poetry install
+        python -m poetry run pytest
