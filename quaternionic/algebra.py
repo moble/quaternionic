@@ -225,7 +225,7 @@ def exp(q, qout):
 def log(q, qout):
     """Return logarithm of input quaternion log(q)"""
     b = np.sqrt(q[1]**2 + q[2]**2 + q[3]**2)
-    if np.abs(b) <= _quaternion_resolution * np.abs(q[0]):
+    if b <= _quaternion_resolution * np.abs(q[0]):
         if q[0] < 0.0:
             if np.abs(q[0] + 1) > _quaternion_resolution:
                 qout[0] = np.log(-q[0])
