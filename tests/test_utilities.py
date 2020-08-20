@@ -112,7 +112,9 @@ def test_pyguvectorize():
                 args = [arg0.ndarray] if inputs[0] == '(n)' else [z,]
                 if len(inputs) > 1:
                     args.append(y.ndarray if inputs[1] == '(n)' else z)
-                assert np.array_equal(
+                assert np.allclose(
+                    f1(*args),
                     quaternionic.utilities.pyguvectorize(f2.types, f2.signature)(f2)(*args),
-                    f1(*args)
+                    atol=0.0,
+                    rtol=_quaternion_resolution
                 )
