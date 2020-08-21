@@ -102,7 +102,7 @@ jobs:
         env:
           # Get key from https://pypi.org/manage/account/token/, and
           # copy it to Github > repo > Settings > Secrets
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}: 
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
         run: |
           python -m poetry build
           python -m poetry install
