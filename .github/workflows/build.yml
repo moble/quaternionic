@@ -55,10 +55,10 @@ jobs:
         with:
           python-version: 3.8  # We need this for importlib.metadata
 
-      - name: Construct Changelog
-        uses: TriPSs/conventional-changelog-action@v3
+      - name: Generate changelog
+        uses: charmixer/auto-changelog-action@v1.1
         with:
-          github-token: ${{ secrets.github_token }}
+          token: ${{ secrets.github_token }}
 
       - name: Install poetry
         shell: bash -l {0}
