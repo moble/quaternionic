@@ -6,7 +6,7 @@ jobs:
   build:
     name: Build and test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    if: "!contains(github.event.head_commit.message, 'ci skip')" && "!contains(github.event.head_commit.message, 'skip ci')"
+    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
     strategy:
       fail-fast: false
       matrix:
@@ -56,10 +56,9 @@ jobs:
           python-version: 3.8  # We need this for importlib.metadata
 
       - name: Construct Changelog
-        uses: scottbrenner/generate-changelog-action@master
-        id: generate_changelog
-        env:
-          REPO: ${{ github.repository }}
+        uses: TriPSs/conventional-changelog-action@v3
+        with:
+          github-token: ${{ secrets.github_token }}
 
       - name: Install poetry
         shell: bash -l {0}
@@ -72,7 +71,7 @@ jobs:
         shell: bash -l {0}
         run: |
           echo "<changelog>"
-          echo ${{ steps.generate_changelog.outputs.changelog }}
+          echo ${{ steps.changelog.outputs.clean_changelog }}
           echo "</changelog>"
           echo ""
           export version_bump_rule=$(echo "
@@ -91,8 +90,10 @@ jobs:
             poetry run python -c 'from importlib.metadata import version; print(version("quaternionic"))'
           )
           echo "new_version: '${new_version}'"
-          git config --local user.email "$(git log --format='%ae' HEAD^!)"
-          git config --local user.name "$(git log --format='%an' HEAD^!)"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          # git config --local user.email "$(git log --format='%ae' HEAD^!)"
+          # git config --local user.name "$(git log --format='%an' HEAD^!)"
           git add pyproject.toml
           git commit -m "Bump version to v${new_version}"
           git tag -a "v${new_version}" -m "Version ${new_version}"
