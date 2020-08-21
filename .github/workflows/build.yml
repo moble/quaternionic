@@ -39,8 +39,8 @@ jobs:
     name: Create release and send to PyPI
     needs: build
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'master' }}
-    # #if: "contains(github.event.head_commit.message, 'Release v')"
+    if: github.ref == 'refs/heads/master'
+    if: "!contains(github.event.head_commit.message, '[no release]')"
 
     steps:
       - name: Check out code
