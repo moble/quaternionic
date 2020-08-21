@@ -79,7 +79,7 @@ jobs:
           echo "version_bump_rule: '${version_bump_rule}'"
           python -m poetry version "${version_bump_rule}"
           export new_version=$(
-            python -m poetry poetry run python -c 'from importlib.metadata import version; print(version("quaternionic"))'
+            python -m poetry run python -c 'from importlib.metadata import version; print(version("quaternionic"))'
           )
           echo "new_version: '${new_version}'"
           git config user.name github-actions
