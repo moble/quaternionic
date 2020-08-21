@@ -55,10 +55,15 @@ jobs:
         with:
           python-version: 3.8  # We need this for importlib.metadata
 
-      - name: Generate changelog
-        uses: charmixer/auto-changelog-action@v1.1
-        with:
-          token: ${{ secrets.github_token }}
+      - name: changelog
+        uses: scottbrenner/generate-changelog-action@master
+        id: Changelog
+        env:
+          REPO: ${{ github.repository }}
+      # - name: Generate changelog
+      #   uses: charmixer/auto-changelog-action@v1.1
+      #   with:
+      #     token: ${{ secrets.github_token }}
 
       - name: Install poetry
         shell: bash -l {0}
@@ -71,7 +76,8 @@ jobs:
         shell: bash -l {0}
         run: |
           echo "<changelog>"
-          cat CHANGELOG.md
+          # cat CHANGELOG.md
+          echo ${{ steps.Changelog.outputs.changelog }}
           echo "</changelog>"
           echo ""
           export version_bump_rule=$(echo "
