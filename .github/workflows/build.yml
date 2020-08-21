@@ -71,7 +71,7 @@ jobs:
         shell: bash -l {0}
         run: |
           echo "<changelog>"
-          echo ${{ steps.changelog.outputs.clean_changelog }}
+          cat CHANGELOG.md
           echo "</changelog>"
           echo ""
           export version_bump_rule=$(echo "
