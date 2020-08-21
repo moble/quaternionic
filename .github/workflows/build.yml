@@ -77,6 +77,8 @@ jobs:
           " | sed -e 's/^[[:space:]]\{4\}//' | python)
           echo "version_bump_rule: '${version_bump_rule}'"
           python -m poetry version "${version_bump_rule}"
+          python -m poetry build
+          python -m poetry install
           export new_version=$(
             python -m poetry run python -c 'from importlib.metadata import version; print(version("quaternionic"))'
           )
@@ -97,7 +99,10 @@ jobs:
       - name: Publish to PyPI
         if: "!contains(github.event.head_commit.message, '[no pypi]')"
         shell: bash -l {0}
-        run: python -m poetry publish
+        run: |
+          python -m poetry build
+          python -m poetry install
+          python -m poetry publish
 
       - name: Create release
         if: "!contains(github.event.head_commit.message, '[no release]')"
