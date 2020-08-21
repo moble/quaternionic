@@ -10,38 +10,36 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # os: [ubuntu-latest, macos-latest, windows-latest]
-        # python-version: [3.6, 3.7, 3.8]
-        os: [ubuntu-latest]
-        python-version: [3.6]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
 
-    # - name: Set up Python ${{ matrix.python-version }}
-    #   uses: actions/setup-python@v2
-    #   with:
-    #     python-version: ${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
 
-    # - name: Install poetry
-    #   shell: bash -l {0}
-    #   run: |
-    #     python -m pip install --upgrade pip
-    #     #pip install poetry  # Only install poetry like this in containers
-    #     pip install --no-warn-script-location --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
+    - name: Install poetry
+      shell: bash -l {0}
+      run: |
+        python -m pip install --upgrade pip
+        #pip install poetry  # Only install poetry like this in containers
+        pip install --no-warn-script-location --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
 
-    # - name: Run poetry
-    #   shell: bash -l {0}
-    #   run: |
-    #     python -m poetry build
-    #     python -m poetry install
-    #     python -m poetry run pytest
+    - name: Run poetry
+      shell: bash -l {0}
+      run: |
+        python -m poetry build
+        python -m poetry install
+        python -m poetry run pytest
 
   release:
     name: Create release and send to PyPI
     needs: build
     runs-on: ubuntu-latest
-    # if: ${{ github.ref == 'master' }}
+    if: ${{ github.ref == 'master' }}
     # #if: "contains(github.event.head_commit.message, 'Release v')"
 
     steps:
@@ -51,7 +49,7 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8  # We need this for importlib.metadata
+          python-version: 3.8  # We need >=3.8 for importlib.metadata
 
       - name: Install poetry and this package
         shell: bash -l {0}
@@ -91,27 +89,25 @@ jobs:
           git add pyproject.toml
           git commit -m "Bump version to v${new_version}"
           git tag -a "v${new_version}" -m "Version ${new_version}"
+          echo "::set-env name=new_version_tag::v${new_version}"  # Save env variable for later steps
           git status
-      #     git push --follow-tags
-      #     # This uses GITHUB_TOKEN, which won't trigger a new workflow run — which is how we want it
-      #     # https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token
+          git push --follow-tags
+          # This uses GITHUB_TOKEN, which won't trigger a new workflow run — which is how we want it
+          # https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token
 
-      # - name: Publish to PyPI
-      #   shell: bash -l {0}
-      #   run: |
-      #     python -m poetry build
-      #     python -m poetry install
-      #     python -m poetry publish
+      - name: Publish to PyPI
+        if: "!contains(github.event.head_commit.message, '[no pypi]')"
+        shell: bash -l {0}
+        run: python -m poetry publish
 
-      # - name: Create release
-      #   id: create_release
-      #   uses: actions/create-release@latest
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     tag_name: ${{ github.ref }}
-      #     release_name: Release ${{ github.ref }}
-      #     body: |
-      #       ${{ steps.generate_changelog.outputs.changelog }}
-      #     draft: false
-      #     prerelease: false
+      - name: Create release
+        if: "!contains(github.event.head_commit.message, '[no release]')"
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.new_version_tag }}
+          release_name: Release ${{ env.new_version_tag }}
+          draft: false
+          prerelease: false
