@@ -1,14 +1,17 @@
-[![Build Status](https://github.com/moble/quaternionic/workflows/Test%20and%20deploy/badge.svg)](https://github.com/moble/quaternionic/actions)
-[![Documentation Status](https://readthedocs.org/projects/quaternionic/badge/?version=latest)](https://quaternionic.readthedocs.io/en/latest/?badge=latest)
+[![Test Status](https://github.com/moble/quaternionic/workflows/tests/badge.svg)](https://github.com/moble/quaternionic/actions)
 [![Test Coverage](https://codecov.io/gh/moble/quaternionic/branch/master/graph/badge.svg)](https://codecov.io/gh/moble/quaternionic)
+[![Documentation Status](https://readthedocs.org/projects/quaternionic/badge/?version=latest)](https://quaternionic.readthedocs.io/en/latest/?badge=latest)
+[![PyPI Version](https://img.shields.io/pypi/v/quaternionic?color=)](https://pypi.org/project/quaternionic/)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/quaternionic.svg?color=)](https://anaconda.org/conda-forge/quaternionic)
 
 
 # Quaternions by way of numpy arrays
 
 This module subclasses numpy's array type, interpreting the array as an array of quaternions, and
-accelerating the algebra using numba.  There is also basic initial support for symbolic manipulation
-of quaternions by creating quaternionic arrays with sympy symbols as elements, though this is a work
-in progress.
+accelerating the algebra using numba.  This enables natural manipulations, like multiplying
+quaternions as `a*b`, while also working with standard numpy functions, as in `np.log(q)`.  There is
+also basic initial support for symbolic manipulation of quaternions by creating quaternionic arrays
+with sympy symbols as elements, though this is a work in progress.
 
 This package has evolved from the [quaternion](https://github.com/moble/quaternion) package, which
 adds a quaternion dtype directly to numpy.  In many ways, that is a much better approach because
