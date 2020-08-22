@@ -35,7 +35,7 @@ target-version = ['py36']
 minversion = "6.0"
 norecursedirs = ".* build dist *.egg-info install ENV"
 junit_family="xunit2"
-addopts = "-v --tb=short --doctest-glob='' --cov --cov-branch --cov-report html"
+addopts = "-v --tb=short --doctest-glob='' --cov --cov-branch --cov-report xml"
 
 [build-system]
 requires = ["poetry>=1.0.10"]
