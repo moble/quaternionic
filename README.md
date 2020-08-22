@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/moble/quaternionic.svg?branch=master)](https://travis-ci.org/moble/quaternionic)
+[![Build Status](https://github.com/moble/quaternionic/workflows/Test%20and%20deploy/badge.svg)](https://github.com/moble/quaternionic/actions)
 [![Documentation Status](https://readthedocs.org/projects/quaternionic/badge/?version=latest)](https://quaternionic.readthedocs.io/en/latest/?badge=latest)
 [![Test Coverage](https://codecov.io/gh/moble/quaternionic/branch/master/graph/badge.svg)](https://codecov.io/gh/moble/quaternionic)
 
