@@ -193,7 +193,7 @@ def pyguvectorize_module_functions(module, obj):
             setattr(obj, k, v_ufunc)
 
 
-if platform.python_implementation() == 'PyPy':
+if platform.python_implementation().lower() == 'pypy':
     float64, boolean = [float], [bool]
     jit = lambda f: f
     guvectorize = pyguvectorize
