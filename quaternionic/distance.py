@@ -3,8 +3,7 @@
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
 import numpy as np
-from numba import float64
-from . import jit, guvectorize, algebra
+from . import jit, guvectorize, algebra, float64
 from .utilities import ndarray_args
 
 _divide = jit(algebra.divide)

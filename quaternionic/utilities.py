@@ -2,16 +2,12 @@
 # See LICENSE file for details:
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
-import functools
-import numba
+import platform
 
 ufunc_attributes = [
     'nin', 'nout', 'nargs', 'ntypes', 'types', 'identity', 'signature',
     'reduce', 'accumulate', 'reduceat', 'outer', 'at'
 ]
-
-jit = functools.partial(numba.njit, cache=True)
-guvectorize = functools.partial(numba.guvectorize, nopython=True, cache=True)
 
 
 def type_self_return(f):
@@ -133,7 +129,6 @@ def pyguvectorize(types, signature):
     """
     import functools
     import numpy as np
-    import numba as nb
     inputs, output = signature.split('->')
     inputs = inputs.split(',')
     slice_a = slice(None) if inputs[0]=='()' else 0
@@ -196,3 +191,15 @@ def pyguvectorize_module_functions(module, obj):
         if isinstance(v, types.FunctionType) and hasattr(v, 'types') and hasattr(v, 'signature'):
             v_ufunc = pyguvectorize(v.types, v.signature)(v)
             setattr(obj, k, v_ufunc)
+
+
+if platform.python_implementation() == 'PyPy':
+    float64, boolean = [float], [bool]
+    jit = lambda f: f
+    guvectorize = pyguvectorize
+else:
+    import functools
+    import numba
+    from numba import float64, boolean
+    jit = functools.partial(numba.njit, cache=True)
+    guvectorize = functools.partial(numba.guvectorize, nopython=True, cache=True)
