@@ -33,7 +33,7 @@ jobs:
 
       - name: Run poetry
         run: |
-          python -m poetry update
+          rm poetry.lock
           python -m poetry build
           python -m poetry install
           python -m poetry run pytest --cov --cov-branch --cov-report=xml
