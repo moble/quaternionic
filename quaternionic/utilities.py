@@ -10,9 +10,6 @@ ufunc_attributes = [
     'reduce', 'accumulate', 'reduceat', 'outer', 'at'
 ]
 
-jit = functools.partial(numba.njit, cache=True)
-guvectorize = functools.partial(numba.guvectorize, nopython=True, cache=True)
-
 
 def type_self_return(f):
     """Decorate jitted functions to return with type of first argument"""
