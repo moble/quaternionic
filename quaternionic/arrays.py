@@ -78,7 +78,7 @@ def QuaternionicArray(jit=jit, dtype=float):
                 raise ValueError("len(input_array.shape) == 0")
             if input_array.shape[-1] != 4:
                 raise ValueError(
-                    f"\nInput array has shape {input_array.shape} when viewed as a float array.\n"
+                    "\nInput array has shape {0} when viewed as a float array.\n".format(input_array.shape) +
                     "Its last dimension should have size 4, representing the components of a quaternion."
                 )
             obj = input_array.view(cls)
@@ -95,7 +95,7 @@ def QuaternionicArray(jit=jit, dtype=float):
         def __array_finalize__(self, obj):
             if self.shape[-1] != 4:
                 raise ValueError(
-                    f"\nArray to finalize has shape {self.shape}; "
+                    "\nArray to finalize has shape {0}; ".format(self.shape) +
                     "last dimension should have size 4 to represent a quaternion.\n"
                     "If you are trying to slice the quaternions, you should append `.ndarray` before slicing.\n"
                     "For example, instead of `q[..., 2:]`, you must use `q.ndarray[..., 2:]` to return a\n"
@@ -111,10 +111,12 @@ def QuaternionicArray(jit=jit, dtype=float):
 
             # We will not be supporting any more ufunc keywords beyond `out`
             if kwargs:
-                raise NotImplementedError(f"Unrecognized arguments to {type(self).__name__}.__array_ufunc__: {kwargs}")
+                raise NotImplementedError(
+                    "Unrecognized arguments to {0}.__array_ufunc__: {1}".format(type(self).__name__, kwargs)
+                )
 
             if method in ["reduce", "accumulate", "reduceat", "outer", "at"]:
-                raise NotImplementedError(f"Only __call__ method works for quaternionic arrays")
+                raise NotImplementedError("Only __call__ method works for quaternionic arrays")
 
             this_type = lambda o: isinstance(o, type(self))
 
@@ -146,7 +148,7 @@ def QuaternionicArray(jit=jit, dtype=float):
                         result = result[0]
                     if isinstance(result, type(self)):
                         result = result.view(np.ndarray)
-                    getattr(algebra, f"{ufunc.__name__}_scalar")(a1, a2.ndarray, result)
+                    getattr(algebra, "{0}_scalar".format(ufunc.__name__))(a1, a2.ndarray, result)
                     result = type(self)(result)
 
                 # float64[4](float64[4], float64)
@@ -160,7 +162,7 @@ def QuaternionicArray(jit=jit, dtype=float):
                         result = result[0]
                     if isinstance(result, type(self)):
                         result = result.view(np.ndarray)
-                    getattr(algebra, f"scalar_{ufunc.__name__}")(a1.ndarray, a2, result)
+                    getattr(algebra, "scalar_{0}".format(ufunc.__name__))(a1.ndarray, a2, result)
                     result = type(self)(result)
                 else:
                     return NotImplemented

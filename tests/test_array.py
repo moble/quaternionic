@@ -196,7 +196,7 @@ def test_array_ufunc(array):
                 with pytest.raises(TypeError):
                     attr(p, q)
             else:  # pragma: no cover
-                raise ValueError(f"Unexpected number of input arguments for {k}")
+                raise ValueError("Unexpected number of input arguments for {0}".format(k))
 
 
 def test_repr(array):
