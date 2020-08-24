@@ -110,7 +110,10 @@ def QuaternionConvertersMixin(jit=jit):
 
             if nonorthogonal:
                 from operator import mul
-                from functools import reduce
+                try:
+                    from functools import reduce
+                except ImportError:
+                    from functools32 import reduce
 
                 K3 = np.empty(shape+(4, 4), dtype=rot.dtype)
                 K3[..., 0, 0] = (rot[..., 0, 0] - rot[..., 1, 1] - rot[..., 2, 2])/3

@@ -5,6 +5,10 @@
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
 import platform
+try:
+    import functools
+except ImportError:
+    import functools32 as functools
 
 ufunc_attributes = [
     'nin', 'nout', 'nargs', 'ntypes', 'types', 'identity', 'signature',

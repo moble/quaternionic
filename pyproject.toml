@@ -17,7 +17,7 @@ llvmlite = [
     {version = "<0.32.0", markers = "python_version < '3.6' and implementation_name == 'cpython'"},
     {version = "*", markers = "python_version >= '3.6' and implementation_name == 'cpython'"}
 ]
-functools32 = {version = "*", markers = "python_version < '3.2' and implementation_name == 'pypy'"},
+functools32 = {version = "*", markers = "python_version < '3.2'"},
 mkdocs = {version = "^1.1.2", optional = true, markers = "python_version >= '3.6' and implementation_name == 'cpython'"}
 mktheapidocs = {extras = ["plugin"], version = "^0.2.0", optional = true, markers = "python_version >= '3.6' and implementation_name == 'cpython'"}
 
