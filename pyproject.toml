@@ -11,17 +11,17 @@ homepage = "https://github.com/moble/quaternionic"
 python = "^3.6"
 numpy = "^1.13"
 scipy = "^1.0"
-numba = {version = "^0.50", markers = "implementation_name = 'cpython'"}
+numba = {version = "^0.50", markers = "implementation_name == 'cpython'"}
 importlib-metadata = {version = "^1.0", python = "<3.8"}
-mkdocs = {version = "^1.1.2", optional = true, markers = "implementation_name = 'cpython'"}
-mktheapidocs = {extras = ["plugin"], version = "^0.2.0", optional = true, markers = "implementation_name = 'cpython'"}
+mkdocs = {version = "^1.1.2", optional = true, markers = "implementation_name == 'cpython'"}
+mktheapidocs = {extras = ["plugin"], version = "^0.2.0", optional = true, markers = "implementation_name == 'cpython'"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.0"
 pytest-cov = "^2.10.1"
-mkdocs = {version = "^1.1.2", markers = "implementation_name = 'cpython'"}
-mktheapidocs = {extras = ["plugin"], version = "^0.2.0", markers = "implementation_name = 'cpython'"}
-black = {version = "^19.10b0", markers = "implementation_name = 'cpython'"}
+mkdocs = {version = "^1.1.2", markers = "implementation_name == 'cpython'"}
+mktheapidocs = {extras = ["plugin"], version = "^0.2.0", markers = "implementation_name == 'cpython'"}
+black = {version = "^19.10b0", markers = "implementation_name == 'cpython'"}
 
 [tool.poetry.extras]
 mkdocs = ["mkdocs"]
