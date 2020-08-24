@@ -114,7 +114,7 @@ def QuaternionicArray(jit=jit, dtype=float):
                 raise NotImplementedError(f"Unrecognized arguments to {type(self).__name__}.__array_ufunc__: {kwargs}")
 
             if method in ["reduce", "accumulate", "reduceat", "outer", "at"]:
-                raise NotImplementedError(f"Only __call__ method works for quaternionic arrays")
+                raise NotImplementedError(f"Only __call__ method works for quaternionic arrays; got {method}")
 
             this_type = lambda o: isinstance(o, type(self))
 

@@ -36,7 +36,7 @@ and placed attached to the `algebra_ufuncs` object.
 
 
 import numpy as np
-from numba import float64, boolean
+from . import float64, boolean
 from .utilities import attach_typelist_and_signature
 
 
