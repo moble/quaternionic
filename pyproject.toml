@@ -13,9 +13,9 @@ importlib-metadata = {version = "^1.0", python = "<3.8"}
 numpy = "^1.13"
 scipy = "^1.0"
 numba = {version = "^0.50", markers = "implementation_name == 'cpython'"}
-mkdocs = {version = "^1.1.2", optional = true}
-mktheapidocs = {extras = ["plugin"], version = "^0.2.0", optional = true}
-python-markdown-math = {version = "^0.7", optional = true}
+mkdocs = {version = "^1.1.2", optional = true, markers = "implementation_name == 'cpython'"}
+mktheapidocs = {extras = ["plugin"], version = "^0.2.0", optional = true, markers = "implementation_name == 'cpython'"}
+python-markdown-math = {version = "^0.7", optional = true, markers = "implementation_name == 'cpython'"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.0"
