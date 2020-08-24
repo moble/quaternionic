@@ -23,5 +23,4 @@ jobs:
         run: |
           python --version
           echo "which python = $(which python)"
-          echo "RUNNER_TOOL_CACHE = ${RUNNER_TOOL_CACHE}"
-          if [[ $(which python) != *"${RUNNER_TOOL_CACHE}"* ]]; then exit 1; fi
+          if [[ $(which python) != *"hostedtoolcache"* ]]; then exit 1; fi
