@@ -10,8 +10,14 @@ homepage = "https://github.com/moble/quaternionic"
 [tool.poetry.dependencies]
 #python = "^3.6"
 importlib-metadata = {version = "^1.0", python = "<3.8"}
-numpy = "^1.13"
-scipy = "^1.0"
+numpy = [
+    {version = ">=1.13,<=1.16", python = "<3.6"},
+    {version = ">=1.13", python = ">=3.6"}
+]
+scipy = [
+    {version = ">=1.0,<=1.2", python = "<3.6"},
+    {version = ">=1.0", python = ">=3.6"}
+]
 numba = [
     {version = ">=0.50", markers = "python_version >= '3.6' and implementation_name == 'cpython'"},
     {version = "<0.49", markers = "python_version < '3.6' and implementation_name == 'cpython'"}
