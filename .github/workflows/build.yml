@@ -1,8 +1,8 @@
 name: tests
 
-on:
-  branch: notmaster
-# on: [push, pull_request]
+# on:
+#   branch: notmaster
+on: [push, pull_request]
 
 jobs:
   build:
@@ -15,10 +15,8 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [2.7, 3.5, 3.6, 3.7, 3.8, pypy2, pypy3]
         # exclude:
-        #   - os: macos-latest
-        #     python-version: 3.8
         #   - os: windows-latest
-        #     python-version: 3.6
+        #     python-version: pypy3
 
     steps:
       - name: Check out code
@@ -30,24 +28,20 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install poetry
-        shell: bash -l {0}
         run: |
           python -m pip install --upgrade pip
           #python -m pip install poetry  # Only install poetry like this in containers
           python -m pip install --no-warn-script-location --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
 
       - name: Run poetry
-        shell: bash -l {0}
         run: |
           python -m poetry build
           python -m poetry install
-          echo "Python version: $(python --version)"  # Debug
-          echo "Poetry python version: $(python -m poetry run python --version)"  # Debug
           python -m poetry run pytest --cov --cov-branch --cov-report=xml
 
       - name: Upload coverage
         if: "matrix.python-version == 3.8 && matrix.os == 'ubuntu-latest'"
-        shell: bash -l {0}
+        shell: bash
         run: |
           bash <(curl -s https://codecov.io/bash)
 
@@ -68,7 +62,6 @@ jobs:
           python-version: 3.8
 
       - name: Install poetry and this package
-        shell: bash -l {0}
         run: |
           python -m pip install --upgrade pip
           python -m pip install toml
@@ -78,7 +71,7 @@ jobs:
           python -m poetry install
 
       - name: Bump version
-        shell: bash -l {0}
+        shell: bash
         run: |
           export version_bump_rule=$(echo ${{ github.event.head_commit.message }} | python .github/scripts/parse_bump_rule.py )
           echo "version_bump_rule: '${version_bump_rule}'"
@@ -88,7 +81,7 @@ jobs:
           echo "::set-env name=new_version_tag::v${new_version}"  # Save env variable for later steps
 
       - name: Tag and push new version
-        shell: bash -l {0}
+        shell: bash
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -112,10 +105,9 @@ jobs:
 
       - name: Publish to PyPI
         if: "!contains(github.event.head_commit.message, '[no pypi]')"
-        shell: bash -l {0}
         env:
-          # Get key from https://pypi.org/manage/account/token/, and
-          # copy it to Github > repo > Settings > Secrets
+          # 1) Get key from https://pypi.org/manage/account/token/
+          # 2) Copy it to Github > repo > Settings > Secrets
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
         run: |
           python -m poetry build
