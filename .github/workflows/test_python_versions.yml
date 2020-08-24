@@ -18,10 +18,24 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Check versions
+      - name: Check versions without bash
+        run: |
+          echo "Without bash:"
+          python --version
+          python -c 'import platform; print(platform.python_implementation())'
+
+      - name: Check versions without login
+        shell: bash
+        run: |
+          echo "Without login:"
+          python --version
+          python -c 'import platform; print(platform.python_implementation())'
+          type -a python
+
+      - name: Check versions with login
         shell: bash -l {0}
         run: |
+          echo "With login:"
           python --version
-          python -c 'import sys; print(sys.implementation.name)'
+          python -c 'import platform; print(platform.python_implementation())'
           type -a python
-          find -L $(echo $PATH | tr ":" " ") -iname 'python*' -type f \(-perm -001 -or \( -perm -100 -and -user $(whoami)\) \) -print
