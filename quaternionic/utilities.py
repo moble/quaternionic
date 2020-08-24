@@ -12,9 +12,29 @@ ufunc_attributes = [
 ]
 
 
+def update_wrapper(wrapper, wrapped, assigned=functools.WRAPPER_ASSIGNMENTS, updated=functools.WRAPPER_UPDATES):
+    for attr in assigned:
+        try:
+            value = getattr(wrapped, attr)
+        except AttributeError:
+            pass
+        else:
+            if hasattr(wrapper, attr):
+                setattr(wrapper, attr, value)
+    for attr in updated:
+        if hasattr(wrapper, attr):
+            getattr(wrapper, attr).update(getattr(wrapped, attr, {}))
+    wrapper.__wrapped__ = wrapped
+    return wrapper
+
+
+def wraps(wrapped, assigned=functools.WRAPPER_ASSIGNMENTS, updated=functools.WRAPPER_UPDATES):
+    return functools.partial(update_wrapper, wrapped=wrapped, assigned=assigned, updated=updated)
+
+
 def type_self_return(f):
     """Decorate jitted functions to return with type of first argument"""
-    @functools.wraps(f)
+    @wraps(f)
     def f_wrapped(*args, **kwargs):
         return_value = f(*args, **kwargs)
         return type(args[0])(return_value)
@@ -26,7 +46,7 @@ def type_self_return(f):
 
 def ndarray_args(f):
     """Decorate jitted functions to accept quaternionic arrays"""
-    @functools.wraps(f)
+    @wraps(f)
     def f_wrapped(*args, **kwargs):
         args_ndarray = (arg if not hasattr(arg, 'ndarray') else arg.ndarray for arg in args)
         return f(*args_ndarray, **kwargs)
@@ -38,7 +58,7 @@ def ndarray_args(f):
 
 def ndarray_args_and_return(f):
     """Decorate jitted functions to accept and return quaternionic arrays"""
-    @functools.wraps(f)
+    @wraps(f)
     def f_wrapped(*args, **kwargs):
         args_ndarray = (arg if not hasattr(arg, 'ndarray') else arg.ndarray for arg in args)
         return type(args[0])(f(*args_ndarray, **kwargs))
@@ -147,7 +167,7 @@ def pyguvectorize(types, signature):
     dtype_c = np.dtype(types[0][-1].dtype.name)
     if len(inputs) == 1:
         def wrapper(f):
-            @functools.wraps(f)
+            @wraps(f)
             def f_wrapped(a):
                 shape_c = a[..., slice_a].shape + last_axis_c
                 c = np.empty(shape_c, dtype=dtype_c)
@@ -163,7 +183,7 @@ def pyguvectorize(types, signature):
             return f_wrapped
     else:
         def wrapper(f):
-            @functools.wraps(f)
+            @wraps(f)
             def f_wrapped(a, b):
                 shape_c = np.broadcast(a[..., slice_a], b[..., slice_b]).shape + last_axis_c
                 c = np.empty(shape_c, dtype=dtype_c)
