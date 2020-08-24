@@ -198,7 +198,7 @@ if platform.python_implementation().lower() == 'pypy':
         'name': 'float64', 'dtype': self, '__getitem__': lambda self, *args: self
     })
     boolean = type('nbboolean', (object,), {
-        'name': 'boolean', 'dtype': self, '__getitem__': lambda self, *args: return self
+        'name': 'boolean', 'dtype': self, '__getitem__': lambda self, *args: self
     })
     jit = lambda f: f
     guvectorize = pyguvectorize
