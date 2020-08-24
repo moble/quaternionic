@@ -20,9 +20,9 @@ python-markdown-math = {version = "^0.7", optional = true}
 [tool.poetry.dev-dependencies]
 pytest = "^6.0"
 pytest-cov = "^2.10.1"
-mkdocs = "^1.1.2"
-mktheapidocs = {extras = ["plugin"], version = "^0.2.0"}
-python-markdown-math = {version = "^0.7"}
+mkdocs = {version = "^1.1.2", markers = "implementation_name == 'cpython'"
+mktheapidocs = {extras = ["plugin"], version = "^0.2.0", markers = "implementation_name == 'cpython'"}
+python-markdown-math = {version = "^0.7", markers = "implementation_name == 'cpython'"}
 black = {version = "^19.10b0", markers = "implementation_name == 'cpython'"}
 
 [tool.poetry.extras]
