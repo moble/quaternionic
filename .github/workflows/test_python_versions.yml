@@ -13,7 +13,7 @@ jobs:
         python-version: [2.7, 3.5, 3.6, 3.7, 3.8, pypy2, pypy3]
 
     steps:
-      - name: Set up python ${{ matrix.python-version }}
+      - name: ${{ matrix.os }} python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
@@ -38,3 +38,11 @@ jobs:
           python -c 'import platform; print(platform.python_implementation())'
           type -a python
           echo "PATH=${PATH}"
+
+      - name: Bubble problems up to github actions
+        shell: bash -l {0}
+        run: |
+          py_ver="${{ matrix.python-version }}"
+          if [ $py_ver == "pypy2" ]; then py_ver="2.7"; fi
+          if [ $py_ver == "pypy3" ]; then py_ver="3.6"; fi
+          (echo 'import sys'; echo 'if "{0}.{1}".format(sys.version_info.major, sys.version_info.minor)!="${py_ver}": raise ValueError()') | python
