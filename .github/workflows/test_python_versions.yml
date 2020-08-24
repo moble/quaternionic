@@ -38,11 +38,5 @@ jobs:
           python -c 'import platform; print(platform.python_implementation())'
           type -a python
           echo "PATH=${PATH}"
-
-      - name: Bubble problems up to github actions
-        shell: bash -l {0}
-        run: |
-          py_ver="${{ matrix.python-version }}"
-          if [ $py_ver == "pypy2" ]; then py_ver="2.7"; fi
-          if [ $py_ver == "pypy3" ]; then py_ver="3.6"; fi
-          (echo "from sys import version_info as vi"; echo "v='{0}.{1}'.format(vi.major, vi.minor)"; echo "if v!='${py_ver}': raise ValueError(v)") | python
+          which python
+          if [[ $(which python) != *"hostedtoolcache"* ]]; then exit 1; fi
