@@ -23,7 +23,7 @@ pytest-cov = "^2.10.1"
 mkdocs = "^1.1.2"
 mktheapidocs = {extras = ["plugin"], version = "^0.2.0"}
 python-markdown-math = {version = "^0.7"}
-black = "^19.10b0"
+black = {version = "^19.10b0", markers = "implementation_name == 'cpython'"}
 
 [tool.poetry.extras]
 mkdocs = ["mkdocs"]
