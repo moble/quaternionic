@@ -194,7 +194,7 @@ def pyguvectorize_module_functions(module, obj):
             setattr(obj, k, v_ufunc)
 
 
-if sys.implementation.name.lower() == 'pypy':  # pragma: no branch
+if sys.implementation.name.lower() == 'pypy':  # pragma: no cover
     class _FakeNumbaType(object):
         def __init__(self, name):
             self.name = name
