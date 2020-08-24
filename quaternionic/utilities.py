@@ -194,7 +194,12 @@ def pyguvectorize_module_functions(module, obj):
 
 
 if platform.python_implementation().lower() == 'pypy':
-    float64, boolean = [float], [bool]
+    float64 = type('nbfloat64', (object,), {
+        'name': 'float64', 'dtype': self, '__getitem__': lambda self, *args: self
+    })
+    boolean = type('nbboolean', (object,), {
+        'name': 'boolean', 'dtype': self, '__getitem__': lambda self, *args: return self
+    })
     jit = lambda f: f
     guvectorize = pyguvectorize
 else:
