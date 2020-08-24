@@ -1,12 +1,13 @@
 name: tests
 
 # on:
-#   branch: notmaster
+#   branch: notarealbranch  # To disable temporarily
+
 on: [push, pull_request]
 
 jobs:
   build:
-    name: Test on ${{ matrix.os }} python ${{ matrix.python-version }}
+    name: ${{ matrix.os }} python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
     strategy:
