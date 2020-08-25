@@ -11,4 +11,4 @@ python:
       extra_requirements:
         - mkdocs
         - mktheapidocs
-        - python-markdown-math
+        - pymdown-extensions
