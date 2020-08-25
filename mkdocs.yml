@@ -4,19 +4,17 @@ repo_url: https://github.com/moble/quaternionic
 
 plugins:
   - mktheapidocs:
-      modules: 
+      modules:
         quaternionic:
-          section: api 
+          section: api
           source_repo: "https://github.com/moble/quaternionic"
 
 theme:
   name: 'readthedocs'
 
 extra_javascript:
-   - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js
 
 markdown_extensions:
-  - mdx_math:
-      enable_dollar_delimiter: true
-  - markdown.extensions.codehilite:
-      guess_lang: false
+  - pymdownx.arithmatex:
+      generic: true
