@@ -91,21 +91,21 @@ In addition to the basic numpy array features, we also have a number of extra pr
 particularly useful for quaternions, including
 
   * Methods to extract and/or set components
-    * w, x, y, z
-    * i, j, k (equivalent to x, y, z)
-    * scalar, vector (equivalent to w, [x, y, z])
-    * real, imag (equivalent to scalar, vector)
+    * `w`, `x`, `y`, `z`
+    * `i`, `j`, `k` (equivalent to `x`, `y`, `z`)
+    * `scalar`, `vector` (equivalent to `w`, [`x`, `y`, `z`])
+    * `real`, `imag` (equivalent to `scalar`, `vector`)
   * Methods related to norms
-    * abs (square-root of sum of squares of components)
-    * norm (sum of squares of components)
-    * modulus, magnitude (equal to abs)
-    * absolute\_square, abs2, mag2, squared_norm (equal to norm)
-    * normalized
-    * inverse
+    * `abs` (square-root of sum of squares of components)
+    * `norm` (sum of squares of components)
+    * `modulus`, `magnitude` (equal to `abs`)
+    * `absolute_square`, `abs2`, `mag2`, `squared_norm` (equal to `norm`)
+    * `normalized`
+    * `inverse`
   * Methods related to array infrastructure
-    * ndarray (the numpy array underlying the quaternionic array)
-    * flattened (all dimensions but last are flattened into one)
-    * iterator (iterate over all quaternions)
+    * `ndarray` (the numpy array underlying the quaternionic array)
+    * `flattened` (all dimensions but last are flattened into one)
+    * `iterator` (iterate over all quaternions)
     
 Note that this package makes a distinction between `abs` and `norm` — the latter being the square of
 the former.  This choice agrees with the [Boost library's implementation of
@@ -122,20 +122,21 @@ of aliases are also provided that may be less confusing.  For example, some peop
 
 The most common application of quaternions is to representing rotations by means of unit
 quaternions.  Note that this package does not *restrict* quaternions to have unit norms, since it is
-usually better for numerical purposes not to do so.  For example, whereas rotation of a vector `v`
-by a quaternion is usually implemented as `R * v * np.conjugate(R)`, it is generally better to drop
-the assumption that the quaternion has unit magnitude and implement rotation as `R * v *
-np.reciprocal(R)`.  That is what this package does by default whenever rotations are involved.
+usually better for numerical purposes not to do so.  For example, whereas rotation of a vector $v$
+by a quaternion is usually implemented as $R\, v\, \bar{R}$, it is generally better to drop the
+assumption that the quaternion has unit magnitude and implement rotation as $R\, v\, R^{-1}$.  This
+is almost always more efficient, and more accurate.  That is what this package does by default
+whenever rotations are involved.
 
 Although this package does not restrict to unit quaternions, there are several converters to and
 from other representations of rotations, including
 
-   * to/from\_rotation\_matrix
-   * to\_transformation\_matrix (for non-unit quaternions)
-   * to/from\_axis\_angle representation
-   * to/from\_euler\_angles (though using Euler angles is almost always a bad idea)
-   * to/from\_spherical\_coordinates
-   * to/from\_angular\_velocity
+   * `to_rotation_matrix`, `from_rotation_matrix`
+   * `to_transformation_matrix` (for non-unit quaternions)
+   * `to_axis_angle`, `from_axis_angle` representation
+   * `to_euler_angles`, `from_euler_angles` (though using Euler angles is almost always a bad idea)
+   * `to_spherical_coordinates`, `from_spherical_coordinates`
+   * `to_angular_velocity`, `from_angular_velocity`
 
 Note that the last item relates to quaternion-valued functions of time.  Converting to an angular
 velocity requires differentiation, while converting from angular velocity requires integration (as
@@ -187,17 +188,17 @@ the geodesic distance within the manifold of *unit* quaternions, and is somewhat
 more meaningful; the "chordal" functions measure the Euclidean distance in the (linear) space of all
 quaternions, and is faster but its precise value is not necessarily as meaningful.
 
-These functions satisfy some important conditions.  For each of these functions `d`, and for any
-nonzero quaternions `q1`, `q2`, `a`, and `b`, we have
+These functions satisfy some important conditions.  For each of these functions $d$, and for any
+nonzero quaternions $q_1$, $q_2$, $a$, and $b$, we have
 
-  * symmetry: `d(q1, q2) = d(q2, q1)`
-  * invariance: `d(a*q1, a*q2) = d(q1, q2) = d(q1*b, q2*b)`
-  * identity: `d(q1, q1) = 0`
+  * symmetry: $d(q_1, q_2) = d(q_2, q_1)$
+  * invariance: $d(a\, q_1, a\, q_2) = d(q_1, q_2) = d(q_1\, b, q_2\, b)$
+  * identity: $d(q_1, q_1) = 0$
   * positive-definiteness:
-    * For rotor functions `d(q1, q2) > 0` whenever `q1 ≠ q2`
-    * For rotation functions `d(q1, q2) > 0` whenever `q1 ≠ q2` and `q1 ≠ -q2`
+    * For rotor functions $d(q_1, q_2) > 0$ whenever $q_1 \neq q_2$
+    * For rotation functions $d(q_1, q_2) > 0$ whenever $q_1 \neq q_2$ and $q_1 \neq -q_2$
 
-Note that the rotation functions also satisfy `d(q1, -q1) = 0`.
+Note that the rotation functions also satisfy $d(q_1, -q_1) = 0$.
 
 See [Moakher (2002)](https://doi.org/10.1137/S0895479801383877) for a nice general discussion.
 
