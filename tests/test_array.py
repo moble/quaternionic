@@ -362,7 +362,7 @@ def test_quaternion_sqrt(Qs, Q_names, Q_conditions, array):
                 assert np.allclose(np.sqrt(srq) * np.sqrt(srq), srq, rtol=sqrt_precision)
     # Test a huge batch of random quaternions
     np.random.seed(1234)
-    a = array(np.random.uniform(-10, 10, size=10_000*4).reshape((-1, 4)))
+    a = array(np.random.uniform(-10, 10, size=10000*4).reshape((-1, 4)))
     assert np.allclose(a, np.square(np.sqrt(a)), rtol=10*sqrt_precision, atol=0)
     # Test some edge cases
     _quaternion_resolution = 10 * np.finfo(float).resolution

@@ -12,6 +12,11 @@ plugins:
 theme:
   name: 'readthedocs'
 
+extra_javascript:
+   - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+
 markdown_extensions:
+  - mdx_math:
+      enable_dollar_delimiter: true
   - markdown.extensions.codehilite:
       guess_lang: false

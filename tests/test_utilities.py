@@ -1,4 +1,4 @@
-import functools
+import sys
 import numpy as np
 import quaternionic
 import pytest
@@ -66,6 +66,7 @@ def test_ndarray_args_and_return():
     assert isinstance(d3, np.ndarray) and isinstance(d3, quaternionic.array)
 
 
+@pytest.mark.skipif(sys.implementation.name.lower() == 'pypy', reason="No numba on pypy")
 def test_types_to_ftylist():
     import numba
     types_to_ftylist = quaternionic.utilities.convert_numpy_ufunc_type_to_numba_ftylist
