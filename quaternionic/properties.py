@@ -12,13 +12,13 @@ def QuaternionPropertiesMixin(jit=jit):
         """Basic properties for quaternionic array class
 
         This abstract base class comprises the basic interface for quaternionic
-        arrays, including the components (w, x, y, z), the parts (scalar, vector),
-        the norm and absolute value, the normalized equivalent, and so on.  Also
-        included are various
+        arrays, including the components (w, x, y, z), the parts (scalar,
+        vector), the norm and absolute value, the normalized equivalent, and so
+        on.  Also included are various
 
-        The other main elements for a quaternionic array class are converters (to
-        and from matrices, Euler angles, etc.)  and, of course, the algebraic
-        functions (addition, multiplication, etc.).
+        The other main elements for a quaternionic array class are converters
+        (to and from matrices, Euler angles, etc.)  and, of course, the
+        algebraic functions (addition, multiplication, etc.).
 
         """
 
@@ -63,8 +63,8 @@ def QuaternionPropertiesMixin(jit=jit):
             """The "vector" part of the quaternion (final three components)
 
             Note that it is entirely standard to describe this part of the
-            quaternion as the "vector" part.  It would be more correct to refer to
-            it as the "bivector" part, as explained by geometric algebra.
+            quaternion as the "vector" part.  It would be more correct to refer
+            to it as the "bivector" part, as explained by geometric algebra.
 
             """
             return self.ndarray[..., 1:]
@@ -77,20 +77,21 @@ def QuaternionPropertiesMixin(jit=jit):
         @ndarray_args
         @jit
         def norm(self):
-            """The (square) norm of the quaternion
+            """The (Cayley) norm of the quaternion
 
             This quantity is the sum of the squares of the components of the
             quaternion — equal to the square of the absolute value.
 
             Note that it may be surprising to find that this "norm" does not
-            include the usual square root.  This is conventional.  For example, the
-            Boost library's implementation of quaternions also uses this
-            convention.  Similarly, the implementation of complex numbers in C++
-            defines the `abs` and `norm` functions in this way, while python and
-            numpy only define `abs`.
+            include the usual square root.  This is conventional.  For example,
+            the Boost library's implementation of quaternions also uses this
+            convention.  Similarly, the implementation of complex numbers in
+            C++ defines the `abs` and `norm` functions in this way, while
+            python and numpy only define `abs`.
 
-            If you are uncomfortable with this choice of the meaning of `norm`, it
-            may make more sense to use one of the aliases of this function, which include
+            If you are uncomfortable with this choice of the meaning of `norm`,
+            it may make more sense to use one of the aliases of this function,
+            which include
 
               * absolute_square
               * abs2
@@ -182,9 +183,10 @@ def QuaternionPropertiesMixin(jit=jit):
         def nonzero(self):
             """Return the indices of all nonzero elements
 
-            This is essentially the same function as numpy.nonzero, except that the
-            last dimension is treated as a single quaternion; if any component of
-            the quaternion is nonzero, the quaternion is considered nonzero.
+            This is essentially the same function as numpy.nonzero, except that
+            the last dimension is treated as a single quaternion; if any
+            component of the quaternion is nonzero, the quaternion is
+            considered nonzero.
 
             """
             return np.nonzero(np.atleast_1d(np.any(self.ndarray, axis=-1)))
@@ -192,20 +194,21 @@ def QuaternionPropertiesMixin(jit=jit):
         def rotate(self, v, axis=-1):
             """Rotate vectors by quaternions in this array
 
-            For simplicity, this function simply converts the input quaternion(s)
-            to a matrix, and rotates the input vector(s) by the usual matrix
-            multiplication.  However, it should be noted that if each input
-            quaternion is only used to rotate a single vector, it is more efficient
-            (in terms of operation counts) to use the formula
+            For simplicity, this function simply converts the input
+            quaternion(s) to a matrix, and rotates the input vector(s) by the
+            usual matrix multiplication.  However, it should be noted that if
+            each input quaternion is only used to rotate a single vector, it is
+            more efficient (in terms of operation counts) to use the formula
 
               v' = v + 2 * r x (s * v + r x v) / m
 
-            where x represents the cross product, s and r are the scalar and vector
-            parts of the quaternion, respectively, and m is the sum of the squares
-            of the components of the quaternion.  If you are looping over a very
-            large number of quaternions, and just rotating a single vector each
-            time, you might want to implement that alternative algorithm using
-            numba (or something that doesn't use python).
+            where x represents the cross product, s and r are the scalar and
+            vector parts of the quaternion, respectively, and m is the sum of
+            the squares of the components of the quaternion.  If you are
+            looping over a very large number of quaternions, and just rotating
+            a single vector each time, you might want to implement that
+            alternative algorithm using numba (or something that doesn't use
+            python).
 
 
             Parameters

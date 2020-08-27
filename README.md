@@ -124,16 +124,20 @@ particularly useful for quaternions, including
     * `ndarray` (the numpy array underlying the quaternionic array)
     * `flattened` (all dimensions but last are flattened into one)
     * `iterator` (iterate over all quaternions)
-    
-Note that this package makes a distinction between `abs` and `norm` — the latter being the square of
-the former.  This choice agrees with the [Boost library's implementation of
+
+Note that this package makes a distinction between `abs` and `norm` — the latter being equal to the
+square of the former.  This version of the norm is also known as the "Cayley" norm, commonly used
+when emphasizing the properties of an object in an algebra, as opposed to the "Euclidean" norm more
+common when emphasizing the properties of an object in a vector space — though of course, algebras
+are vector spaces with additional structure.  This choice agrees with the [Boost library's
+implementation of
 quaternions](https://www.boost.org/doc/libs/1_74_0/libs/math/doc/html/math_toolkit/value_op.html),
 as well as this package's forerunner
 [quaternion](https://github.com/moble/quaternion/blob/99913120b1b2a8a5eb7769c29ee760a236d40880/quaternion.h#L115-L120).
 This also agrees with the corresponding functions on the [C++ standard library's complex
 numbers](http://www.cplusplus.com/reference/complex/norm/).  Because this may be confusing, a number
 of aliases are also provided that may be less confusing.  For example, some people find the pair
-`abs` and `abs2` to be more sensible.
+`abs` and `abs2` (meaning the square of `abs`) to be more sensible.
 
 
 ## Rotations
