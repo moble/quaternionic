@@ -77,7 +77,7 @@ def QuaternionPropertiesMixin(jit=jit):
         @ndarray_args
         @jit
         def norm(self):
-            """The (squared) norm of the quaternion
+            """The (square) norm of the quaternion
 
             This quantity is the sum of the squares of the components of the
             quaternion — equal to the square of the absolute value.
@@ -92,9 +92,8 @@ def QuaternionPropertiesMixin(jit=jit):
             If you are uncomfortable with this choice of the meaning of `norm`, it
             may make more sense to use one of the aliases of this function, which include
 
-              * abs2
               * absolute_square
-              * squared_norm
+              * abs2
               * mag2
 
             """
@@ -152,7 +151,6 @@ def QuaternionPropertiesMixin(jit=jit):
         k = z
         imag = vector
         absolute_square = norm
-        squared_norm = norm
         abs2 = norm
         mag2 = norm
         modulus = abs
