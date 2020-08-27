@@ -38,17 +38,19 @@ or
 pip install quaternionic
 ```
 
-These will download and install the package.  It can also be installed from source by running `pip
-install .` from the top-level directory of the code.
+These will download and install the package.  You can also install the package from source if you
+have `pip` version 10.0 or greater by running `pip install .`, or if you have `poetry` by running
+`poetry install`.
 
-Note that only python 3.6 or greater is supported, and pip itself must be version 10.0 or greater.
-(I have tried to support PyPy3, although I cannot test this as `scipy` does not currently install.
-Pull requests are welcome.)  In any case, I strongly recommend installing by way of an environment
-manager — especially [conda](https://docs.anaconda.com/anaconda/install/), though other managers
-like `virtualenv` or `pipenv` should also work.
+Note that only python 3.6 or greater is supported.  (I have also tried to support PyPy3, although I
+cannot test this as `scipy` does not currently install.  Pull requests are welcome.)  In any case, I
+strongly recommend installing by way of an environment manager — especially
+[conda](https://docs.anaconda.com/anaconda/install/), though other managers like `virtualenv` or
+`pipenv` should also work.
 
 For development work, the best current option is [poetry](https://python-poetry.org/).  From the
-top-level directory, run `poetry install` or just `poetry run <some command>`.
+top-level directory, you can run `poetry run <some command>` to run the command in an isolated
+environment.
 
 
 # Usage
