@@ -232,20 +232,27 @@ Finally, there are also capabilities related to interpolation
 
 # Related packages
 
-Packages with some quaternion features include
+Other python packages with some quaternion features include
 
-  * [quaternion](https://github.com/moble/quaternion/) (renamed
+  * [quaternion](https://github.com/moble/quaternion/) (core written in C; very fast; adds
+    quaternion `dtype` to numpy; named
     [numpy-quaternion](https://pypi.org/project/numpy-quaternion/) on pypi due to name conflict)
   * [clifford](https://github.com/pygae/clifford) (very powerful; more general geometric algebras)
-  * [pyquaternion](http://kieranwynn.github.io/pyquaternion/) (many features; pure python; no acceleration)
-  * [quaternions](https://github.com/mjsobrep/quaternions) (basic pure python package; no acceleration; specialized for rotations only)
-  * [rowan](https://github.com/glotzerlab/rowan) (similar approach to this package, but no acceleration or overloading)
-  * [Quaternion](https://pypi.org/project/Quaternion/) (minimal capabilities; unmaintained)
+  * [rowan](https://github.com/glotzerlab/rowan) (many features; similar approach to this package;
+    no acceleration or overloading)
+  * [pyquaternion](http://kieranwynn.github.io/pyquaternion/) (many features; pure python; no
+    acceleration or overloading)
+  * [quaternions](https://github.com/mjsobrep/quaternions) (basic pure python package; no
+    acceleration; specialized for rotations only)
   * [scipy.spatial.transform.Rotation.as\_quat](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.as_quat.html)
-    (quaternion output for Rotation object)
-  * [mathutils](https://gitlab.com/ideasman42/blender-mathutils) (a Blender package with python bindings)
+    (quaternion output for `Rotation` object)
+  * [mathutils](https://gitlab.com/ideasman42/blender-mathutils) (a Blender package with python
+    bindings)
+  * [Quaternion](https://pypi.org/project/Quaternion/) (extremely limited capabilities; unmaintained)
 
-Also note that there is some capability to do symbolic manipulations of quaternions in these packages:
+Also note that there is some capability to do symbolic manipulations of quaternions in these
+packages:
 
-  * [galgebra](https://github.com/pygae/galgebra)
+  * [galgebra](https://github.com/pygae/galgebra) (more general geometric algebras; analogous to
+    `clifford`, but for symbolic calculations)
   * [sympy.algebras.quaternion](https://docs.sympy.org/latest/modules/algebras.html)
