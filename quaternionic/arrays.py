@@ -48,7 +48,7 @@ def QuaternionicArray(jit=jit, dtype=float):
             * abs (square-root of sum of squares of components)
             * norm (sum of squares of components)
             * modulus, magnitude (equal to abs)
-            * absolute_square, abs2, mag2, squared_norm (equal to norm)
+            * absolute_square, abs2, mag2 (equal to norm)
             * normalized
             * conjugate, conj
             * inverse

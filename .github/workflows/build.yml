@@ -36,7 +36,7 @@ jobs:
           rm poetry.lock
           python -m poetry build
           python -m poetry install
-          python -m poetry run pytest --cov --cov-branch --cov-report=xml
+          python -m poetry run pytest --cov --cov-branch --cov-report=xml --cov-report=term
 
       - name: Upload coverage
         if: "matrix.python-version == 3.8 && matrix.os == 'ubuntu-latest'"
@@ -67,7 +67,7 @@ jobs:
           #python -m pip install poetry  # Only install poetry like this in containers
           python -m pip install --no-warn-script-location --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
           python -m poetry build
-          python -m poetry install
+          python -m poetry install --no-dev
 
       - name: Bump version
         shell: bash
@@ -110,5 +110,5 @@ jobs:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
         run: |
           python -m poetry build
-          python -m poetry install
+          python -m poetry install --no-dev
           python -m poetry publish

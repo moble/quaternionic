@@ -5,7 +5,7 @@
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/quaternionic.svg?color=)](https://anaconda.org/conda-forge/quaternionic)
 
 
-# Quaternions by way of numpy arrays
+# Quaternionic arrays
 
 This module subclasses numpy's array type, interpreting the array as an array of quaternions, and
 accelerating the algebra using numba.  This enables natural manipulations, like multiplying
@@ -14,33 +14,51 @@ also basic initial support for symbolic manipulation of quaternions by creating 
 with sympy symbols as elements, though this is a work in progress.
 
 This package has evolved from the [quaternion](https://github.com/moble/quaternion) package, which
-adds a quaternion dtype directly to numpy.  In many ways, that is a much better approach because
-dtypes are built in to numpy, making it more robust than this package.  However, that approach has
-its own limitations, including that it is harder to maintain, and requires much of the code to be
-written in C, which also makes it harder to distribute.  This package is written entirely in python
-code, but should actually have comparable performance because it is compiled by numba.  Moreover,
-because the core code is written in pure python, it is reusable for purposes other than the core
-purpose of this package, which is to provide the numeric array type.
+adds a quaternion dtype directly to numpy.  In some ways, that is a better approach because dtypes
+are built in to numpy, making it more robust than this package.  However, that approach has its own
+limitations, including that it is harder to maintain, and requires much of the code to be written in
+C, which also makes it harder to distribute.  This package is written entirely in python code, but
+should actually have comparable performance because it is compiled by numba.  Moreover, because the
+core code is written in pure python, it is reusable for purposes other than the core purpose of this
+package, which is to provide the numeric array type.
 
 
 # Installation
 
-Because this package is pure python code, it can be installed with the simplest tools.  In
-particular, you can just run
+Because this package is pure python code, installation is very simple.  In particular, with
+a reasonably modern installation, you can just run
+
+```bash
+conda install -c conda-forge quaternionic
+```
+
+or
 
 ```bash
 pip install quaternionic
 ```
 
+These will download and install the package.  It can also be installed from source by running `pip
+install .` from the top-level directory of the code.
+
+Note that only python 3.6 or greater is supported, and pip itself must be version 10.0 or greater.
+(I have tried to support PyPy3, although I cannot test this as `scipy` does not currently install.
+Pull requests are welcome.)  In any case, I strongly recommend installing by way of an environment
+manager — especially [conda](https://docs.anaconda.com/anaconda/install/), though other managers
+like `virtualenv` or `pipenv` should also work.
+
 For development work, the best current option is [poetry](https://python-poetry.org/).  From the
 top-level directory, run `poetry install` or just `poetry run <some command>`.
+
 
 # Usage
 
 ## Basic construction
 
-Any numpy array `a` with a last axis of size 4 (and dtype=float) can be reinterpreted as a
-quaternionic array with `quaternionic.array(a)`:
+The key function is `quaternionic.array`, which takes nearly the same arguments as `numpy.array`,
+except that whatever array will result must have a final axis of size 4 (and the `dtype` must be
+`float`).  As long as these conditions are satisfied, we can create new arrays or just reinterpret
+existing arrays:
 
 ```python
 import numpy as np
@@ -73,7 +91,7 @@ All the usual quaternion operations are available, including
   * Multiplication `q1 * q2`
   * Division `q1 / q2`
   * Scalar multiplication `q1 * s == s * q1`
-  * Scalar division `q1 / s != s / q1`
+  * Scalar division `q1 / s` and `s / q1`
   * Reciprocal `np.reciprocal(q1) == 1/q1`
   * Exponential `np.exp(q1)`
   * Logarithm `np.log(q1)`
@@ -99,23 +117,27 @@ particularly useful for quaternions, including
     * `abs` (square-root of sum of squares of components)
     * `norm` (sum of squares of components)
     * `modulus`, `magnitude` (equal to `abs`)
-    * `absolute_square`, `abs2`, `mag2`, `squared_norm` (equal to `norm`)
+    * `absolute_square`, `abs2`, `mag2` (equal to `norm`)
     * `normalized`
     * `inverse`
   * Methods related to array infrastructure
     * `ndarray` (the numpy array underlying the quaternionic array)
     * `flattened` (all dimensions but last are flattened into one)
     * `iterator` (iterate over all quaternions)
-    
-Note that this package makes a distinction between `abs` and `norm` — the latter being the square of
-the former.  This choice agrees with the [Boost library's implementation of
+
+Note that this package makes a distinction between `abs` and `norm` — the latter being equal to the
+square of the former.  This version of the norm is also known as the "Cayley" norm, commonly used
+when emphasizing the properties of an object in an algebra, as opposed to the "Euclidean" norm more
+common when emphasizing the properties of an object in a vector space — though of course, algebras
+are vector spaces with additional structure.  This choice agrees with the [Boost library's
+implementation of
 quaternions](https://www.boost.org/doc/libs/1_74_0/libs/math/doc/html/math_toolkit/value_op.html),
 as well as this package's forerunner
 [quaternion](https://github.com/moble/quaternion/blob/99913120b1b2a8a5eb7769c29ee760a236d40880/quaternion.h#L115-L120).
 This also agrees with the corresponding functions on the [C++ standard library's complex
 numbers](http://www.cplusplus.com/reference/complex/norm/).  Because this may be confusing, a number
 of aliases are also provided that may be less confusing.  For example, some people find the pair
-`abs` and `abs2` to be more sensible.
+`abs` and `abs2` (meaning the square of `abs`) to be more sensible.
 
 
 ## Rotations
@@ -183,22 +205,23 @@ The "rotor" distances do not account for possible differences in signs, meaning 
 can be large even when they represent identical rotations; the "rotation" functions just return the
 smaller of the distance between `q1` and `q2` or the distance between `q1` and `-q2`.  So, for
 example, either "rotation" distance between `q` and `-q` is always zero, whereas neither "rotor"
-distance between `q` and `-q` will ever be zero (unless `q=0`).  The "intrinsic" functions measure
-the geodesic distance within the manifold of *unit* quaternions, and is somewhat slower but may be
-more meaningful; the "chordal" functions measure the Euclidean distance in the (linear) space of all
-quaternions, and is faster but its precise value is not necessarily as meaningful.
+distance between `q` and `-q` will ever be zero (unless `q` is zero).  The "intrinsic" functions
+measure the geodesic distance within the manifold of *unit* quaternions, and is somewhat slower but
+may be more meaningful; the "chordal" functions measure the Euclidean distance in the (linear) space
+of all quaternions, and is faster but its precise value is not necessarily as meaningful.
 
-These functions satisfy some important conditions.  For each of these functions $d$, and for any
-nonzero quaternions $q_1$, $q_2$, $a$, and $b$, we have
+These functions satisfy some important conditions.  For each of these functions `d`, and for any
+nonzero quaternions `q1` and `q2`, and *unit* quaternions `q3` and `q4`, we have
 
-  * symmetry: $d(q_1, q_2) = d(q_2, q_1)$
-  * invariance: $d(a\, q_1, a\, q_2) = d(q_1, q_2) = d(q_1\, b, q_2\, b)$
-  * identity: $d(q_1, q_1) = 0$
+  * symmetry: `d(q1, q2) = d(q2, q1)`
+  * invariance: `d(q3*q1, q3*q2) = d(q1, q2) = d(q1*q4, q2*q4)`
+  * identity: `d(q1, q1) = 0`
   * positive-definiteness:
-    * For rotor functions $d(q_1, q_2) > 0$ whenever $q_1 \neq q_2$
-    * For rotation functions $d(q_1, q_2) > 0$ whenever $q_1 \neq q_2$ and $q_1 \neq -q_2$
+    * For rotor functions `d(q1, q2) > 0` whenever `q1 ≠ q2`
+    * For rotation functions `d(q1, q2) > 0` whenever `q1 ≠ q2` and `q1 ≠ -q2`
 
-Note that the rotation functions also satisfy $d(q_1, -q_1) = 0$.
+Note that the rotation functions also satisfy both the usual identity property `d(q1, q1) = 0` and
+the opposite-identity property `d(q1, -q1) = 0`.
 
 See [Moakher (2002)](https://doi.org/10.1137/S0895479801383877) for a nice general discussion.
 
@@ -213,20 +236,27 @@ Finally, there are also capabilities related to interpolation
 
 # Related packages
 
-Packages with some quaternion features include
+Other python packages with some quaternion features include
 
-  * [quaternion](https://github.com/moble/quaternion/) (renamed
+  * [quaternion](https://github.com/moble/quaternion/) (core written in C; very fast; adds
+    quaternion `dtype` to numpy; named
     [numpy-quaternion](https://pypi.org/project/numpy-quaternion/) on pypi due to name conflict)
   * [clifford](https://github.com/pygae/clifford) (very powerful; more general geometric algebras)
-  * [pyquaternion](http://kieranwynn.github.io/pyquaternion/) (many features; pure python; no acceleration)
-  * [quaternions](https://github.com/mjsobrep/quaternions) (basic pure python package; no acceleration; specialized for rotations only)
-  * [rowan](https://github.com/glotzerlab/rowan) (similar approach to this package, but no acceleration or overloading)
-  * [Quaternion](https://pypi.org/project/Quaternion/) (minimal capabilities; unmaintained)
-  * [scipy.spatial.transform.Rotation.as_quat](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.as_quat.html)
-    (quaternion output for Rotation object)
-  * [mathutils](https://gitlab.com/ideasman42/blender-mathutils) (a Blender package with python bindings)
+  * [rowan](https://github.com/glotzerlab/rowan) (many features; similar approach to this package;
+    no acceleration or overloading)
+  * [pyquaternion](http://kieranwynn.github.io/pyquaternion/) (many features; pure python; no
+    acceleration or overloading)
+  * [quaternions](https://github.com/mjsobrep/quaternions) (basic pure python package; no
+    acceleration; specialized for rotations only)
+  * [scipy.spatial.transform.Rotation.as\_quat](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.as_quat.html)
+    (quaternion output for `Rotation` object)
+  * [mathutils](https://gitlab.com/ideasman42/blender-mathutils) (a Blender package with python
+    bindings)
+  * [Quaternion](https://pypi.org/project/Quaternion/) (extremely limited capabilities; unmaintained)
 
-Also note that there is some capability to do symbolic manipulations of quaternions in these packages:
+Also note that there is some capability to do symbolic manipulations of quaternions in these
+packages:
 
-  * [galgebra](https://github.com/pygae/galgebra)
+  * [galgebra](https://github.com/pygae/galgebra) (more general geometric algebras; analogous to
+    `clifford`, but for symbolic calculations)
   * [sympy.algebras.quaternion](https://docs.sympy.org/latest/modules/algebras.html)
