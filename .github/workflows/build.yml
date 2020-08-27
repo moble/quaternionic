@@ -66,6 +66,7 @@ jobs:
           python -m pip install toml
           #python -m pip install poetry  # Only install poetry like this in containers
           python -m pip install --no-warn-script-location --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
+          python -m poetry update
           python -m poetry build
           python -m poetry install --no-dev
 
