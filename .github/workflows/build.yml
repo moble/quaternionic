@@ -7,6 +7,9 @@ jobs:
     name: Test parsing of commit message
     runs-on: ubuntu-latest
     steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
