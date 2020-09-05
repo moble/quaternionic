@@ -6,6 +6,7 @@ readme = "README.md"
 license = "MIT"
 authors = ["Michael Boyle <michael.oliver.boyle@gmail.com>"]
 homepage = "https://github.com/moble/quaternionic"
+include = ["tests"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
