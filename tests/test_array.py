@@ -206,7 +206,7 @@ def test_repr(array):
 
 def test_str(array):
     q = array(np.random.rand(17, 3, 4))
-    assert str(q) == 'quaternionic.' + str(q.ndarray)
+    assert str(q) == str(q.ndarray)
 
 
 # Unary bool returners

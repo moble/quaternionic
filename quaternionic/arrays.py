@@ -252,7 +252,7 @@ def QuaternionicArray(jit=jit, dtype=float):
             return 'quaternionic.' + repr(self.ndarray)
 
         def __str__(self):
-            return 'quaternionic.' + str(self.ndarray)
+            return str(self.ndarray)
 
     return QArray
 
