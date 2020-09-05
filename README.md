@@ -35,12 +35,16 @@ conda install -c conda-forge quaternionic
 or
 
 ```bash
-pip install quaternionic
+python -m pip install quaternionic
 ```
 
-These will download and install the package.  You can also install the package from source if you
-have `pip` version 10.0 or greater by running `pip install .`, or if you have `poetry` by running
-`poetry install`.
+These will download and install the package.  (Using `python -m pip` instead of just `pip` or `pip3`
+helps avoid problems that new python users frequently run into; the reason is explained by a veteran
+python core contributor [here](https://snarky.ca/why-you-should-use-python-m-pip/).)
+
+You can also install the package from source if you have `pip` version 10.0 or greater by running
+`python -m pip install .` — or if you have `poetry` by running `poetry install` — from the top-level
+directory.
 
 Note that only python 3.6 or greater is supported.  (I have also tried to support PyPy3, although I
 cannot test this as `scipy` does not currently install.  Pull requests are welcome.)  In any case, I
