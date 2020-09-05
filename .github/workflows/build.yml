@@ -3,6 +3,7 @@ name: tests
 on: [push]
 
 jobs:
+
   build:
     name: ${{ matrix.os }} python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
@@ -72,8 +73,10 @@ jobs:
 
       - name: Bump version
         shell: bash
+        env:
+          github_event_head_commit_message: ${{ github.event.head_commit.message }}
         run: |
-          export version_bump_rule=$(echo '${{ github.event.head_commit.message }}' | python .github/scripts/parse_bump_rule.py )
+          export version_bump_rule=$(python .github/scripts/parse_bump_rule.py)
           echo "version_bump_rule: '${version_bump_rule}'"
           python -m poetry version "${version_bump_rule}"
           export new_version=$(python .github/scripts/parse_version.py pyproject.toml)
