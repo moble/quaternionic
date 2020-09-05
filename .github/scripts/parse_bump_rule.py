@@ -1,4 +1,5 @@
 import sys
+import os
 
 
 def parse(message):
@@ -13,5 +14,5 @@ def parse(message):
     return 'patch'
 
 
-message = sys.stdin.read()
+message = os.environ['github_event_head_commit_message']
 print(parse(message))

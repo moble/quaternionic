@@ -3,113 +3,133 @@ name: tests
 on: [push]
 
 jobs:
-  build:
-    name: ${{ matrix.os }} python ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
-    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[skip tests]')"
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8] #, pypy3]
-        # exclude:
-        #   - os: windows-latest
-        #     python-version: pypy3
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install poetry
-        run: |
-          python -m pip install --upgrade pip
-          #python -m pip install poetry  # Only install poetry like this in containers
-          python -m pip install --no-warn-script-location --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
-
-      - name: Run poetry
-        run: |
-          rm poetry.lock
-          python -m poetry build
-          python -m poetry install
-          python -m poetry run pytest --cov --cov-branch --cov-report=xml
-
-      - name: Upload coverage
-        if: "matrix.python-version == 3.8 && matrix.os == 'ubuntu-latest'"
-        shell: bash
-        run: |
-          bash <(curl -s https://codecov.io/bash)
-
-
   release:
-    name: Create release and send to PyPI
-    needs: build
+    name: Test parsing of commit message
     runs-on: ubuntu-latest
-    if: "github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, '[no release]') && (success() || contains(github.event.head_commit.message, '[skip tests]'))"
-
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
 
-      - name: Install poetry and this package
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install toml
-          #python -m pip install poetry  # Only install poetry like this in containers
-          python -m pip install --no-warn-script-location --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
-          python -m poetry update
-          python -m poetry build
-          python -m poetry install --no-dev
-
       - name: Bump version
         shell: bash
+        env:
+          github_event_head_commit_message: ${{ github.event.head_commit.message }}
         run: |
-          export version_bump_rule=$(echo '${{ github.event.head_commit.message }}' | python .github/scripts/parse_bump_rule.py )
+          export version_bump_rule=$(python .github/scripts/parse_bump_rule.py)
           echo "version_bump_rule: '${version_bump_rule}'"
-          python -m poetry version "${version_bump_rule}"
-          export new_version=$(python .github/scripts/parse_version.py pyproject.toml)
-          echo "new_version: '${new_version}'"
-          echo "::set-env name=new_version::${new_version}"  # Save env variable for later steps
 
-      - name: Tag and push new version
-        shell: bash
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add pyproject.toml
-          git commit -m "Bump version to v${new_version}"
-          git tag -a "v${new_version}" -m "Version ${new_version}"
-          git status
-          git push --follow-tags  # Will not trigger new workflow because it uses GITHUB_TOKEN
 
-      - name: Create release
-        if: "!contains(github.event.head_commit.message, '[no release]')"
-        id: create_release
-        uses: actions/create-release@latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.new_version_tag }}
-          release_name: Release ${{ env.new_version_tag }}
-          draft: false
-          prerelease: false
+  # build:
+  #   name: ${{ matrix.os }} python ${{ matrix.python-version }}
+  #   runs-on: ${{ matrix.os }}
+  #   if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[skip tests]')"
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ubuntu-latest, macos-latest, windows-latest]
+  #       python-version: [3.6, 3.7, 3.8] #, pypy3]
+  #       # exclude:
+  #       #   - os: windows-latest
+  #       #     python-version: pypy3
 
-      - name: Publish to PyPI
-        if: "!contains(github.event.head_commit.message, '[no pypi]')"
-        env:
-          # 1) Get key from https://pypi.org/manage/account/token/
-          # 2) Copy it to Github > repo > Settings > Secrets
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          python -m poetry build
-          python -m poetry install --no-dev
-          python -m poetry publish
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v2
+
+  #     - name: Set up python ${{ matrix.python-version }}
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+
+  #     - name: Install poetry
+  #       run: |
+  #         python -m pip install --upgrade pip
+  #         #python -m pip install poetry  # Only install poetry like this in containers
+  #         python -m pip install --no-warn-script-location --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
+
+  #     - name: Run poetry
+  #       run: |
+  #         rm poetry.lock
+  #         python -m poetry build
+  #         python -m poetry install
+  #         python -m poetry run pytest --cov --cov-branch --cov-report=xml
+
+  #     - name: Upload coverage
+  #       if: "matrix.python-version == 3.8 && matrix.os == 'ubuntu-latest'"
+  #       shell: bash
+  #       run: |
+  #         bash <(curl -s https://codecov.io/bash)
+
+
+  # release:
+  #   name: Create release and send to PyPI
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   if: "github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, '[no release]') && (success() || contains(github.event.head_commit.message, '[skip tests]'))"
+
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v2
+
+  #     - name: Set up python ${{ matrix.python-version }}
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: 3.8
+
+  #     - name: Install poetry and this package
+  #       run: |
+  #         python -m pip install --upgrade pip
+  #         python -m pip install toml
+  #         #python -m pip install poetry  # Only install poetry like this in containers
+  #         python -m pip install --no-warn-script-location --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
+  #         python -m poetry update
+  #         python -m poetry build
+  #         python -m poetry install --no-dev
+
+  #     - name: Bump version
+  #       shell: bash
+  #       env:
+  #         github_event_head_commit_message: ${{ github.event.head_commit.message }}
+  #       run: |
+  #         export version_bump_rule=$(python .github/scripts/parse_bump_rule.py)
+  #         echo "version_bump_rule: '${version_bump_rule}'"
+  #         python -m poetry version "${version_bump_rule}"
+  #         export new_version=$(python .github/scripts/parse_version.py pyproject.toml)
+  #         echo "new_version: '${new_version}'"
+  #         echo "::set-env name=new_version::${new_version}"  # Save env variable for later steps
+
+  #     - name: Tag and push new version
+  #       shell: bash
+  #       run: |
+  #         git config user.name github-actions
+  #         git config user.email github-actions@github.com
+  #         git add pyproject.toml
+  #         git commit -m "Bump version to v${new_version}"
+  #         git tag -a "v${new_version}" -m "Version ${new_version}"
+  #         git status
+  #         git push --follow-tags  # Will not trigger new workflow because it uses GITHUB_TOKEN
+
+  #     - name: Create release
+  #       if: "!contains(github.event.head_commit.message, '[no release]')"
+  #       id: create_release
+  #       uses: actions/create-release@latest
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       with:
+  #         tag_name: ${{ env.new_version_tag }}
+  #         release_name: Release ${{ env.new_version_tag }}
+  #         draft: false
+  #         prerelease: false
+
+  #     - name: Publish to PyPI
+  #       if: "!contains(github.event.head_commit.message, '[no pypi]')"
+  #       env:
+  #         # 1) Get key from https://pypi.org/manage/account/token/
+  #         # 2) Copy it to Github > repo > Settings > Secrets
+  #         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+  #       run: |
+  #         python -m poetry build
+  #         python -m poetry install --no-dev
+  #         python -m poetry publish
