@@ -2,7 +2,7 @@
 category = "main"
 description = "A configurable sidebar-enabled Sphinx theme"
 name = "alabaster"
-optional = false
+optional = true
 python-versions = "*"
 version = "0.7.12"
 
@@ -10,7 +10,7 @@ version = "0.7.12"
 category = "main"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 name = "appdirs"
-optional = false
+optional = true
 python-versions = "*"
 version = "1.4.4"
 
@@ -28,18 +28,19 @@ description = "Classes Without Boilerplate"
 name = "attrs"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "20.1.0"
+version = "20.2.0"
 
 [package.extras]
 dev = ["coverage (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "zope.interface", "sphinx", "sphinx-rtd-theme", "pre-commit"]
 docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
 tests = ["coverage (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "zope.interface"]
+tests_no_zope = ["coverage (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six"]
 
 [[package]]
 category = "main"
 description = "Internationalization utilities"
 name = "babel"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "2.8.0"
 
@@ -50,7 +51,7 @@ pytz = ">=2015.7"
 category = "main"
 description = "The uncompromising code formatter."
 name = "black"
-optional = false
+optional = true
 python-versions = ">=3.6"
 version = "20.8b1"
 
@@ -73,7 +74,7 @@ d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
 category = "main"
 description = "Python package for providing Mozilla's CA Bundle."
 name = "certifi"
-optional = false
+optional = true
 python-versions = "*"
 version = "2020.6.20"
 
@@ -81,7 +82,7 @@ version = "2020.6.20"
 category = "main"
 description = "Universal encoding detector for Python 2 and 3"
 name = "chardet"
-optional = false
+optional = true
 python-versions = "*"
 version = "3.0.4"
 
@@ -89,7 +90,7 @@ version = "3.0.4"
 category = "main"
 description = "Composable command line interface toolkit"
 name = "click"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 version = "7.1.2"
 
@@ -116,7 +117,7 @@ toml = ["toml"]
 category = "main"
 description = "A backport of the dataclasses module for Python 3.6"
 name = "dataclasses"
-optional = false
+optional = true
 python-versions = ">=3.6, <3.7"
 version = "0.7"
 
@@ -124,7 +125,7 @@ version = "0.7"
 category = "main"
 description = "Docutils -- Python Documentation Utilities"
 name = "docutils"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 version = "0.16"
 
@@ -132,7 +133,7 @@ version = "0.16"
 category = "main"
 description = "Clean single-source support for Python 3 and 2"
 name = "future"
-optional = false
+optional = true
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 version = "0.18.2"
 
@@ -140,7 +141,7 @@ version = "0.18.2"
 category = "main"
 description = "Internationalized Domain Names in Applications (IDNA)"
 name = "idna"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "2.10"
 
@@ -148,7 +149,7 @@ version = "2.10"
 category = "main"
 description = "Getting image size from png/jpeg/jpeg2000/gif file"
 name = "imagesize"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "1.2.0"
 
@@ -179,7 +180,7 @@ version = "1.0.1"
 category = "main"
 description = "A very fast and expressive template engine."
 name = "jinja2"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 version = "2.11.2"
 
@@ -193,7 +194,7 @@ i18n = ["Babel (>=0.8)"]
 category = "main"
 description = "Lightweight pipelining: using Python functions as pipeline jobs."
 name = "joblib"
-optional = false
+optional = true
 python-versions = ">=3.6"
 version = "0.16.0"
 
@@ -201,7 +202,7 @@ version = "0.16.0"
 category = "main"
 description = "Python LiveReload is an awesome tool for web developers"
 name = "livereload"
-optional = false
+optional = true
 python-versions = "*"
 version = "2.6.3"
 
@@ -221,7 +222,7 @@ version = "0.34.0"
 category = "main"
 description = "A Python implementation of Lunr.js"
 name = "lunr"
-optional = false
+optional = true
 python-versions = "*"
 version = "0.5.8"
 
@@ -237,7 +238,7 @@ languages = ["nltk (>=3.2.5,<3.5)", "nltk (>=3.2.5)"]
 category = "main"
 description = "Python implementation of Markdown."
 name = "markdown"
-optional = false
+optional = true
 python-versions = ">=3.5"
 version = "3.2.2"
 
@@ -251,7 +252,7 @@ testing = ["coverage", "pyyaml"]
 category = "main"
 description = "Safely add untrusted strings to HTML/XML markup."
 name = "markupsafe"
-optional = false
+optional = true
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 version = "1.1.1"
 
@@ -259,7 +260,7 @@ version = "1.1.1"
 category = "main"
 description = "Project documentation with Markdown."
 name = "mkdocs"
-optional = false
+optional = true
 python-versions = ">=3.5"
 version = "1.1.2"
 
@@ -276,7 +277,7 @@ lunr = {version = "0.5.8", extras = ["languages"]}
 category = "main"
 description = "Generate markdown API documentation from Numpydoc docstrings."
 name = "mktheapidocs"
-optional = false
+optional = true
 python-versions = "*"
 version = "0.2.0.post0.dev8"
 
@@ -284,7 +285,6 @@ version = "0.2.0.post0.dev8"
 black = "*"
 click = "*"
 numpydoc = "*"
-mkdocs = {version = ">=1.1", optional = true, markers = "extra == \"plugin\""}
 
 [package.extras]
 plugin = ["mkdocs (>=1.1)"]
@@ -295,13 +295,13 @@ description = "More routines for operating on iterables, beyond itertools"
 name = "more-itertools"
 optional = false
 python-versions = ">=3.5"
-version = "8.4.0"
+version = "8.5.0"
 
 [[package]]
 category = "main"
 description = "Experimental type system extensions for programs checked with the mypy typechecker."
 name = "mypy-extensions"
-optional = false
+optional = true
 python-versions = "*"
 version = "0.4.3"
 
@@ -309,7 +309,7 @@ version = "0.4.3"
 category = "main"
 description = "Natural Language Toolkit"
 name = "nltk"
-optional = false
+optional = true
 python-versions = "*"
 version = "3.5"
 
@@ -333,7 +333,7 @@ description = "compiling Python code using LLVM"
 name = "numba"
 optional = false
 python-versions = ">=3.6"
-version = "0.51.1"
+version = "0.51.2"
 
 [package.dependencies]
 llvmlite = ">=0.34.0.dev0,<0.35"
@@ -351,7 +351,7 @@ version = "1.19.1"
 category = "main"
 description = "Sphinx extension to support docstrings in Numpy format"
 name = "numpydoc"
-optional = false
+optional = true
 python-versions = ">=3.5"
 version = "1.1.0"
 
@@ -378,7 +378,7 @@ six = "*"
 category = "main"
 description = "Utility library for gitignore style pattern matching of file paths."
 name = "pathspec"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 version = "0.8.0"
 
@@ -408,7 +408,7 @@ version = "1.9.0"
 category = "main"
 description = "Pygments is a syntax highlighting package written in Python."
 name = "pygments"
-optional = false
+optional = true
 python-versions = ">=3.5"
 version = "2.6.1"
 
@@ -416,7 +416,7 @@ version = "2.6.1"
 category = "main"
 description = "Extension pack for Python Markdown."
 name = "pymdown-extensions"
-optional = false
+optional = true
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
 version = "8.0"
 
@@ -474,7 +474,7 @@ testing = ["fields", "hunter", "process-tests (2.0.2)", "six", "pytest-xdist", "
 category = "main"
 description = "World timezone definitions, modern and historical"
 name = "pytz"
-optional = false
+optional = true
 python-versions = "*"
 version = "2020.1"
 
@@ -482,7 +482,7 @@ version = "2020.1"
 category = "main"
 description = "YAML parser and emitter for Python"
 name = "pyyaml"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 version = "5.3.1"
 
@@ -490,7 +490,7 @@ version = "5.3.1"
 category = "main"
 description = "Alternative regular expression module, to replace re."
 name = "regex"
-optional = false
+optional = true
 python-versions = "*"
 version = "2020.7.14"
 
@@ -498,7 +498,7 @@ version = "2020.7.14"
 category = "main"
 description = "Python HTTP for Humans."
 name = "requests"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 version = "2.24.0"
 
@@ -535,7 +535,7 @@ version = "1.15.0"
 category = "main"
 description = "This package provides 26 stemmers for 25 languages generated from Snowball algorithms."
 name = "snowballstemmer"
-optional = false
+optional = true
 python-versions = "*"
 version = "2.0.0"
 
@@ -543,7 +543,7 @@ version = "2.0.0"
 category = "main"
 description = "Python documentation generator"
 name = "sphinx"
-optional = false
+optional = true
 python-versions = ">=3.5"
 version = "3.2.1"
 
@@ -574,7 +574,7 @@ test = ["pytest", "pytest-cov", "html5lib", "typed-ast", "cython"]
 category = "main"
 description = "sphinxcontrib-applehelp is a sphinx extension which outputs Apple help books"
 name = "sphinxcontrib-applehelp"
-optional = false
+optional = true
 python-versions = ">=3.5"
 version = "1.0.2"
 
@@ -586,7 +586,7 @@ test = ["pytest"]
 category = "main"
 description = "sphinxcontrib-devhelp is a sphinx extension which outputs Devhelp document."
 name = "sphinxcontrib-devhelp"
-optional = false
+optional = true
 python-versions = ">=3.5"
 version = "1.0.2"
 
@@ -598,7 +598,7 @@ test = ["pytest"]
 category = "main"
 description = "sphinxcontrib-htmlhelp is a sphinx extension which renders HTML help files"
 name = "sphinxcontrib-htmlhelp"
-optional = false
+optional = true
 python-versions = ">=3.5"
 version = "1.0.3"
 
@@ -610,7 +610,7 @@ test = ["pytest", "html5lib"]
 category = "main"
 description = "A sphinx extension which renders display math in HTML via JavaScript"
 name = "sphinxcontrib-jsmath"
-optional = false
+optional = true
 python-versions = ">=3.5"
 version = "1.0.1"
 
@@ -621,7 +621,7 @@ test = ["pytest", "flake8", "mypy"]
 category = "main"
 description = "sphinxcontrib-qthelp is a sphinx extension which outputs QtHelp document."
 name = "sphinxcontrib-qthelp"
-optional = false
+optional = true
 python-versions = ">=3.5"
 version = "1.0.3"
 
@@ -633,7 +633,7 @@ test = ["pytest"]
 category = "main"
 description = "sphinxcontrib-serializinghtml is a sphinx extension which outputs \"serialized\" HTML files (json and pickle)."
 name = "sphinxcontrib-serializinghtml"
-optional = false
+optional = true
 python-versions = ">=3.5"
 version = "1.1.4"
 
@@ -653,7 +653,7 @@ version = "0.10.1"
 category = "main"
 description = "Tornado is a Python web framework and asynchronous networking library, originally developed at FriendFeed."
 name = "tornado"
-optional = false
+optional = true
 python-versions = ">= 3.5"
 version = "6.0.4"
 
@@ -661,7 +661,7 @@ version = "6.0.4"
 category = "main"
 description = "Fast, Extensible Progress Meter"
 name = "tqdm"
-optional = false
+optional = true
 python-versions = ">=2.6, !=3.0.*, !=3.1.*"
 version = "4.48.2"
 
@@ -672,7 +672,7 @@ dev = ["py-make (>=0.1.0)", "twine", "argopt", "pydoc-markdown"]
 category = "main"
 description = "a fork of Python 2 and 3 ast modules with type comment support"
 name = "typed-ast"
-optional = false
+optional = true
 python-versions = "*"
 version = "1.4.1"
 
@@ -680,7 +680,7 @@ version = "1.4.1"
 category = "main"
 description = "Backported and Experimental Type Hints for Python 3.5+"
 name = "typing-extensions"
-optional = false
+optional = true
 python-versions = "*"
 version = "3.7.4.3"
 
@@ -688,7 +688,7 @@ version = "3.7.4.3"
 category = "main"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 name = "urllib3"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 version = "1.25.10"
 
@@ -715,7 +715,7 @@ mktheapidocs = ["mktheapidocs"]
 pymdown-extensions = ["pymdown-extensions"]
 
 [metadata]
-content-hash = "5a266874fc31a7b83b80b14303d5611a826331943d269569521869dd25aef355"
+content-hash = "78fa0e633675314ac919cc39d07428be672060d692f21cbc13a04593d35960ad"
 lock-version = "1.1"
 python-versions = "^3.6"
 
@@ -733,8 +733,8 @@ atomicwrites = [
     {file = "atomicwrites-1.4.0.tar.gz", hash = "sha256:ae70396ad1a434f9c7046fd2dd196fc04b12f9e91ffb859164193be8b6168a7a"},
 ]
 attrs = [
-    {file = "attrs-20.1.0-py2.py3-none-any.whl", hash = "sha256:2867b7b9f8326499ab5b0e2d12801fa5c98842d2cbd22b35112ae04bf85b4dff"},
-    {file = "attrs-20.1.0.tar.gz", hash = "sha256:0ef97238856430dcf9228e07f316aefc17e8939fc8507e18c6501b761ef1a42a"},
+    {file = "attrs-20.2.0-py2.py3-none-any.whl", hash = "sha256:fce7fc47dfc976152e82d53ff92fa0407700c21acd20886a13777a0d20e655dc"},
+    {file = "attrs-20.2.0.tar.gz", hash = "sha256:26b54ddbbb9ee1d34d5d3668dd37d6cf74990ab23c828c2888dccdceee395594"},
 ]
 babel = [
     {file = "Babel-2.8.0-py2.py3-none-any.whl", hash = "sha256:d670ea0b10f8b723672d3a6abeb87b565b244da220d76b4dba1b66269ec152d4"},
@@ -903,8 +903,8 @@ mktheapidocs = [
     {file = "mktheapidocs-0.2.0.post0.dev8-py3-none-any.whl", hash = "sha256:288d06a30943c77f37d90f673485d568949d30fc6d18e4427dc5eda99b84788a"},
 ]
 more-itertools = [
-    {file = "more-itertools-8.4.0.tar.gz", hash = "sha256:68c70cc7167bdf5c7c9d8f6954a7837089c6a36bf565383919bb595efb8a17e5"},
-    {file = "more_itertools-8.4.0-py3-none-any.whl", hash = "sha256:b78134b2063dd214000685165d81c154522c3ee0a1c0d4d113c80361c234c5a2"},
+    {file = "more-itertools-8.5.0.tar.gz", hash = "sha256:6f83822ae94818eae2612063a5101a7311e68ae8002005b5e05f03fd74a86a20"},
+    {file = "more_itertools-8.5.0-py3-none-any.whl", hash = "sha256:9b30f12df9393f0d28af9210ff8efe48d10c94f73e5daf886f10c4b0b0b4f03c"},
 ]
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
@@ -914,22 +914,22 @@ nltk = [
     {file = "nltk-3.5.zip", hash = "sha256:845365449cd8c5f9731f7cb9f8bd6fd0767553b9d53af9eb1b3abf7700936b35"},
 ]
 numba = [
-    {file = "numba-0.51.1-cp36-cp36m-macosx_10_14_x86_64.whl", hash = "sha256:feb90cc4f7b29b552cfcefb7608aee9f136d89cba44c0037023026b636d52685"},
-    {file = "numba-0.51.1-cp36-cp36m-manylinux2014_i686.whl", hash = "sha256:347901c50a07e87c725e73bce40142e04e82c9c146af471fd6bf296c273e4c0d"},
-    {file = "numba-0.51.1-cp36-cp36m-manylinux2014_x86_64.whl", hash = "sha256:94565faba74e4945ae81d5eec4b2fbf696ae0fb58545716c264deabcdedda753"},
-    {file = "numba-0.51.1-cp36-cp36m-win32.whl", hash = "sha256:555646bc4ec19ba786ed8242835083ea21ae4b0f2fcda7049808de1fffc75a8e"},
-    {file = "numba-0.51.1-cp36-cp36m-win_amd64.whl", hash = "sha256:7f05e0cf8e10be8d90798a628de2b5deac22f59d3a4347465c06762e1bc24d1a"},
-    {file = "numba-0.51.1-cp37-cp37m-macosx_10_14_x86_64.whl", hash = "sha256:fb9b5e154ab92eb44d5f6faaaec511fbc102a432f332a4cc979355a4281f5bd2"},
-    {file = "numba-0.51.1-cp37-cp37m-manylinux2014_i686.whl", hash = "sha256:daaedb35ab0ec6b74a970b85d54a8573750f57d3dcf4c9e00e4112178ae26806"},
-    {file = "numba-0.51.1-cp37-cp37m-manylinux2014_x86_64.whl", hash = "sha256:baadf6c5910b160f8a8b03c748f0f63f6c997fb92f4f6d9d60dfbab05ac66fc2"},
-    {file = "numba-0.51.1-cp37-cp37m-win32.whl", hash = "sha256:cdb4bbdc7a168afbb3b94630e5160eb227ff5df07fda61d461bd2f8a91af7f69"},
-    {file = "numba-0.51.1-cp37-cp37m-win_amd64.whl", hash = "sha256:bc8d267baef87af0c9838464338307d69e7dac18dc23b2e96108da76b220fe9c"},
-    {file = "numba-0.51.1-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:17c8bf1663d1b0cafa0fdc88a4fc4feb642fae87bd312eca3f8cfb1a8ae93569"},
-    {file = "numba-0.51.1-cp38-cp38-manylinux2014_i686.whl", hash = "sha256:0cf9ee333fda98e2b057561ed696ba169b59f43e853f066ffc8c13661bdf4753"},
-    {file = "numba-0.51.1-cp38-cp38-manylinux2014_x86_64.whl", hash = "sha256:1eba3e446d66286b299ea59cfe42483a61562b2b09cdf74ef24988a287bd217e"},
-    {file = "numba-0.51.1-cp38-cp38-win32.whl", hash = "sha256:dc019921e2e6b567e15d07c0aca52b39900a1344467f399dccab400a6faeddf4"},
-    {file = "numba-0.51.1-cp38-cp38-win_amd64.whl", hash = "sha256:75e8858fb74d80c1532568b61d6e66ac0cd9cca5dc4ddec0df46a14652a8a36f"},
-    {file = "numba-0.51.1.tar.gz", hash = "sha256:1e765b1a41535684bf3b0465c1d0a24dcbbff6af325270c8f4dad924c0940160"},
+    {file = "numba-0.51.2-cp36-cp36m-macosx_10_14_x86_64.whl", hash = "sha256:af798310eeb318c56cdb83254abbe9a938cc0182d08671d7f9f032dc817e064d"},
+    {file = "numba-0.51.2-cp36-cp36m-manylinux2014_i686.whl", hash = "sha256:93e18350f2094e7432321c1275730a3143b94af012fb609cc180fa376c44867f"},
+    {file = "numba-0.51.2-cp36-cp36m-manylinux2014_x86_64.whl", hash = "sha256:9e2bb1f129bfadd757ad7a9c18ab79c3ab25ce6d6a68e58565d6c52ad07b3566"},
+    {file = "numba-0.51.2-cp36-cp36m-win32.whl", hash = "sha256:31cdf6b6d1301d5fb6c4fcb8b4c711ba5c9f60ba2fca008b550da9b56185367c"},
+    {file = "numba-0.51.2-cp36-cp36m-win_amd64.whl", hash = "sha256:df6edca13c04a31fdb5addf5205199478a7da372712829157ef491e8a6e7031f"},
+    {file = "numba-0.51.2-cp37-cp37m-macosx_10_14_x86_64.whl", hash = "sha256:a628122dacfcba9a3ea68a9e95578c6b6391016e34962c46550ea8e189e0412e"},
+    {file = "numba-0.51.2-cp37-cp37m-manylinux2014_i686.whl", hash = "sha256:106736d5a8dab6bebce989d4ab1b3f169c264582598f172e6e5b736210d2e834"},
+    {file = "numba-0.51.2-cp37-cp37m-manylinux2014_x86_64.whl", hash = "sha256:a12f16fdb4ca5edc94e2ef412e4e768c29217ef9b6fdfc237d064ebe30acfe14"},
+    {file = "numba-0.51.2-cp37-cp37m-win32.whl", hash = "sha256:025b033fd31c44bba17802293c81270084b5454b5b055b8c10c394385c232f00"},
+    {file = "numba-0.51.2-cp37-cp37m-win_amd64.whl", hash = "sha256:081788f584fa500339e9b74bf02e3c5029d408c114e555ada19cae0b92721416"},
+    {file = "numba-0.51.2-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:5416b584183fd599afda11b947b64f89450fcf26a9c15b408167f412b98a3a94"},
+    {file = "numba-0.51.2-cp38-cp38-manylinux2014_i686.whl", hash = "sha256:05da65dca2ac28a192c9d8f20e9e477eb1237205cfc4d131c414f5f8092c6639"},
+    {file = "numba-0.51.2-cp38-cp38-manylinux2014_x86_64.whl", hash = "sha256:aee435e3b7e465dd49971f8ea76aa414532a87736916cb399534e017334d1138"},
+    {file = "numba-0.51.2-cp38-cp38-win32.whl", hash = "sha256:bbbe2432433b11d3fadab0226a84c1a81918cb905ba1aeb022249e8d2ba8856c"},
+    {file = "numba-0.51.2-cp38-cp38-win_amd64.whl", hash = "sha256:259e7c15b24feec4a99fb41eb8c47b5ad49b544d1a5ad40ad0252ef531ba06fd"},
+    {file = "numba-0.51.2.tar.gz", hash = "sha256:16bd59572114adbf5f600ea383880d7b2071ae45477e84a24994e089ea390768"},
 ]
 numpy = [
     {file = "numpy-1.19.1-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:b1cca51512299841bf69add3b75361779962f9cee7d9ee3bb446d5982e925b69"},
