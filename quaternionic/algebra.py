@@ -414,6 +414,6 @@ def isinf(qin, bout):
     bout[0] = np.isinf(qin[0]) or np.isinf(qin[1]) or np.isinf(qin[2]) or np.isinf(qin[3])
 
 
-@attach_typelist_and_signature([(float64[:], boolean[:])], '(n)->n()')
+@attach_typelist_and_signature([(float64[:], boolean[:])], '(n)->()')
 def isnan(qin, bout):
     bout[0] = np.isnan(qin[0]) or np.isnan(qin[1]) or np.isnan(qin[2]) or np.isnan(qin[3])
