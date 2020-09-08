@@ -1,6 +1,6 @@
 site_name: quaternionic
 
-# repo_url: https://github.com/moble/quaternionic
+repo_url: https://github.com/moble/quaternionic
 
 plugins:
   - search
@@ -13,16 +13,16 @@ plugins:
 
 nav:
   - index.md
-  - API2: mkapi/api/quaternionic
+  - API: mkapi/api/quaternionic
 
-# theme:
-#   name: 'readthedocs'
+theme:
+  name: 'readthedocs'
 
-# extra_javascript:
-#   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js
 
-# markdown_extensions:
-#   - toc:
-#       permalink: "#"
-#   - pymdownx.arithmatex:
-#       generic: true
+markdown_extensions:
+  - toc:
+      permalink: "#"
+  - pymdownx.arithmatex:
+      generic: true
