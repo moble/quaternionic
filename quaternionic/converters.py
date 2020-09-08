@@ -2,6 +2,18 @@
 # See LICENSE file for details:
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
+"""Convert to and from quaternion representation
+
+This module provides a variety of conversion functions that translate
+quaternions to and from rotation matrices, axis-angle representation, Euler
+angles, and spherical coordinates.
+
+More specifically, this module provides a factory function that creates a mixin
+class, which can be inherited from by other classes and will add converters to
+the inheriting class.
+
+"""
+
 import abc
 import numpy as np
 from . import jit

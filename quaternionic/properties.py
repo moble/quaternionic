@@ -2,6 +2,18 @@
 # See LICENSE file for details:
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
+"""Convenient properties for quaternionic arrays
+
+This module provides a variety of attributes relevant to quaternionic arrays —
+such as properties to extract components of the quaternion, to find the norm,
+conjugate, or inverse of a quaternion, and so on.
+
+More specifically, this module provides a factory function that creates a mixin
+class, which can be inherited from by other classes and will add these
+properties to the inheriting class.
+
+"""
+
 import abc
 import collections
 import numpy as np
