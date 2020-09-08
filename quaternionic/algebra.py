@@ -2,7 +2,7 @@
 # See LICENSE file for details:
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
-"""Essential functions for quaternion algebra
+"""Essential functions for quaternion algebra.
 
 These functions form the basic algebraic behavior of quaternions — addition,
 multiplication, exp, log, etc.
@@ -22,8 +22,8 @@ These functions are generic, meaning that they can be used without the
 in natural ways — as in `q1+q2`, `q1*q2`, etc. — and using the standard numpy
 functions — as in `np.exp(q)`, `np.log(q)`, etc.
 
-For this purpose, we implement as many of the standard ufuncs
-<https://numpy.org/doc/stable/reference/ufuncs.html> as make sense for
+For this purpose, we implement as many of [the standard
+ufuncs](https://numpy.org/doc/stable/reference/ufuncs.html) as make sense for
 quaternions.  For the most part, this means ignoring operations related to
 integers, remainders, ordering, or trigonometric functions.  The bit-twiddling
 functions are re-interpreted as they usually are in geometric algebra to denote
@@ -253,11 +253,21 @@ def log(q, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:])], '(n)->(n)')
 def sqrt(q, qout):
-    """Return square-root of input quaternion √q
+    """Return square-root of input quaternion √q.
 
-    The general formula is
+    The general formula whenever the denominator is nonzero is
 
+    ```
         √q = (|q| + q) / √(2|q| + 2q.w)
+    ```
+
+    This can be proven by expanding `q` as `q.w + q.vec` and multiplying the
+    expression above by itself.
+
+    When the denominator is zero, the quaternion is a pure-real negative number.
+    It is not clear what the appropriate square-root is in this case (because the
+    quaternions come with infinitely many elements that square to -1), so we
+    arbitrarily choose the result to be proportional to the `x` quaternion.
 
     """
     # √Q = (a + Q) / √(2*a + 2*Q[0])
@@ -296,12 +306,14 @@ def reciprocal(q, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def bitwise_or(q1, q2, qout):
-    """Return scalar product of quaternions q1|q2
+    """Return scalar product of quaternions q1|q2.
 
-    If we denote by <a>ₛ the grade-s component of the general multivector `a`,
+    If we denote by `⟨a⟩ₛ` the grade-s component of the general multivector `a`,
     we can express this product as
 
-        a | b = Σₛ,ᵣ <<a>ₛ <b>ᵣ>₀
+    ```
+        a | b = Σₛ,ᵣ ⟨⟨a⟩ₛ ⟨b⟩ᵣ⟩₀
+    ```
 
     Note that this is different from the "Hestenes dot" product where the sum
     runs over s≠0 and r≠0; that is the product returned by `galgebra` using
@@ -316,13 +328,15 @@ def bitwise_or(q1, q2, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def bitwise_xor(q1, q2, qout):
-    """Return outer product of quaternions q1^q2
+    """Return outer product of quaternions q1^q2.
 
     This is the generalized outer product of geometric algebra.  If we denote
-    by <a>ₛ the grade-s component of the general multivector `a`, we can
+    by `⟨a⟩ₛ` the grade-s component of the general multivector `a`, we can
     express this product as
 
-        a ^ b = Σₛ,ᵣ <<a>ₛ <b>ᵣ>ₛ₊ᵣ
+    ```
+        a ^ b = Σₛ,ᵣ ⟨⟨a⟩ₛ ⟨b⟩ᵣ⟩ₛ₊ᵣ
+    ```
 
     Note that the result may seem surprising because we sometimes think of quaternions as 
 
@@ -338,11 +352,13 @@ invert = conj  # reversion (= conjugate for quaternion algebra)
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def left_shift(q1, q2, qout):
-    """Return left-contraction of quaternions q1<<q2 = q1⌋q1
+    """Return left-contraction of quaternions q1<<q2 = q1⌋q1.
 
-    For all quaternions a, b, c, we have
+    For all quaternions `a`, `b`, `c`, we have
 
+    ```
         (a ^ b) * c = a * (b ⌋ c)
+    ```
 
     """
     qout[0] = q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3]
@@ -353,11 +369,13 @@ def left_shift(q1, q2, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def right_shift(q1, q2, qout):
-    """Return right-contraction of quaternions q1>>q2 = q1⌊q2
+    """Return right-contraction of quaternions q1>>q2 = q1⌊q2.
 
-    For all quaternions a, b, c, we have
+    For all quaternions `a`, `b`, `c`, we have
 
+    ```
         c * (b ^ a) = (c ⌊ b) * a
+    ```
 
     """
     qout[0] = q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3]
@@ -396,6 +414,6 @@ def isinf(qin, bout):
     bout[0] = np.isinf(qin[0]) or np.isinf(qin[1]) or np.isinf(qin[2]) or np.isinf(qin[3])
 
 
-@attach_typelist_and_signature([(float64[:], boolean[:])], '(n)->()')
+@attach_typelist_and_signature([(float64[:], boolean[:])], '(n)->n()')
 def isnan(qin, bout):
     bout[0] = np.isnan(qin[0]) or np.isnan(qin[1]) or np.isnan(qin[2]) or np.isnan(qin[3])

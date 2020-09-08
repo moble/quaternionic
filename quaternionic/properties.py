@@ -9,7 +9,7 @@ from .utilities import type_self_return, ndarray_args, ndarray_args_and_return
 
 def QuaternionPropertiesMixin(jit=jit):
     class mixin(abc.ABC):
-        """Basic properties for quaternionic array class
+        """Basic properties for quaternionic array class.
 
         This abstract base class comprises the basic interface for quaternionic
         arrays, including the components (w, x, y, z), the parts (scalar,
@@ -60,7 +60,7 @@ def QuaternionPropertiesMixin(jit=jit):
 
         @property
         def vector(self):
-            """The "vector" part of the quaternion (final three components)
+            """The "vector" part of the quaternion (final three components).
 
             Note that it is entirely standard to describe this part of the
             quaternion as the "vector" part.  It would be more correct to refer
@@ -77,7 +77,7 @@ def QuaternionPropertiesMixin(jit=jit):
         @ndarray_args
         @jit
         def norm(self):
-            """The (Cayley) norm of the quaternion
+            """The (Cayley) norm of the quaternion.
 
             This quantity is the sum of the squares of the components of the
             quaternion — equal to the square of the absolute value.
@@ -108,7 +108,7 @@ def QuaternionPropertiesMixin(jit=jit):
         @ndarray_args
         @jit
         def abs(self):
-            """The absolute value of the quaternion
+            """The absolute value of the quaternion.
 
             This quantity is the square-root of the sum of the squares of the
             components of each quaternion.
@@ -181,7 +181,7 @@ def QuaternionPropertiesMixin(jit=jit):
                 yield(s[i])
 
         def nonzero(self):
-            """Return the indices of all nonzero elements
+            """Return the indices of all nonzero elements.
 
             This is essentially the same function as numpy.nonzero, except that
             the last dimension is treated as a single quaternion; if any
@@ -192,7 +192,7 @@ def QuaternionPropertiesMixin(jit=jit):
             return np.nonzero(np.atleast_1d(np.any(self.ndarray, axis=-1)))
 
         def rotate(self, v, axis=-1):
-            """Rotate vectors by quaternions in this array
+            """Rotate vectors by quaternions in this array.
 
             For simplicity, this function simply converts the input
             quaternion(s) to a matrix, and rotates the input vector(s) by the
@@ -212,16 +212,16 @@ def QuaternionPropertiesMixin(jit=jit):
 
 
             Parameters
-            ==========
-            v: float array
+            ----------
+            v : float array
                 Three-vectors to be rotated.
-            axis: int
+            axis : int
                 Axis of the `v` array to use as the vector dimension.  This axis of
                 `v` must have length 3.
 
             Returns
-            =======
-            vprime: float array
+            -------
+            vprime : float array
                 The rotated vectors.  This array has shape self.shape+v.shape.
 
             """

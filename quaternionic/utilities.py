@@ -98,7 +98,7 @@ def attach_typelist_and_signature(ftylist, signature):
 
 
 def guvectorize_module_functions(module, obj):
-    """Compile all functions in module to ufuncs and attach to obj
+    """Compile all functions in module to ufuncs and attach to obj.
 
     Note that the functions in module must have attributes `types` and
     `signature`, providing the necessary arguments to numba's guvectorize
@@ -114,7 +114,7 @@ def guvectorize_module_functions(module, obj):
 
 
 def pyguvectorize(types, signature):
-    """Test function to convert functions to general universal functions
+    """Test function to convert functions to general universal functions.
 
     Note that this is almost certainly only useful for functions defined in
     quaternionic.algebra — and specifically only if they have `type` and
@@ -181,7 +181,7 @@ def pyguvectorize(types, signature):
 
 
 def pyguvectorize_module_functions(module, obj):
-    """Wrap all functions in module to ufunc-like python funcs and attach to obj
+    """Wrap all functions in module to ufunc-like python funcs and attach to obj.
 
     This function is almost exclusively useful for testing purposes.  See
     docstring of pyguvectorize function for details.

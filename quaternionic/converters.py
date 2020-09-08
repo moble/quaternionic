@@ -10,7 +10,7 @@ from .utilities import ndarray_args
 
 def QuaternionConvertersMixin(jit=jit):
     class mixin(abc.ABC):
-        """Converters for quaternionic array class
+        """Converters for quaternionic array class.
 
         This abstract base class provides converters for quaternionic arrays, going
         to and from other representations, including the axis-angle representation,
@@ -22,7 +22,7 @@ def QuaternionConvertersMixin(jit=jit):
         @ndarray_args
         @jit
         def to_rotation_matrix(self):
-            """Convert quaternions to 3x3 rotation matrices
+            """Convert quaternions to 3x3 rotation matrices.
 
             Assuming the quaternion R rotates a vector v according to
 
@@ -34,10 +34,9 @@ def QuaternionConvertersMixin(jit=jit):
 
             This function returns that matrix.
 
-
             Returns
             -------
-            rot: float array
+            rot : float array
                 Output shape is self.shape[:-1]+(3,3).  This matrix should multiply
                 (from the left) a column vector to produce the rotated column
                 vector.
@@ -60,38 +59,34 @@ def QuaternionConvertersMixin(jit=jit):
 
         @classmethod
         def from_rotation_matrix(cls, rot, nonorthogonal=True):
-            """Convert input 3x3 rotation matrix to unit quaternion
+            """Convert input 3x3 rotation matrix to unit quaternion.
 
-            By default, if scipy.linalg is available, this function uses
-            Bar-Itzhack's algorithm to allow for non-orthogonal matrices.
-            [J. Guidance, Vol. 23, No. 6, p. 1085 <http://dx.doi.org/10.2514/2.4654>]
-            This will almost certainly be quite a bit slower than simpler versions,
-            though it will be more robust to numerical errors in the rotation matrix.
-            Also note that Bar-Itzhack uses some pretty weird conventions.  The last
-            component of the quaternion appears to represent the scalar, and the
-            quaternion itself is conjugated relative to the convention used
-            throughout this module.
+            Assuming an orthogonal 3x3 matrix ℛ rotates a vector v such that
 
-            If scipy.linalg is not available or if the optional
-            `nonorthogonal` parameter is set to `False`, this function falls
-            back to the possibly faster, but less robust, algorithm of Markley
-            [J. Guidance, Vol. 31, No. 2, p. 440
-            <http://dx.doi.org/10.2514/1.31730>].
+                v' = ℛ * v,
+
+            we can also express this rotation in terms of a unit quaternion R such that
+
+                v' = R * v * R⁻¹,
+
+            where v and v' are now considered pure-vector quaternions.  This function
+            returns that quaternion.  If `rot` is not orthogonal, the "closest" orthogonal
+            matrix is used; see Notes below.
 
             Parameters
             ----------
-            rot: (...Nx3x3) float array
+            rot : (...Nx3x3) float array
                 Each 3x3 matrix represents a rotation by multiplying (from the left)
                 a column vector to produce a rotated column vector.  Note that this
                 input may actually have ndims>3; it is just assumed that the last
                 two dimensions have size 3, representing the matrix.
-            nonorthogonal: bool, optional
+            nonorthogonal : bool, optional
                 If scipy.linalg is available, use the more robust algorithm of
                 Bar-Itzhack.  Default value is True.
 
             Returns
             -------
-            q: array of quaternions
+            q : array of quaternions
                 Unit quaternions resulting in rotations corresponding to input
                 rotations.  Output shape is rot.shape[:-2].
 
@@ -99,6 +94,21 @@ def QuaternionConvertersMixin(jit=jit):
             ------
             LinAlgError
                 If any of the eigenvalue solutions does not converge
+
+            Notes
+            -----
+            By default this function uses Bar-Itzhack's algorithm to allow for
+            non-orthogonal matrices.  [J. Guidance, Vol. 23, No. 6, p. 1085
+            <http://dx.doi.org/10.2514/2.4654>]  This will almost certainly be quite a bit
+            slower than simpler versions, though it will be more robust to numerical errors
+            in the rotation matrix.  Also note that the Bar-Itzhack paper uses some pretty
+            weird conventions.  The last component of the quaternion appears to represent
+            the scalar, and the quaternion itself is conjugated relative to the convention
+            used throughout this module.
+
+            If the optional `nonorthogonal` parameter is set to `False`, this function
+            falls back to the possibly faster, but less robust, algorithm of Markley
+            [J. Guidance, Vol. 31, No. 2, p. 440 <http://dx.doi.org/10.2514/1.31730>].
 
             """
             from scipy import linalg
@@ -198,7 +208,7 @@ def QuaternionConvertersMixin(jit=jit):
         @ndarray_args
         @jit
         def to_transformation_matrix(self):
-            """Convert quaternions to 4x4 transformation matrices
+            """Convert quaternions to 4x4 transformation matrices.
 
             Assuming the quaternion Q transforms another quaternion P according to
 
@@ -214,14 +224,14 @@ def QuaternionConvertersMixin(jit=jit):
 
             Returns
             -------
-            m: float array
+            m : float array
                 Output shape is self.shape[:-1]+(4,4).  This matrix should multiply
                 (from the left) a column vector to produce the transformed column
                 vector.
 
             See also
             --------
-            to_rotation_matrix: assumes Q is a unit quaternion
+            to_rotation_matrix : assumes Q is a unit quaternion
 
             """
             s = self.reshape((-1, 4))
@@ -241,14 +251,14 @@ def QuaternionConvertersMixin(jit=jit):
 
         @property
         def to_axis_angle(self):
-            """Convert input quaternion to the axis-angle representation
+            """Convert input quaternion to the axis-angle representation.
 
             Note that if any of the input quaternions has norm zero, no error is
             raised, but NaNs will appear in the output.
 
             Returns
             -------
-            rot: float array
+            rot : float array
                 Output shape is q.shape[:-1]+(3,).  Each vector represents the axis of
                 the rotation, with norm proportional to the angle of the rotation in
                 radians.
@@ -260,17 +270,17 @@ def QuaternionConvertersMixin(jit=jit):
 
         @classmethod
         def from_axis_angle(cls, vec):
-            """Convert 3-vector in axis-angle representation to unit quaternion
+            """Convert 3-vector in axis-angle representation to unit quaternion.
 
             Parameters
             ----------
-            vec: (...N, 3) float array
+            vec : (...N, 3) float array
                 Each vector represents the axis of the rotation, with norm
                 proportional to the angle of the rotation in radians.
 
             Returns
             -------
-            q: array of quaternions
+            q : array of quaternions
                 Unit quaternions resulting in rotations corresponding to input
                 rotations.  Output shape is rot.shape[:-1].
 
@@ -286,7 +296,7 @@ def QuaternionConvertersMixin(jit=jit):
         @ndarray_args
         @jit
         def to_euler_angles(self):
-            """Open Pandora's Box
+            """Open Pandora's Box.
 
             If somebody is trying to make you use Euler angles, tell them no, and
             walk away, and go and tell your mum.
@@ -309,7 +319,7 @@ def QuaternionConvertersMixin(jit=jit):
 
             Returns
             -------
-            alpha_beta_gamma: float array
+            alpha_beta_gamma : float array
                 Output shape is q.shape+(3,).  These represent the angles (alpha,
                 beta, gamma) in radians, where the normalized input quaternion
                 represents `exp(alpha*z/2) * exp(beta*y/2) * exp(gamma*z/2)`.
@@ -332,7 +342,7 @@ def QuaternionConvertersMixin(jit=jit):
 
         @classmethod
         def from_euler_angles(cls, alpha_beta_gamma, beta=None, gamma=None):
-            """Improve your life drastically
+            """Improve your life drastically.
 
             Assumes the Euler angles correspond to the quaternion R via
 
@@ -347,21 +357,21 @@ def QuaternionConvertersMixin(jit=jit):
 
             Parameters
             ----------
-            alpha_beta_gamma: float or array of floats
+            alpha_beta_gamma : float or array of floats
                 This argument may either contain an array with last dimension of
                 size 3, where those three elements describe the (alpha, beta, gamma)
                 radian values for each rotation; or it may contain just the alpha
                 values, in which case the next two arguments must also be given.
-            beta: None, float, or array of floats
+            beta : None, float, or array of floats
                 If this array is given, it must be able to broadcast against the
                 first and third arguments.
-            gamma: None, float, or array of floats
+            gamma : None, float, or array of floats
                 If this array is given, it must be able to broadcast against the
                 first and second arguments.
 
             Returns
             -------
-            R: quaternion array
+            R : quaternion array
                 The shape of this array will be the same as the input, except that
                 the last dimension will be removed.
 
@@ -390,7 +400,7 @@ def QuaternionConvertersMixin(jit=jit):
 
         @property
         def to_spherical_coordinates(self):
-            """Return the spherical coordinates corresponding to this quaternion
+            """Return the spherical coordinates corresponding to this quaternion.
 
             Obviously, spherical coordinates do not contain as much information as a
             quaternion, so this function does lose some information.  However, the
@@ -399,7 +409,7 @@ def QuaternionConvertersMixin(jit=jit):
 
             Returns
             -------
-            vartheta_varphi: float array
+            vartheta_varphi : float array
                 Output shape is q.shape+(2,).  These represent the angles (vartheta,
                 varphi) in radians, where the normalized input quaternion represents
                 `exp(varphi*z/2) * exp(vartheta*y/2)`, up to an arbitrary inital
@@ -410,7 +420,7 @@ def QuaternionConvertersMixin(jit=jit):
 
         @classmethod
         def from_spherical_coordinates(cls, theta_phi, phi=None):
-            """Return the quaternion corresponding to these spherical coordinates
+            """Return the quaternion corresponding to these spherical coordinates.
 
             Assumes the spherical coordinates correspond to the quaternion R via
 
@@ -424,18 +434,18 @@ def QuaternionConvertersMixin(jit=jit):
 
             Parameters
             ----------
-            theta_phi: float or array of floats
+            theta_phi : float or array of floats
                 This argument may either contain an array with last dimension of
                 size 2, where those two elements describe the (theta, phi) values in
                 radians for each point; or it may contain just the theta values in
                 radians, in which case the next argument must also be given.
-            phi: None, float, or array of floats
+            phi : None, float, or array of floats
                 If this array is given, it must be able to broadcast against the
                 first argument.
 
             Returns
             -------
-            R: quaternion array
+            R : quaternion array
                 If the second argument is not given to this function, the shape
                 will be the same as the input shape except for the last dimension,
                 which will be removed.  If the second argument is given, this

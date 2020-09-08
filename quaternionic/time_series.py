@@ -24,13 +24,13 @@ class QuaternionTimeseriesMixin(abc.ABC):
         """Construct a spline object for the quaternion data
 
         Parameters
-        ==========
-        t: array-like of float
+        ----------
+        t : array-like of float
             This array represents the times at which the quaternions are
             measured, and with respect to which the derivative will be taken.
             Note that these times must be real, finite and in strictly
             increasing order.
-        axis: int, optional
+        axis : int, optional
             Axis along which this array is assumed to be varying with
             `t`. Meaning that for t[i] the corresponding quaternions are
             `np.take(self, i, axis=axis)`.  Defaults to 0.
@@ -44,21 +44,21 @@ class QuaternionTimeseriesMixin(abc.ABC):
         """Take derivative of quaternion timeseries with respect to `t`
 
         Parameters
-        ==========
-        t: array-like of float
+        ----------
+        t : array-like of float
             This array represents the times at which the quaternions are
             measured, and with respect to which the derivative will be taken.
             Note that these times must be real, finite and in strictly
             increasing order.
-        t_new: array-like of float, optional
+        t_new : array-like of float, optional
             If present, the output is interpolated to this set of times.
             Defaults to None, meaning that the original set of times will be
             used.
-        axis: int, optional
+        axis : int, optional
             Axis along which this array is assumed to be varying with
             `t`. Meaning that for t[i] the corresponding quaternions are
             `np.take(self, i, axis=axis)`.  Defaults to 0.
-        nu: int, optional
+        nu : int, optional
             Order of derivative to evaluate. Default is 1, i.e., compute the
             first derivative. If negative, the antiderivative is returned.
 
@@ -92,17 +92,17 @@ class QuaternionTimeseriesMixin(abc.ABC):
             dv'/dt = ω * v' + v' * ω̄.
 
         Parameters
-        ==========
-        t: array-like of float
+        ----------
+        t : array-like of float
             This array represents the times at which the quaternions are
             measured, and with respect to which the derivative will be taken.
             Note that these times must be real, finite and in strictly
             increasing order.
-        t_new: array-like of float, optional
+        t_new : array-like of float, optional
             If present, the output is interpolated to this set of times.
             Defaults to None, meaning that the original set of times will be
             used.
-        axis: int, optional
+        axis : int, optional
             Axis along which this array is assumed to be varying with
             `t`. Meaning that for t[i] the corresponding quaternions are
             `np.take(self, i, axis=axis)`.  Defaults to 0.
@@ -137,21 +137,21 @@ class QuaternionTimeseriesMixin(abc.ABC):
         for.
 
         Parameters
-        ==========
-        t: array-like of float
+        ----------
+        t : array-like of float
             This array represents the times at which the quaternions are
             measured, and with respect to which the derivative will be taken.
             Note that these times must be real, finite and in strictly
             increasing order.
-        t_new: array-like of float, optional
+        t_new : array-like of float, optional
             If present, the output is interpolated to this set of times.
             Defaults to None, meaning that the original set of times will be
             used.
-        axis: int, optional
+        axis : int, optional
             Axis along which this array is assumed to be varying with
             `t`. Meaning that for t[i] the corresponding quaternions are
             `np.take(self, i, axis=axis)`.  Defaults to 0.
-        iterations: int, optional
+        iterations : int, optional
             Repeat the minimization to refine the result.  Defaults to 2.
 
         """
@@ -173,7 +173,7 @@ class QuaternionTimeseriesMixin(abc.ABC):
 
         See also
         --------
-        squad: spherical quadratic interpolation
+        squad : spherical quadratic interpolation
         quaternionic.slerp_pairwise
 
         """
@@ -184,7 +184,7 @@ class QuaternionTimeseriesMixin(abc.ABC):
 
         See also
         --------
-        slerp: spherical linear interpolation
+        slerp : spherical linear interpolation
         quaternionic.squad_pairwise
 
         """

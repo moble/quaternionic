@@ -10,7 +10,7 @@ from .converters import QuaternionConvertersMixin
 
 
 def QuaternionicArray(jit=jit, dtype=float):
-    """Construct a quaternionic array type
+    """Construct a quaternionic array type.
 
     This factory returns a `class` encapsulating a quaternionic array type,
     where the jit function and dtype are passed to this factory function, and
@@ -22,7 +22,7 @@ def QuaternionicArray(jit=jit, dtype=float):
 
     """
     class QArray(QuaternionPropertiesMixin(jit), QuaternionConvertersMixin(jit), np.ndarray):
-        """Subclass of numpy arrays interpreted as quaternions
+        """Subclass of numpy arrays interpreted as quaternions.
 
         This class encapsulates quaternion algebra, with numpy's "ufunc"s
         overridden by quaternionic methods.  Standard algebraic operations can be

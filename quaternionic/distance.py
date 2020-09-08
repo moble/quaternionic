@@ -16,7 +16,7 @@ def CreateMetrics(jit=jit, guvectorize=guvectorize):
         @ndarray_args
         @guvectorize([(float64[:], float64[:], float64[:])], '(n),(n)->()')
         def intrinsic(q1, q2, out):
-            """Geodesic distance between rotors within the Spin(3)=SU(2) manifold
+            """Geodesic distance between rotors within the Spin(3)=SU(2) manifold.
 
             This function is equivalent to
 
@@ -31,7 +31,7 @@ def CreateMetrics(jit=jit, guvectorize=guvectorize):
 
             Parameters
             ----------
-            q1, q2: QuaternionicArray
+            q1, q2 : QuaternionicArray
                 Quaternionic arrays to be measured
 
             See also
@@ -50,7 +50,7 @@ def CreateMetrics(jit=jit, guvectorize=guvectorize):
         @ndarray_args
         @guvectorize([(float64[:], float64[:], float64[:])], '(n),(n)->()')
         def chordal(q1, q2, out):
-            """Euclidean distance between rotors
+            """Euclidean distance between rotors.
 
             This function is equivalent to
 
@@ -63,7 +63,7 @@ def CreateMetrics(jit=jit, guvectorize=guvectorize):
 
             Parameters
             ----------
-            q1, q2: QuaternionicArray
+            q1, q2 : QuaternionicArray
                 Quaternionic arrays to be measured
 
             See also
@@ -80,7 +80,7 @@ def CreateMetrics(jit=jit, guvectorize=guvectorize):
         @ndarray_args
         @guvectorize([(float64[:], float64[:], float64[:])], '(n),(n)->()')
         def intrinsic(q1, q2, out):
-            """Geodesic distance between rotations within the SO(3) manifold
+            """Geodesic distance between rotations within the SO(3) manifold.
 
             This function is equivalent to
 
@@ -98,7 +98,7 @@ def CreateMetrics(jit=jit, guvectorize=guvectorize):
 
             Parameters
             ----------
-            q1, q2: QuaternionicArray
+            q1, q2 : QuaternionicArray
                 Quaternionic arrays to be measured
 
             See also
@@ -122,7 +122,7 @@ def CreateMetrics(jit=jit, guvectorize=guvectorize):
         @ndarray_args
         @guvectorize([(float64[:], float64[:], float64[:])], '(n),(n)->()')
         def chordal(q1, q2, out):
-            """Euclidean distance between rotations
+            """Euclidean distance between rotations.
 
             This function is equivalent to
 
@@ -138,7 +138,7 @@ def CreateMetrics(jit=jit, guvectorize=guvectorize):
 
             Parameters
             ----------
-            q1, q2: QuaternionicArray
+            q1, q2 : QuaternionicArray
                 Quaternionic arrays to be measured
 
             See also
