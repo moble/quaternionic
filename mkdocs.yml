@@ -1,20 +1,28 @@
 site_name: quaternionic
 
-repo_url: https://github.com/moble/quaternionic
+# repo_url: https://github.com/moble/quaternionic
 
 plugins:
-  - mktheapidocs:
-      modules:
-        quaternionic:
-          section: api
-          source_repo: "https://github.com/moble/quaternionic/blob/master"
+  - search
+  - mkapi
+  # - mktheapidocs:
+  #     modules:
+  #       quaternionic:
+  #         section: api
+  #         source_repo: "https://github.com/moble/quaternionic"
 
-theme:
-  name: 'readthedocs'
+nav:
+  - index.md
+  - API2: mkapi/api/quaternionic
 
-extra_javascript:
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js
+# theme:
+#   name: 'readthedocs'
 
-markdown_extensions:
-  - pymdownx.arithmatex:
-      generic: true
+# extra_javascript:
+#   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js
+
+# markdown_extensions:
+#   - toc:
+#       permalink: "#"
+#   - pymdownx.arithmatex:
+#       generic: true
