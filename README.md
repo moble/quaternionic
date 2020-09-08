@@ -161,7 +161,7 @@ from other representations of rotations, including
 
    * `to_rotation_matrix`, `from_rotation_matrix`
    * `to_transformation_matrix` (for non-unit quaternions)
-   * `to_axis_angle`, `from_axis_angle` representation
+   * `to_axis_angle`, `from_axis_angle`
    * `to_euler_angles`, `from_euler_angles` (though using Euler angles is almost always a bad idea)
    * `to_spherical_coordinates`, `from_spherical_coordinates`
    * `to_angular_velocity`, `from_angular_velocity`
@@ -200,7 +200,7 @@ np.max(quaternionic.distance.rotation.intrinsic(q1, q2))  # Typically around 1e-
 
 ## Distance functions
 
-The `quaternionic.distance` contains four distance functions:
+The `quaternionic.distance` module contains four distance functions:
 
   * `rotor.intrinsic`
   * `rotor.chordal`
