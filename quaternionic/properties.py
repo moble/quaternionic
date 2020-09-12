@@ -3,9 +3,14 @@
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
 import abc
+import collections
 import numpy as np
 from . import jit
 from .utilities import type_self_return, ndarray_args, ndarray_args_and_return
+
+
+TwoSpinor = collections.namedtuple("TwoSpinor", ["a", "b"])
+
 
 def QuaternionPropertiesMixin(jit=jit):
     class mixin(abc.ABC):
@@ -72,6 +77,23 @@ def QuaternionPropertiesMixin(jit=jit):
         @vector.setter
         def vector(self, v):
             self.ndarray[..., 1:] = v
+
+        @property
+        def two_spinor(self):
+            """Return the two-spinor representation of the quaternion
+
+            The standard mapping from quaternions to two-spinors is
+
+                q ↦ (q.w + 1j * q.z, q.y + 1j * q.x)
+
+            This function returns a namedtuple with those components (as numpy
+            arrays), where the elements names are 'a' and 'b', respectively.
+
+            """
+            return TwoSpinor(
+                self.ndarray[..., 0] + 1j * self.ndarray[..., 3],
+                self.ndarray[..., 2] + 1j * self.ndarray[..., 1]
+            )
 
         @property
         @ndarray_args

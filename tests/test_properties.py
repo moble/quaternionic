@@ -45,6 +45,17 @@ def test_setting_components():
     assert np.array_equal(q.ndarray, [1.0, 2.0, 3.0, 4.0])
 
 
+def test_two_spinor():
+    np.random.seed(1234)
+    arr = np.random.rand(17, 9, 4)
+    q = quaternionic.array(arr)
+    s = q.two_spinor
+    a = q.w + 1j * q.z
+    b = q.y + 1j * q.x
+    assert np.array_equal(s.a, a)
+    assert np.array_equal(s.b, b)
+
+
 def test_iterator():
     a = np.arange(17*3*4).reshape((17, 3, 4))
     q = quaternionic.array(a)
