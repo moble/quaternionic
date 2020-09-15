@@ -210,3 +210,179 @@ def test_to_euler_angles(eps, array):
     q0 = array(0, 0.6, 0.8, 0)
     assert q0.norm == 1.0
     assert abs(q0 - array.from_euler_angles(*list(q0.to_euler_angles))) < 1.e-15
+
+
+def test_to_angular_velocity():
+    import math
+    import numpy as np
+    import quaternionic
+
+    t0 = 0.0
+    t2 = 10_000.0
+    Omega_orb = 2 * math.pi * 100 / t2
+    Omega_prec = 2 * math.pi * 10 / t2
+    alpha = 0.125 * math.pi
+    alphadot = 2 * alpha / t2
+    nu = 0.2 * alpha
+    Omega_nu = Omega_prec
+    R0 = np.exp(-1.1 * alpha * quaternionic.x / 2)
+
+    def R(t):
+        return (R0
+                * np.exp(Omega_prec * t * quaternionic.z / 2) * np.exp((alpha + alphadot * t) * quaternionic.x / 2)
+                * np.exp(-Omega_prec * t * quaternionic.z / 2)
+                * np.exp(Omega_orb * t * quaternionic.z / 2)
+                * np.exp(nu * np.cos(Omega_nu * t) * quaternionic.y / 2))
+
+    def Rdot(t):
+        R_dynamic = R0.inverse * R(t)
+        R_prec = np.exp(Omega_prec * t * quaternionic.z / 2)
+        R_nu = np.exp(nu * np.cos(Omega_nu * t) * quaternionic.y / 2)
+        return R0 * (0.5 * Omega_prec * quaternionic.z * R_dynamic
+                     + 0.5 * alphadot * R_prec * quaternionic.x * R_prec.conj() * R_dynamic
+                     + 0.5 * (Omega_orb - Omega_prec) * R_dynamic * R_nu.inverse * quaternionic.z * R_nu
+                     + 0.5 * (-Omega_nu * nu * np.sin(Omega_nu * t)) * R_dynamic * quaternionic.y)
+
+    def Omega_tot(_, t):
+        Rotor = R(t)
+        RotorDot = Rdot(t)
+        return (2 * RotorDot * Rotor.inverse).vector
+
+    t = np.linspace(t0, t2/100, num=10_000)
+    R_approx = R(t).to_angular_velocity(t, t_new=None, axis=0)
+    R_exact = Omega_tot(None, t)
+    assert np.max(np.linalg.norm(R_approx - R_exact, axis=1)) < 1e-13
+
+    t = np.linspace(t0, t2/100, num=10_000)
+    t_new = np.linspace(t0, t2/100, num=103)
+    R_approx = R(t).to_angular_velocity(t, t_new=t_new, axis=0)
+    R_exact = Omega_tot(None, t_new)
+    assert np.max(np.linalg.norm(R_approx - R_exact, axis=1)) < 1e-13
+
+
+def test_from_angular_velocity():
+    import math
+    import numpy as np
+    import quaternionic
+
+    t0 = 0.0
+    t2 = 10_000.0
+    Omega_orb = 2 * math.pi * 100 / t2
+    Omega_prec = 2 * math.pi * 10 / t2
+    alpha = 0.125 * math.pi
+    alphadot = 2 * alpha / t2
+    nu = 0.2 * alpha
+    Omega_nu = Omega_prec
+    R0 = np.exp(-1.1 * alpha * quaternionic.x / 2)
+
+    def R(t):
+        return (R0
+                * np.exp(Omega_prec * t * quaternionic.z / 2) * np.exp((alpha + alphadot * t) * quaternionic.x / 2)
+                * np.exp(-Omega_prec * t * quaternionic.z / 2)
+                * np.exp(Omega_orb * t * quaternionic.z / 2)
+                * np.exp(nu * np.cos(Omega_nu * t) * quaternionic.y / 2))
+
+    def Rdot(t):
+        R_dynamic = R0.inverse * R(t)
+        R_prec = np.exp(Omega_prec * t * quaternionic.z / 2)
+        R_nu = np.exp(nu * np.cos(Omega_nu * t) * quaternionic.y / 2)
+        return R0 * (0.5 * Omega_prec * quaternionic.z * R_dynamic
+                     + 0.5 * alphadot * R_prec * quaternionic.x * R_prec.conj() * R_dynamic
+                     + 0.5 * (Omega_orb - Omega_prec) * R_dynamic * R_nu.inverse * quaternionic.z * R_nu
+                     + 0.5 * (-Omega_nu * nu * np.sin(Omega_nu * t)) * R_dynamic * quaternionic.y)
+
+    def Omega_tot(_, t):
+        Rotor = R(t)
+        RotorDot = Rdot(t)
+        return (2 * RotorDot * Rotor.inverse).vector
+
+    t = np.linspace(t0, t2/10, num=1_000)
+
+    # Test raisers
+    with pytest.raises(ValueError):
+        R_approx = quaternionic.array.from_angular_velocity([1+2j, 3+4j], t, R0=R(t0), tolerance=1e-6)
+    with pytest.raises(ValueError):
+        R_approx = quaternionic.array.from_angular_velocity(np.random.rand(17, 2), t, R0=R(t0), tolerance=1e-6)
+
+    # Test with exact Omega function
+    R_approx = quaternionic.array.from_angular_velocity(Omega_tot, t, R0=R(t0), tolerance=1e-6)
+    R_exact = R(t)
+    # phi_Delta = np.array([quaternionic.distance.rotation.intrinsic(e, a) for e, a in zip(R_exact, R_approx)])
+    phi_Delta = quaternionic.distance.rotation.intrinsic(R_exact, R_approx)
+    assert np.max(phi_Delta) < 1e-4, np.max(phi_Delta)
+
+    # Test with exact Omega function
+    R_approx = quaternionic.array.from_angular_velocity(Omega_tot, t, R0=None, tolerance=1e-6)
+    R_exact = R(t) * R(t0).inverse
+    # phi_Delta = np.array([quaternionic.distance.rotation.intrinsic(e, a) for e, a in zip(R_exact, R_approx)])
+    phi_Delta = quaternionic.distance.rotation.intrinsic(R_exact, R_approx)
+    assert np.max(phi_Delta) < 1e-4, np.max(phi_Delta)
+
+    # Test with explicit values, given at the moments output above
+    v = np.array([Omega_tot(None, ti) for ti in t])
+    R_approx = quaternionic.array.from_angular_velocity(v, t, R0=R(t0), tolerance=1e-6)
+    R_exact = R(t)
+    phi_Delta = quaternionic.distance.rotation.intrinsic(R_exact, R_approx)
+    assert np.max(phi_Delta) < 1e-4, np.max(phi_Delta)
+
+
+def test_to_minimal_rotation():
+    import math
+    import numpy as np
+    import quaternionic
+
+    t = np.linspace(0.0, 100.0, num=1_000)
+    ω = (5 * 2 * np.pi) / (t[-1] - t[0])
+
+    # Test basic removal of rotation about z
+    q = np.exp((ω * t / 2) * quaternionic.z)
+    q_minimal_rotation = q.to_minimal_rotation(t, t_new=None, axis=0, iterations=2)
+    qa = q * quaternionic.z * q.inverse
+    qb = q_minimal_rotation * quaternionic.z * q_minimal_rotation.inverse
+    assert np.max((qa - qb).norm) < 1e-16
+    assert np.max((q_minimal_rotation - quaternionic.one).norm) < 1e-16
+
+    # Test same with t_new
+    t_new = np.linspace(0.0, 100.0, num=1_005)
+    ω = (5 * 2 * np.pi) / (t[-1] - t[0])
+    q = np.exp((ω * t / 2) * quaternionic.z)
+    q_new = np.exp((ω * t_new / 2) * quaternionic.z)
+    q_minimal_rotation = q.to_minimal_rotation(t, t_new=t_new, axis=0, iterations=2)
+    qa = q_new * quaternionic.z * q_new.inverse
+    qb = q_minimal_rotation * quaternionic.z * q_minimal_rotation.inverse
+    assert t_new.shape[0] == q_minimal_rotation.shape[0]
+    assert np.max((qa - qb).norm) < 1e-16
+    assert np.max((q_minimal_rotation - quaternionic.one).norm) < 1e-16
+
+    # Test rotation onto uniform rotation in x-y plane
+    q = quaternionic.array(
+        np.stack(
+            (
+                np.ones(t.size),
+                np.cos(ω*t),
+                np.sin(ω*t),
+                np.zeros(t.size)
+            ),
+            axis=1
+        )
+        / np.sqrt(2)
+    )
+    q_minimal_rotation = q.to_minimal_rotation(t)
+    qa = q * quaternionic.z * q.inverse
+    qb = q_minimal_rotation * quaternionic.z * q_minimal_rotation.inverse
+    assert np.max((qa - qb).norm) < 1e-16
+    assert np.max(abs(ω - np.linalg.norm(q_minimal_rotation.to_angular_velocity(t), axis=1))) < 1e-8
+    assert np.max(abs(q_minimal_rotation.to_angular_velocity(t)[:, :2])) < 1e-8
+
+
+# def test_slerp():
+#     slerp()
+
+
+# def test_slerp_pairwise():
+#     slerp_pairwise()
+
+
+# def test_squad():
+#     squad()
+

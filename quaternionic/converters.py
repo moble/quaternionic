@@ -523,9 +523,9 @@ def QuaternionConvertersMixin(jit=jit):
                 Q = self  # shortcut
             else:
                 Q = type(self)(spline(t_new))
-            t_new = t_new or t
+            t_new = t if t_new is None else t_new
             Q̇ = type(self)(spline.derivative()(t_new))
-            return 2 * Q̇ / Q
+            return (2 * Q̇ / Q).vector
 
         @classmethod
         def from_angular_velocity(cls, omega, t, R0=None, tolerance=1e-12):
@@ -568,52 +568,41 @@ def QuaternionConvertersMixin(jit=jit):
             import warnings
             from scipy.integrate import solve_ivp
             from scipy.interpolate import CubicSpline
+            from . import one, array
             eps = 1e-14
 
             if R0 is None:
-                R0 = quaternionic.one
+                R0 = one.ndarray
+            else:
+                R0 = array(R0).ndarray
 
             R = cls(np.empty((t.size, 4)))
-
-            y0 = R0.ndarray
 
             if callable(omega):
                 ω = omega
             else:
-                if not isinstance(omega, np.ndarray):
-                    raise ValueError(f"Expected a callable or ndarray as first argument; got {type(omega)}")
+                omega = np.asarray(omega)
+                if omega.dtype != np.float:
+                    raise ValueError(f"Input omega must have float dtype; it has dtype {omega.dtype}.")
                 if omega.shape != (t.shape[0], 3):
                     raise ValueError(f"Input omega must have shape {(t.shape[0], 3)}; it has shape {omega.shape}.")
                 ωspline = CubicSpline(t, omega)
-                ω = lambda ti, _: ωspline(ti)
+                ω = lambda _, ti: ωspline(ti)
 
             def RHS(t, y):
-                ω = quaternionic.array(0.0, *ω(t, R))
-                R = quaternionic.array(y)
-                return (0.5 * ω * R).ndarray
+                R = array(y)
+                Ω = array(0.0, *ω(R, t))
+                return (0.5 * Ω * R).ndarray
 
             solution = solve_ivp(
-                RHS, [t[0], t[-1]], R0.ndarray, method="DOP853",
-                t_eval=t, atol=tolerance, rtol=100*np.finfo(float).eps
+                RHS, [t[0], t[-1]], R0, method="DOP853",
+                t_eval=t, dense_output=True, atol=tolerance, rtol=100*np.finfo(float).eps
             )
+            # print("Number of function evaluations:", solution.nfev)
             return cls(solution.y.T)
 
         def to_minimal_rotation(self, t, t_new=None, axis=0, iterations=2):
             """Adjust frame so that there is no rotation about z' axis
-
-            The output of this function is a frame that rotates the z axis onto the same z'
-            axis as the input frame, but with minimal rotation about that axis.  This is
-            done by pre-composing the input rotation with a rotation about the z axis
-            through an angle γ, where
-
-                dγ/dt = 2*(dR/dt * z * R̄).w
-
-            This ensures that the angular velocity has no component along the z' axis.
-
-            Note that this condition becomes easier to impose the closer the input rotation
-            is to a minimally rotating frame, which means that repeated application of this
-            function improves its accuracy.  By default, this function is iterated twice,
-            though a few more iterations may be called for.
 
             Parameters
             ----------
@@ -631,18 +620,34 @@ def QuaternionConvertersMixin(jit=jit):
             iterations : int, optional
                 Repeat the minimization to refine the result.  Defaults to 2.
 
+            Notes
+            -----
+            The output of this function is a frame that rotates the z axis onto the same z'
+            axis as the input frame, but with minimal rotation about that axis.  This is
+            done by pre-composing the input rotation with a rotation about the z axis
+            through an angle γ, where
+
+                dγ/dt = 2*(dR/dt * z * R̄).w
+
+            This ensures that the angular velocity has no component along the z' axis.
+
+            Note that this condition becomes easier to impose the closer the input rotation
+            is to a minimally rotating frame, which means that repeated application of this
+            function improves its accuracy.  By default, this function is iterated twice,
+            though a few more iterations may be called for.
+
             """
             from scipy.interpolate import CubicSpline
             if iterations == 0:
                 return self
             z = type(self)([0.0, 0.0, 0.0, 1.0])
-            t_new = t_new or t
+            t_new = t if t_new is None else t_new
             spline = CubicSpline(t, self.ndarray, axis=axis)
             R = type(self)(spline(t_new))
             Rdot = type(self)(spline.derivative()(t_new))
             γ̇over2 = (Rdot * z * np.conjugate(R)).w
             γover2 = CubicSpline(t_new, γ̇over2).antiderivative()(t_new)
             Rγ = np.exp(z * γover2)
-            return minimal_rotation(R * Rγ, t_new, t_new=None, axis=axis, iterations=iterations-1)
+            return (R * Rγ).to_minimal_rotation(t_new, t_new=None, axis=axis, iterations=iterations-1)
 
     return mixin
