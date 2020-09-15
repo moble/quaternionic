@@ -251,13 +251,13 @@ def test_to_angular_velocity():
     t = np.linspace(t0, t2/100, num=10_000)
     R_approx = R(t).to_angular_velocity(t, t_new=None, axis=0)
     R_exact = Omega_tot(None, t)
-    assert np.max(np.linalg.norm(R_approx - R_exact, axis=1)) < 1e-13
+    assert np.max(np.linalg.norm(R_approx - R_exact, axis=1)) < 5e-13
 
     t = np.linspace(t0, t2/100, num=10_000)
     t_new = np.linspace(t0, t2/100, num=103)
     R_approx = R(t).to_angular_velocity(t, t_new=t_new, axis=0)
     R_exact = Omega_tot(None, t_new)
-    assert np.max(np.linalg.norm(R_approx - R_exact, axis=1)) < 1e-13
+    assert np.max(np.linalg.norm(R_approx - R_exact, axis=1)) < 5e-13
 
 
 def test_from_angular_velocity():
