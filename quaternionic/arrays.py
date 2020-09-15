@@ -183,7 +183,7 @@ def QuaternionicArray(jit=jit, dtype=float):
                     return NotImplemented
 
             # float64[4](float64[4], float64)
-            elif ufunc in [np.float_power]:
+            elif ufunc in [np.float_power, np.power]:
                 if this_type(args[0]) and not this_type(args[1]):
                     a1, a2 = args[:2]
                     b1 = a1.ndarray[..., 0]

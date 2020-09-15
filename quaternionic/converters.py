@@ -473,4 +473,181 @@ def QuaternionConvertersMixin(jit=jit):
 
             return cls(R)
 
+        def to_angular_velocity(self, t, t_new=None, axis=0):
+            """Compute the angular velocity of quaternion timeseries with respect to `t`
+
+            Note that this is the angular velocity of a rotating frame given by the
+            quaternionic array, assuming that the quaternions take inertial vectors in the
+            current frame to vectors in the rotating frame.
+
+            Parameters
+            ----------
+            t : array-like of float
+                This array represents the times at which the quaternions are measured, and
+                with respect to which the derivative will be taken.  Note that these times
+                must be real, finite and in strictly increasing order.
+            t_new : array-like of float, optional
+                If present, the output is interpolated to this set of times.  Defaults to
+                None, meaning that the original set of times will be used.
+            axis : int, optional
+                Axis along which this array is assumed to be varying with `t`. Meaning that
+                for t[i] the corresponding quaternions are `np.take(self, i, axis=axis)`.
+                Defaults to 0.
+
+            Notes
+            -----
+            For both unit and non-unit quaternions `Q`, we define the angular velocity as
+
+                ω = 2 * dQ/dt * Q⁻¹
+
+            This agress with the standard definition when `Q` is a unit quaternion and we
+            rotate a vector `v` according to
+
+                v' = Q * v * Q̄ = Q * v * Q⁻¹,
+
+            in which case ω is a "pure vector" quaternion, and we have the usual
+
+                dv'/dt = ω × v'.
+
+            It also generalizes this to the case where `Q` is not a unit quaternion, which
+            means that it also rescales the vector by the amount Q*Q̄.  In this case, ω also
+            has a scalar component encoding twice the logarithmic time-derivative of this
+            rescaling, and we have
+
+                dv'/dt = ω * v' + v' * ω̄.
+
+            """
+            from scipy.interpolate import CubicSpline
+            spline = CubicSpline(t, self, axis=axis)
+            if t_new is None:
+                Q = self  # shortcut
+            else:
+                Q = type(self)(spline(t_new))
+            t_new = t if t_new is None else t_new
+            Q̇ = type(self)(spline.derivative()(t_new))
+            return (2 * Q̇ / Q).vector
+
+        @classmethod
+        def from_angular_velocity(cls, omega, t, R0=None, tolerance=1e-12):
+            """Create a quaternionic array corresponding to angular velocity
+
+            Assuming that omega represents the angular velocity of a frame moving with
+            respect to the current frame, this function returns a quaternionic array
+            representing that rotating frame.
+
+            Parameters
+            ----------
+            omega : {callable, (N, 3) array_like}
+                If a callable, this must take a quaternion and a float representing the
+                current orientation and time, respectively.  If array-like, this is
+                assumed to represent the angular velocity at a series of times, given
+                by `t`.
+            t : (N,) array_like
+                Times at which the output frame will be evaluated.
+            R0 : quaternionic, optional
+                Initial orientation of the frame.  If None, the default, this is set to
+                `quaternionic.one`.
+            tolerance : float, optional
+                Absolute tolerance used in integration.  Defaults to 1e-12.
+
+            See Also
+            --------
+            to_angular_velocity
+
+            Notes
+            -----
+            We define the angular velocity as
+
+                ω = 2 * dQ/dt * Q⁻¹
+
+            This only defines the rotating frame up to a constant overall rotation.  In
+            particular, if `Q` satisfies the above equation, then so does `Q * P` for any
+            constant quaternion `P`.
+
+            """
+            import warnings
+            from scipy.integrate import solve_ivp
+            from scipy.interpolate import CubicSpline
+            from . import one, array
+            eps = 1e-14
+
+            if R0 is None:
+                R0 = one.ndarray
+            else:
+                R0 = array(R0).ndarray
+
+            R = cls(np.empty((t.size, 4)))
+
+            if callable(omega):
+                ω = omega
+            else:
+                omega = np.asarray(omega)
+                if omega.dtype != np.float:
+                    raise ValueError(f"Input omega must have float dtype; it has dtype {omega.dtype}.")
+                if omega.shape != (t.shape[0], 3):
+                    raise ValueError(f"Input omega must have shape {(t.shape[0], 3)}; it has shape {omega.shape}.")
+                ωspline = CubicSpline(t, omega)
+                ω = lambda _, ti: ωspline(ti)
+
+            def RHS(t, y):
+                R = array(y)
+                Ω = array(0.0, *ω(R, t))
+                return (0.5 * Ω * R).ndarray
+
+            solution = solve_ivp(
+                RHS, [t[0], t[-1]], R0, method="DOP853",
+                t_eval=t, dense_output=True, atol=tolerance, rtol=100*np.finfo(float).eps
+            )
+            # print("Number of function evaluations:", solution.nfev)
+            return cls(solution.y.T)
+
+        def to_minimal_rotation(self, t, t_new=None, axis=0, iterations=2):
+            """Adjust frame so that there is no rotation about z' axis
+
+            Parameters
+            ----------
+            t : array-like of float
+                This array represents the times at which the quaternions are measured, and
+                with respect to which the derivative will be taken.  Note that these times
+                must be real, finite and in strictly increasing order.
+            t_new : array-like of float, optional
+                If present, the output is interpolated to this set of times.  Defaults to
+                None, meaning that the original set of times will be used.
+            axis : int, optional
+                Axis along which this array is assumed to be varying with `t`. Meaning that
+                for t[i] the corresponding quaternions are `np.take(self, i, axis=axis)`.
+                Defaults to 0.
+            iterations : int, optional
+                Repeat the minimization to refine the result.  Defaults to 2.
+
+            Notes
+            -----
+            The output of this function is a frame that rotates the z axis onto the same z'
+            axis as the input frame, but with minimal rotation about that axis.  This is
+            done by pre-composing the input rotation with a rotation about the z axis
+            through an angle γ, where
+
+                dγ/dt = 2*(dR/dt * z * R̄).w
+
+            This ensures that the angular velocity has no component along the z' axis.
+
+            Note that this condition becomes easier to impose the closer the input rotation
+            is to a minimally rotating frame, which means that repeated application of this
+            function improves its accuracy.  By default, this function is iterated twice,
+            though a few more iterations may be called for.
+
+            """
+            from scipy.interpolate import CubicSpline
+            if iterations == 0:
+                return self
+            z = type(self)([0.0, 0.0, 0.0, 1.0])
+            t_new = t if t_new is None else t_new
+            spline = CubicSpline(t, self.ndarray, axis=axis)
+            R = type(self)(spline(t_new))
+            Rdot = type(self)(spline.derivative()(t_new))
+            γ̇over2 = (Rdot * z * np.conjugate(R)).w
+            γover2 = CubicSpline(t_new, γ̇over2).antiderivative()(t_new)
+            Rγ = np.exp(z * γover2)
+            return (R * Rγ).to_minimal_rotation(t_new, t_new=None, axis=axis, iterations=iterations-1)
+
     return mixin
