@@ -6,50 +6,6 @@ import numpy as np
 import quaternionic
 
 
-def slerp_pairwise(R1, R2, t, tau):
-    """Spherical linear interpolation between quaternionic functions of time
-
-    Parameters
-    ----------
-    R1 : quaternionic.array
-    R2 : quaternionic.array
-        Quaternionic functions of time representing "close" but different
-        orientations that we smoothly transition between.
-    t : array_like
-        Times at which `R1` and `R2` are measured.  This must be the same shape as
-        `R1.shape[0]` and `R2.shape[0]`.
-    tau : array_like
-        Fractional contribution from `R2` — meaning that when `tau` is 0, the
-        output will be precisely the value of `R1` at that instant; when `tau` is
-        1, the output will be precisely `R2`; and when `tau` is between those
-        values, the result will be linearly interpolated between the values of `R1`
-        and `R2` at that instant.  It is permissible to use values outside of this
-        range, but note that this corresponds to extrapolation.
-
-    See also
-    --------
-    slerp : spherical linear interpolation
-    squad : spherical quadratic interpolation
-
-    """
-    # if any((tau < 0) | (tau > 1)):
-    #     raise ValueError("All values of tau must be betwen 0 and 1, inclusive.")
-    if t.ndim != 1 or t.shape[0] != R1.shape[0] or t.shape[0] != R2.shape[0]:
-        raise ValueError(f"Shape of t {t.shape} is not consistent with shapes of R1 {R1.shape} and R2 {R2.shape}.")
-    if R1.shape != R2.shape:
-        raise ValueError("Shapes of R1 {R1.shape} and R2 {R2.shape} are inconsistent.")
-    R1 = quaternionic.array(R1)
-    R2 = quaternionic.array(R2)
-    R3 = quaternionic.array(np.copy(R1))
-    R3[tau == 1] = R2[tau == 1]
-    work_indices = (tau != 0) & (tau != 1)
-    R1w = R1[work_indices]
-    R2w = R2[work_indices]
-    tauw = tau[work_indices]
-    R3[work_indices] = (R2w / R1w) ** tauw * R1w
-    return R3
-
-
 def slerp(R1, R2, tau):
     """Spherical linear interpolation of quaternions
 
@@ -78,7 +34,7 @@ def slerp(R1, R2, tau):
     squad : spherical quadratic interpolation
 
     """
-    return (R2 / R1) ** tau * R1
+    return np.float_power(R2 / R1, tau) * R1
 
 
 def squad(R_in, t_in, t_out):
@@ -96,7 +52,6 @@ def squad(R_in, t_in, t_out):
     See Also
     --------
     slerp : Spherical linear interpolation
-    slerp_pairwise : Transition between to quaternionic functions of time
 
     Notes
     -----
@@ -119,7 +74,9 @@ def squad(R_in, t_in, t_out):
     roll = partial(np.roll, axis=0)
 
     if R_in.size == 0 or t_out.size == 0:
-        return np.array((), dtype=np.quaternion)
+        return quaternionic.array(np.zeros((0, 4)))
+
+    R_in = quaternionic.array(R_in)
 
     # This list contains an index for each `t_out` such that
     # t_in[i-1] <= t_out < t_in[i]
@@ -142,13 +99,20 @@ def squad(R_in, t_in, t_out):
     # though the difference is probably totally washed out here.  In
     # any case, it might be useful to test again.
     #
-    A = R_in * np.exp((- np.log((~R_in) * roll(R_in, -1))
-                       + np.log((~roll(R_in, 1)) * R_in)
-                       * np.reshape((roll(t_in, -1) - t_in) / (t_in - roll(t_in, 1)), t_in_broadcast_shape)
-                       ) * 0.25)
-    B = roll(R_in, -1) * np.exp((np.log((~roll(R_in, -1)) * roll(R_in, -2))
-                                    * np.reshape((roll(t_in, -1) - t_in) / (roll(t_in, -2) - roll(t_in, -1)), t_in_broadcast_shape)
-                                    - np.log((~R_in) * roll(R_in, -1))) * -0.25)
+    A = R_in * np.exp(
+        (
+            - np.log((~R_in) * roll(R_in, -1))
+            + np.log((~roll(R_in, 1)) * R_in)
+            * np.reshape((roll(t_in, -1) - t_in) / (t_in - roll(t_in, 1)), t_in_broadcast_shape)[..., 0]
+         ) * 0.25
+    )
+    B = roll(R_in, -1) * np.exp(
+        (
+            np.log((~roll(R_in, -1)) * roll(R_in, -2))
+            * np.reshape((roll(t_in, -1) - t_in) / (roll(t_in, -2) - roll(t_in, -1)), t_in_broadcast_shape)[..., 0]
+            - np.log((~R_in) * roll(R_in, -1))
+        ) * -0.25
+    )
 
     # Correct the first and last A time steps, and last two B time steps.  We extend R_in with the following wrap-around
     # values:
@@ -200,13 +164,18 @@ def squad(R_in, t_in, t_out):
     # R_ip1[-1] = R_in[-1]*(~R_in[-2])*R_in[-1]
     R_ip1 = roll(R_in, -1)
     R_ip1[-1] = R_in[-1]*(~R_in[-2])*R_in[-1]
-    R_ip1 = np.array(R_ip1[i_in_for_out])
+    R_ip1 = quaternionic.array(R_ip1[i_in_for_out])
     t_inp1 = roll(t_in, -1)
     t_inp1[-1] = t_in[-1] + (t_in[-1] - t_in[-2])
-    tau = np.reshape((t_out - t_in[i_in_for_out]) / ((t_inp1 - t_in)[i_in_for_out]), t_out_broadcast_shape)
+    tau = np.reshape((t_out - t_in[i_in_for_out]) / ((t_inp1 - t_in)[i_in_for_out]), t_out_broadcast_shape)[..., 0]
     # tau = (t_out - t_in[i_in_for_out]) / ((roll(t_in, -1) - t_in)[i_in_for_out])
 
-    raise NotImplementedError()
-    R_out = np.squad_vectorized(tau, R_in[i_in_for_out], A[i_in_for_out], B[i_in_for_out], R_ip1)
+    R_out = slerp(
+        slerp(R_in[i_in_for_out], R_ip1, tau),
+        slerp(A[i_in_for_out], B[i_in_for_out], tau),
+        2*tau*(1-tau)
+    )
+
+    # R_out = np.squad_vectorized(tau, R_in[i_in_for_out], A[i_in_for_out], B[i_in_for_out], R_ip1)
 
     return R_out

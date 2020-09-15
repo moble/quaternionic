@@ -32,4 +32,4 @@ z = array(0, 0, 0, 1)
 z.flags.writeable = False
 k = z
 
-from .interpolation import slerp, squad, slerp_pairwise
+from .interpolation import slerp, squad
