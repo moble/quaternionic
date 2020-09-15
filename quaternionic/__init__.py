@@ -31,3 +31,7 @@ j = y
 z = array(0, 0, 0, 1)
 z.flags.writeable = False
 k = z
+
+from .time_series import (
+    slerp, squad, angular_velocity, integrate_angular_velocity, minimal_rotation, slerp_pairwise
+)

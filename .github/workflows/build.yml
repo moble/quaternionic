@@ -50,7 +50,10 @@ jobs:
     name: Create release and send to PyPI
     needs: build
     runs-on: ubuntu-latest
-    if: "github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, '[no release]') && (success() || contains(github.event.head_commit.message, '[skip tests]'))"
+    if: >-
+        github.ref == 'refs/heads/master'
+        && !contains(github.event.head_commit.message, '[no release]')
+        && (success() || contains(github.event.head_commit.message, '[skip tests]'))
 
     steps:
       - name: Check out code
