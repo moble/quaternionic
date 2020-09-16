@@ -7,7 +7,7 @@ plugins:
       modules:
         quaternionic:
           section: api
-          source_repo: "https://github.com/moble/quaternionic"
+          source_repo: "https://github.com/moble/quaternionic/blob/master"
 
 theme:
   name: 'readthedocs'

@@ -371,7 +371,7 @@ def QuaternionConvertersMixin(jit=jit):
 
             Returns
             -------
-            R : quaternion array
+            R : quaternionic.array
                 The shape of this array will be the same as the input, except that
                 the last dimension will be removed.
 
