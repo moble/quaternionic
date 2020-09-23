@@ -7,7 +7,9 @@ jobs:
   build:
     name: ${{ matrix.os }} python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
-    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[skip tests]')"
+    if: >-
+        !contains(github.event.head_commit.message, '[skip ci]')
+        && !contains(github.event.head_commit.message, '[skip tests]')
     strategy:
       fail-fast: false
       matrix:
@@ -32,12 +34,16 @@ jobs:
           #python -m pip install poetry  # Only install poetry like this in containers
           python -m pip install --no-warn-script-location --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
 
-      - name: Run poetry
+      - name: Build and install with poetry
         run: |
           rm poetry.lock
           python -m poetry build
           python -m poetry install
-          python -m poetry run pytest -s --cov --cov-branch --cov-report=xml
+
+      - name: Run tests
+        #if: "matrix.os != 'windows-latest'"
+        run: |
+          python -m poetry run pytest -s --cov=quaternionic --cov-branch --cov-report=xml
 
       - name: Upload coverage
         if: "matrix.python-version == 3.8 && matrix.os == 'ubuntu-latest'"
