@@ -12,6 +12,10 @@ def test_unflip_rotors(Rs):
     ndim = q.ndim
     axis = -2
     inplace = False
+    with pytest.raises(ValueError):
+        quaternionic.unflip_rotors(q, axis=-1, inplace=inplace)
+    with pytest.raises(ValueError):
+        quaternionic.unflip_rotors(q, axis=ndim-1, inplace=inplace)
     q_out = quaternionic.unflip_rotors(q, axis=axis, inplace=inplace)
     diff = np.linalg.norm(np.diff(q_out, axis=(axis % ndim)), axis=-1)
     assert np.sum(diff > 1.4142135623730950488016887242097) == 0

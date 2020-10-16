@@ -10,7 +10,7 @@ from . import guvectorize
 
 
 @guvectorize([(float64[:, :], float64[:, :])], '(i,j)->(i,j)')
-def _unflip_gufunc(q_in, q_out):
+def _unflip_gufunc(q_in, q_out):  # pragma: no cover
     q_out[0, :] = q_in[0, :]
     for i in range(1, q_in.shape[0]):
         inner_product = (
