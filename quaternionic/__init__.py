@@ -32,4 +32,4 @@ z = array(0, 0, 0, 1)
 z.flags.writeable = False
 k = z
 
-from .interpolation import slerp, squad
+from .interpolation import unflip_rotors, slerp, squad

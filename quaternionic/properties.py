@@ -237,9 +237,9 @@ def QuaternionPropertiesMixin(jit=jit):
             ----------
             v : float array
                 Three-vectors to be rotated.
-            axis : int
+            axis : int, optional
                 Axis of the `v` array to use as the vector dimension.  This axis of
-                `v` must have length 3.
+                `v` must have length 3.  The default is the last axis.
 
             Returns
             -------
