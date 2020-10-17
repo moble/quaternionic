@@ -3,6 +3,34 @@ import quaternionic
 import pytest
 
 
+def test_unflip_rotors(Rs):
+    np.random.seed(12345)
+    unflip_precision = 4e-16
+    f = 2 * np.random.rand(17, 1_000, 4) - 1
+    q = quaternionic.array(f)
+    q = q / abs(q)
+    ndim = q.ndim
+    axis = -2
+    inplace = False
+    with pytest.raises(ValueError):
+        quaternionic.unflip_rotors(q, axis=-1, inplace=inplace)
+    with pytest.raises(ValueError):
+        quaternionic.unflip_rotors(q, axis=ndim-1, inplace=inplace)
+    q_out = quaternionic.unflip_rotors(q, axis=axis, inplace=inplace)
+    diff = np.linalg.norm(np.diff(q_out, axis=(axis % ndim)), axis=-1)
+    assert np.sum(diff > 1.4142135623730950488016887242097) == 0
+    q_in = np.empty((2,)+Rs.shape)
+    q_in[0, ...] = Rs
+    q_in[1, ...] = -Rs
+    q_out = quaternionic.unflip_rotors(q_in, axis=0, inplace=False)
+    assert np.array_equal(q_out[1], Rs)
+    q_in = np.empty((2,)+Rs.shape)
+    q_in[0, ...] = Rs
+    q_in[1, ...] = -Rs
+    quaternionic.unflip_rotors(q_in, axis=0, inplace=True)
+    assert np.array_equal(q_in[1], Rs)
+
+
 def test_slerp(Rs):
     from quaternionic import slerp
     from numpy import allclose

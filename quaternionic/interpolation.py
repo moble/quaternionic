@@ -3,7 +3,79 @@
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
 import numpy as np
+from numba import float64
+
 import quaternionic
+from . import guvectorize
+
+
+@guvectorize([(float64[:, :], float64[:, :])], '(i,j)->(i,j)')
+def _unflip_gufunc(q_in, q_out):  # pragma: no cover
+    q_out[0, :] = q_in[0, :]
+    for i in range(1, q_in.shape[0]):
+        inner_product = (
+            q_out[i-1, 0] * q_in[i, 0]
+            + q_out[i-1, 1] * q_in[i, 1]
+            + q_out[i-1, 2] * q_in[i, 2]
+            + q_out[i-1, 3] * q_in[i, 3]
+        )
+        if inner_product < 0.0:
+            q_out[i, :] = -q_in[i, :]
+        else:
+            q_out[i, :] = q_in[i, :]
+
+
+def unflip_rotors(R_in, axis=-2, inplace=False):
+    """Flip signs of quaternions along axis to ensure continuity
+
+    Parameters
+    ----------
+    R_in : array_like
+        Quaternionic array to modify.
+    axis : int, optional
+        Axis along which successive quaternions will be compared.  Default value is
+        the second-to-last last axis of the array (the last before the quaternion
+        index).
+    inplace : bool, optional
+        If True, modify the data in place without creating a copy; if False (the
+        default), a new array is created and returned.
+
+    Returns
+    -------
+    R_out : array_like
+        An array of precisely the same shape as the input array, differing only by
+        factors of precisely -1 in some elements.
+
+    Notes
+    -----
+    Quaternions form a "double cover" of the rotation group, meaning that if `q`
+    represents a rotation, then `-q` represents the same rotation.  This is clear
+    from the way a quaternion is used to rotate a vector `v`: the rotated vector is
+    `q * v * q.conjugate()`, which is precisely the same as the vector resulting
+    from `(-q) * v * (-q).conjugate()`.  Some ways of constructing quaternions
+    (such as converting from rotation matrices or other representations) can result
+    in unexpected sign choices.  For many applications, this will not be a problem.
+    But if, for example, the quaternions need to be interpolated or differentiated,
+    the results may be surprising.  This function flips the signs of successive
+    quaternions (along some chosen axis, if relevant), so that successive
+    quaternions are as close as possible while still representing the same
+    rotations.
+
+    This function works by taking the inner product between successive quaternions
+    (along `axis`); whenever that product is negative, the sign of the second
+    quaternion is flipped.  This does not depend on the quaternions being
+    normalized.
+
+    """
+    R_in = quaternionic.array(R_in)
+    axis = axis % R_in.ndim
+    if axis >= R_in.ndim - 1:
+        raise ValueError(f"Requested axis {axis} is outside the input array's non-quaternionic shape {R_in.shape[:-1]}")
+    f_in = R_in.ndarray
+    axes = [(axis, -1), (axis, -1)]
+    f_out = f_in if inplace else np.empty_like(f_in)
+    _unflip_gufunc(f_in, out=f_out, axes=axes)
+    return quaternionic.array(f_out)
 
 
 def slerp(R1, R2, tau):
