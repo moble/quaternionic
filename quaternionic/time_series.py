@@ -77,7 +77,7 @@ class QuaternionTimeseriesMixin(abc.ABC):
         t_new = t_new or t
         spline = self.spline(t, axis=axis)
         return type(self)(spline.derivative(nu=nu)(t_new))
-        
+
     def angular_velocity(self, t, t_new=None, axis=0):
         """Compute the angular velocity of quaternion timeseries with respect to `t`
 
