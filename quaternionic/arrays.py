@@ -269,3 +269,4 @@ def quaternionic_array_factory(jit=jit, dtype=float):
 
 
 array = quaternionic_array_factory()
+array.__qualname__ = "array"
