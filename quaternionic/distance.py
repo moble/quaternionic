@@ -51,7 +51,7 @@ _log = jit(algebra.log)
 _absolute = jit(algebra.absolute)
 
 
-def create_rotor_metrics(jit=jit, guvectorize=guvectorize):
+def CreateMetrics(jit=jit, guvectorize=guvectorize):
     class Rotor(object):
         @ndarray_args
         @guvectorize([(float64[:], float64[:], float64[:])], '(n),(n)->()')
@@ -115,10 +115,6 @@ def create_rotor_metrics(jit=jit, guvectorize=guvectorize):
             """
             out[0] = np.sqrt((q1[0]-q2[0])**2 + (q1[1]-q2[1])**2 + (q1[2]-q2[2])**2 + (q1[3]-q2[3])**2)
 
-    return Rotor
-
-
-def create_rotation_metrics(jit=jit, guvectorize=guvectorize):
     class Rotation(object):
         @ndarray_args
         @guvectorize([(float64[:], float64[:], float64[:])], '(n),(n)->()')
@@ -198,8 +194,7 @@ def create_rotation_metrics(jit=jit, guvectorize=guvectorize):
             else:
                 out[0] = np.sqrt(b)
 
-    return Rotation
+    return Rotor, Rotation
 
 
-rotor = create_rotor_metrics()
-rotation = create_rotation_metrics()
+rotor, rotation = CreateMetrics()

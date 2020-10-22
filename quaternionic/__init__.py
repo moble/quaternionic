@@ -26,7 +26,7 @@ from . import algebra, properties, converters, distance, utilities
 algebra_ufuncs = type('AlgebraUfuncs', (object,), dict())()
 utilities.guvectorize_module_functions(algebra, algebra_ufuncs)
 
-from .arrays import quaternionic_array_factory, array
+from .arrays import QuaternionicArray, array
 
 one = array(1, 0, 0, 0)
 one.flags.writeable = False
