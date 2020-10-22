@@ -512,7 +512,7 @@ def QuaternionConvertersMixin(jit=jit):
 
                 ω = 2 * dQ/dt * Q⁻¹
 
-            This agress with the standard definition when `Q` is a unit quaternion and we
+            This agrees with the standard definition when `Q` is a unit quaternion and we
             rotate a vector `v` according to
 
                 v' = Q * v * Q̄ = Q * v * Q⁻¹,
@@ -521,12 +521,20 @@ def QuaternionConvertersMixin(jit=jit):
 
                 dv'/dt = ω × v'.
 
-            It also generalizes this to the case where `Q` is not a unit quaternion, which
-            means that it also rescales the vector by the amount Q*Q̄.  In this case, ω also
-            has a scalar component encoding twice the logarithmic time-derivative of this
-            rescaling, and we have
+            That definition of ω also generalizes to the case where `Q` is not a unit
+            quaternion, which means that it also rescales the vector by the amount `Q*Q̄`.
+            In this case, ω also has a scalar component encoding twice the logarithmic
+            time-derivative of this rescaling, and we have the more general result that
+            when
+
+                v' = Q * v * Q̄,
+
+            we have
 
                 dv'/dt = ω * v' + v' * ω̄.
+
+            If you want to implicitly normalize `Q`, just disregard (or set to 0) the
+            scalar component output by this function.
 
             """
             from scipy.interpolate import CubicSpline
@@ -574,7 +582,7 @@ def QuaternionConvertersMixin(jit=jit):
 
             This only defines the rotating frame up to a constant overall rotation.  In
             particular, if `Q` satisfies the above equation, then so does `Q * P` for any
-            constant quaternion `P`.
+            constant-in-time quaternion `P`.
 
             """
             import warnings
@@ -646,7 +654,7 @@ def QuaternionConvertersMixin(jit=jit):
             Note that this condition becomes easier to impose the closer the input rotation
             is to a minimally rotating frame, which means that repeated application of this
             function improves its accuracy.  By default, this function is iterated twice,
-            though a few more iterations may be called for.
+            though more iterations may be called for in some cases.
 
             """
             from scipy.interpolate import CubicSpline
