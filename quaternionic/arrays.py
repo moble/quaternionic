@@ -19,7 +19,7 @@ from .properties import QuaternionPropertiesMixin
 from .converters import QuaternionConvertersMixin
 
 
-def quaternionic_array_factory(jit=jit, dtype=float):
+def QuaternionicArray(jit=jit, dtype=float):
     """Construct a quaternionic array type.
 
     This factory returns a `class` encapsulating a quaternionic array type,
@@ -268,5 +268,5 @@ def quaternionic_array_factory(jit=jit, dtype=float):
     return QArray
 
 
-array = quaternionic_array_factory()
+array = QuaternionicArray()
 array.__qualname__ = "array"
