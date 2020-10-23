@@ -2,15 +2,15 @@
 # See LICENSE file for details:
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
-# """Interpret arrays as quaternionic arrays
+"""Interpret arrays as quaternionic arrays
 
-# This module is responsible for subclassing numpy's basic `ndarray` type for the
-# data type used by some particular type of array, and optionally JIT-compiling
-# the code as appropriate for that data type.  The resulting "quaternionic" array
-# will essentially be a numpy array, but all algebraic operations will pass
-# through the appropriate quaternionic algebra function.
+This module is responsible for subclassing numpy's basic `ndarray` type for the
+data type used by some particular type of array, and optionally JIT-compiling
+the code as appropriate for that data type.  The resulting "quaternionic" array
+will essentially be a numpy array, but all algebraic operations will pass
+through the appropriate quaternionic algebra function.
 
-# """
+"""
 
 import numpy as np
 

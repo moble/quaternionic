@@ -293,7 +293,7 @@ def QuaternionConvertersMixin(jit=jit):
             Returns
             -------
             q : array of quaternions
-                Unit quaternions resulting in rotations corresponding to input
+                Unit quaternions resulting in rotations corresponding to input axis-angle
                 rotations.  Output shape is rot.shape[:-1].
 
             """
@@ -582,7 +582,7 @@ def QuaternionConvertersMixin(jit=jit):
 
             This only defines the rotating frame up to a constant overall rotation.  In
             particular, if `Q` satisfies the above equation, then so does `Q * P` for any
-            constant-in-time quaternion `P`.
+            (constant-in-time) quaternion `P`.
 
             """
             import warnings
