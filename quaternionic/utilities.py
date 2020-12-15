@@ -121,7 +121,6 @@ def pyguvectorize(types, signature):
     `signature` attributes.  Moreover, the result is a slow python function,
     meant only for testing.
 
-
     Nonetheless, the output of this decorator should be callable with the same
     signature as a gufunc.  In this way, tests designed for the compiled
     gufuncs can also be used to test the python-mode code and obtain coverage

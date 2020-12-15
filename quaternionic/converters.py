@@ -19,6 +19,69 @@ def QuaternionConvertersMixin(jit=jit):
         """
 
         @property
+        def to_scalar_part(self):
+            """The "scalar" part of the quaternion (first component).
+
+            """
+            return self.scalar
+
+        @classmethod
+        def from_scalar_part(cls, scalars):
+            """Create a quaternionic array from its scalar part
+
+            Essentially, this just inserts three 0s after each scalar part, and
+            re-interprets the result as a quaternion.
+
+            Parameters
+            ----------
+            scalars : float array
+                Array of scalar parts of quaternions.
+
+            Returns
+            -------
+            q : array of quaternions
+                Quaternions with scalar parts corresponding to input scalars.  Output shape
+                is scalars.shape+(4,).
+
+            """
+            q = np.zeros(scalars.shape+(4,), dtype=scalars.dtype)
+            q[..., 0] = scalars
+            return cls(q)
+
+        @property
+        def to_vector_part(self):
+            """The "vector" part of the quaternion (final three components).
+
+            Note that it is entirely standard to describe this part of the
+            quaternion as the "vector" part.  It would be more correct to refer
+            to it as the "bivector" part, as explained by geometric algebra.
+
+            """
+            return self.vector
+
+        @classmethod
+        def from_vector_part(cls, vec):
+            """Create a quaternionic array from its vector part
+
+            Essentially, this just inserts a 0 in front of each vector part, and
+            re-interprets the result as a quaternion.
+
+            Parameters
+            ----------
+            vec : (..., 3) float array
+
+                Array of vector parts of quaternions. 
+
+            Returns
+            -------
+            q : array of quaternions
+                Quaternions with vector parts corresponding to input vectors.  Output shape
+                is vec.shape[:-1]+(4,).
+
+            """
+            return cls(np.insert(vec, 0, 0.0, axis=-1))
+
+        @property
         @ndarray_args
         @jit
         def to_rotation_matrix(self):
