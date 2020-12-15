@@ -5,6 +5,30 @@ import quaternionic
 import pytest
 
 
+def test_to_scalar_part(Rs):
+    assert np.array_equal(Rs.to_scalar_part, Rs.ndarray[..., 0])
+
+
+def test_from_scalar_part():
+    scalars = np.random.rand(17, 8, 3)
+    q = quaternionic.array.from_scalar_part(scalars)
+    assert q.shape[-1] == 4
+    assert q.shape[:-1] == scalars.shape
+    assert np.array_equal(q.to_scalar_part, scalars)
+
+
+def test_to_vector_part(Rs):
+    assert np.array_equal(Rs.to_vector_part, Rs.ndarray[..., 1:])
+
+
+def test_from_vector_part():
+    vec = np.random.rand(17, 8, 5, 3)
+    q = quaternionic.array.from_vector_part(vec)
+    assert q.shape[-1] == 4
+    assert q.shape[:-1] == vec.shape[:-1]
+    assert np.array_equal(q.to_vector_part, vec)
+
+
 def test_to_rotation_matrix(Rs, eps, array):
     one, x, y, z = tuple(array(np.eye(4)))
     zero = 0.0 * one
