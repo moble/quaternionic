@@ -90,7 +90,7 @@ jobs:
           python -m poetry version "${version_bump_rule}"
           export new_version=$(python .github/scripts/parse_version.py pyproject.toml)
           echo "new_version: '${new_version}'"
-          echo "::set-env name=new_version::${new_version}"  # Save env variable for later steps
+          echo "new_version=${new_version}" >> $GITHUB_ENV
 
       - name: Tag and push new version
         shell: bash
