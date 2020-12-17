@@ -4,6 +4,12 @@
 
 """Essential functions for quaternion algebra.
 
+***NOTE***: You probably don't need to call these functions directly; these are
+automatically called when using `quaternionic.array` objects naturally.  For
+example, if you have arrays `q1` and `q2`, you can add them with `q1 + q2`,
+multiply them with `q1 * q2`, take an exponential with `np.exp(q1)` or a
+logarithm with `np.log(q1)`, etc.
+
 These functions form the basic algebraic behavior of quaternions — addition,
 multiplication, exp, log, etc.
 
@@ -45,7 +51,7 @@ _quaternion_resolution = 10 * np.finfo(float).resolution
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def add(q1, q2, qout):
-    """Add two quaternions q1+q2"""
+    """Add two quaternions `q1+q2`"""
     qout[0] = q1[0] + q2[0]
     qout[1] = q1[1] + q2[1]
     qout[2] = q1[2] + q2[2]
@@ -54,7 +60,7 @@ def add(q1, q2, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def subtract(q1, q2, qout):
-    """Subtract quaternion q1-q2"""
+    """Subtract quaternion `q1-q2`"""
     qout[0] = q1[0] - q2[0]
     qout[1] = q1[1] - q2[1]
     qout[2] = q1[2] - q2[2]
@@ -63,7 +69,7 @@ def subtract(q1, q2, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def multiply(q1, q2, qout):
-    """Multiply quaternions q1*q2"""
+    """Multiply quaternions `q1*q2`"""
     qout[0] = q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3]
     qout[1] = q1[0]*q2[1] + q1[1]*q2[0] + q1[2]*q2[3] - q1[3]*q2[2]
     qout[2] = q1[0]*q2[2] - q1[1]*q2[3] + q1[2]*q2[0] + q1[3]*q2[1]
@@ -72,7 +78,7 @@ def multiply(q1, q2, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def divide(q1, q2, qout):
-    """Divide quaternions q1/q2 = q1 * q2.inverse"""
+    """Divide quaternions `q1/q2` = `q1 * q2.inverse`"""
     q2norm = q2[0]**2 + q2[1]**2 + q2[2]**2 + q2[3]**2
     qout[0] = (+q1[0]*q2[0] + q1[1]*q2[1] + q1[2]*q2[2] + q1[3]*q2[3]) / q2norm
     qout[1] = (-q1[0]*q2[1] + q1[1]*q2[0] - q1[2]*q2[3] + q1[3]*q2[2]) / q2norm
@@ -85,7 +91,7 @@ true_divide = divide
 
 @attach_typelist_and_signature([(float64, float64[:], float64[:])], '(),(n)->(n)')
 def multiply_scalar(s, q, qout):
-    """Multiply scalar by quaternion s*q"""
+    """Multiply scalar by quaternion `s*q`"""
     qout[0] = s * q[0]
     qout[1] = s * q[1]
     qout[2] = s * q[2]
@@ -94,7 +100,7 @@ def multiply_scalar(s, q, qout):
 
 @attach_typelist_and_signature([(float64, float64[:], float64[:])], '(),(n)->(n)')
 def divide_scalar(s, q, qout):
-    """Divide scalar by quaternion s/q = s * q.inverse"""
+    """Divide scalar by quaternion `s/q` = `s * q.inverse`"""
     qnorm = q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2
     qout[0] = s * q[0] / qnorm
     qout[1] = -s * q[1] / qnorm
@@ -107,7 +113,7 @@ true_divide_scalar = divide_scalar
 
 @attach_typelist_and_signature([(float64[:], float64, float64[:])], '(n),()->(n)')
 def scalar_multiply(q, s, qout):
-    """Multiply quaternion by scalar q*s"""
+    """Multiply quaternion by scalar `q*s`"""
     qout[0] = q[0] * s
     qout[1] = q[1] * s
     qout[2] = q[2] * s
@@ -116,7 +122,7 @@ def scalar_multiply(q, s, qout):
 
 @attach_typelist_and_signature([(float64[:], float64, float64[:])], '(n),()->(n)')
 def scalar_divide(q, s, qout):
-    """Divide quaternion by scalar q/s"""
+    """Divide quaternion by scalar `q/s`"""
     qout[0] = q[0] / s
     qout[1] = q[1] / s
     qout[2] = q[2] / s
@@ -128,7 +134,7 @@ scalar_true_divide = scalar_divide
 
 @attach_typelist_and_signature([(float64[:], float64[:])], '(n)->(n)')
 def negative(q, qout):
-    """Return negative quaternion -q"""
+    """Return negative quaternion `-q`"""
     qout[0] = -q[0]
     qout[1] = -q[1]
     qout[2] = -q[2]
@@ -137,7 +143,7 @@ def negative(q, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:])], '(n)->(n)')
 def positive(q, qout):
-    """Return input quaternion q"""
+    """Return input quaternion"""
     qout[0] = q[0]
     qout[1] = q[1]
     qout[2] = q[2]
@@ -146,7 +152,7 @@ def positive(q, qout):
 
 @attach_typelist_and_signature([(float64[:], float64, float64[:])], '(n),()->(n)')
 def float_power(q, s, qout):
-    """Raise quaternion to scalar power exp(log(q)*s)"""
+    """Raise quaternion to scalar power `exp(log(q)*s)`"""
     b = np.sqrt(q[1]**2 + q[2]**2 + q[3]**2)
     if np.abs(b) <= _quaternion_resolution * np.abs(q[0]):
         if q[0] < 0.0:
@@ -205,7 +211,7 @@ conjugate = conj
 
 @attach_typelist_and_signature([(float64[:], float64[:])], '(n)->(n)')
 def exp(q, qout):
-    """Return exponential of input quaternion exp(q)"""
+    """Return exponential of input quaternion"""
     vnorm = np.sqrt(q[1]**2 + q[2]**2 + q[3]**2)
     if vnorm > _quaternion_resolution:
         s = np.sin(vnorm) / vnorm
@@ -223,7 +229,7 @@ def exp(q, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:])], '(n)->(n)')
 def log(q, qout):
-    """Return logarithm of input quaternion log(q)"""
+    """Return logarithm of input quaternion"""
     b = np.sqrt(q[1]**2 + q[2]**2 + q[3]**2)
     if b <= _quaternion_resolution * np.abs(q[0]):
         if q[0] < 0.0:
@@ -257,12 +263,12 @@ def sqrt(q, qout):
 
     The general formula whenever the denominator is nonzero is
 
-    ```
-        √q = (|q| + q) / √(2|q| + 2q.w)
-    ```
+    $\\sqrt{q} = \\frac{|q| + q} {\\sqrt{2|q| + 2 q_w}}$
 
-    This can be proven by expanding `q` as `q.w + q.vec` and multiplying the
-    expression above by itself.
+    This can be proven by multiplying the right-hand side above by itself,
+    expanding $q$ as $q_w + q_\\mathrm{vec}$, and noting that $|q|^2 = q_w^2 +
+    q_\\mathrm{vec}^2$ and $q^2 = q_w^2 - q_\\mathrm{vec}^2 + 2 q_w
+    q_\\mathrm{vec}$.
 
     When the denominator is zero, the quaternion is a pure-real negative number.
     It is not clear what the appropriate square-root is in this case (because the
@@ -296,7 +302,7 @@ def square(q, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:])], '(n)->(n)')
 def reciprocal(q, qout):
-    """Return reciprocal (inverse) of quaternion q.inverse"""
+    """Return reciprocal (inverse) of quaternion"""
     norm = q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2
     qout[0] = q[0] / norm
     qout[1] = -q[1] / norm
@@ -306,14 +312,12 @@ def reciprocal(q, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def bitwise_or(q1, q2, qout):
-    """Return scalar product of quaternions q1|q2.
+    """Return scalar product of quaternions `q1|q2`.
 
-    If we denote by `⟨a⟩ₛ` the grade-s component of the general multivector `a`,
-    we can express this product as
+    If we denote by $⟨a⟩_s$ the grade-$s$ component of the general multivector
+    $a$, we can express this product as
 
-    ```
-        a | b = Σₛ,ᵣ ⟨⟨a⟩ₛ ⟨b⟩ᵣ⟩₀
-    ```
+    `a | b` = $Σ_{s,r} ⟨⟨a⟩_s ⟨b⟩_r⟩_0$
 
     Note that this is different from the "Hestenes dot" product where the sum
     runs over s≠0 and r≠0; that is the product returned by `galgebra` using
@@ -328,17 +332,20 @@ def bitwise_or(q1, q2, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def bitwise_xor(q1, q2, qout):
-    """Return outer product of quaternions q1^q2.
+    """Return outer product of quaternions `q1^q2`.
 
     This is the generalized outer product of geometric algebra.  If we denote
-    by `⟨a⟩ₛ` the grade-s component of the general multivector `a`, we can
+    by $⟨a⟩_s$ the grade-s component of the general multivector $a$, we can
     express this product as
 
-    ```
-        a ^ b = Σₛ,ᵣ ⟨⟨a⟩ₛ ⟨b⟩ᵣ⟩ₛ₊ᵣ
-    ```
+    `a ^ b` = $Σ_{s,r} ⟨⟨a⟩_s ⟨b⟩_r⟩_{s+r}$
 
-    Note that the result may seem surprising because we sometimes think of quaternions as 
+    Note that the result may seem surprising because we sometimes think of
+    quaternions as "scalar-plus-vector" quantities, but they are more properly
+    "scalar-plus-bivector" quantities.  But since the outer product of a
+    bivector with another bivector is always 0 in three dimensions (which is
+    the dimensionality relevant for quaternions), that contribution to this
+    result will always be 0.
 
     """
     qout[0] = q1[0]*q2[0]
@@ -352,12 +359,12 @@ invert = conj  # reversion (= conjugate for quaternion algebra)
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def left_shift(q1, q2, qout):
-    """Return left-contraction of quaternions q1<<q2 = q1⌋q1.
+    """Return left-contraction of quaternions `q1<<q2` = q1⌋q1.
 
     For all quaternions `a`, `b`, `c`, we have
 
-    ```
-        (a ^ b) * c = a * (b ⌋ c)
+    ```python
+    (a ^ b) * c = a * (b << c)
     ```
 
     """
@@ -369,12 +376,12 @@ def left_shift(q1, q2, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def right_shift(q1, q2, qout):
-    """Return right-contraction of quaternions q1>>q2 = q1⌊q2.
+    """Return right-contraction of quaternions `q1>>q2` = q1⌊q2.
 
     For all quaternions `a`, `b`, `c`, we have
 
-    ```
-        c * (b ^ a) = (c ⌊ b) * a
+    ```python
+    c * (b ^ a) = (c >> b) * a
     ```
 
     """
@@ -386,34 +393,41 @@ def right_shift(q1, q2, qout):
 
 @attach_typelist_and_signature([(float64[:], float64[:], boolean[:])], '(n),(n)->()')
 def not_equal(q1, q2, bout):
+    """Return True if any components are not equal, otherwise False"""
     bout[0] = np.any(q1[:] != q2[:])
 
 
 @attach_typelist_and_signature([(float64[:], float64[:], boolean[:])], '(n),(n)->()')
 def equal(q1, q2, bout):
+    """Return True if all components are identically equal, otherwise False"""
     bout[0] = np.all(q1[:] == q2[:])
 
 
 @attach_typelist_and_signature([(float64[:], float64[:], boolean[:])], '(n),(n)->()')
 def logical_and(q1, q2, bout):
+    """Return True if any component of `q1` and any component of `q2` is nonzero"""
     bout[0] = np.any(q1[:]) and np.any(q2[:])
 
 
 @attach_typelist_and_signature([(float64[:], float64[:], boolean[:])], '(n),(n)->()')
 def logical_or(q1, q2, bout):
+    """Return True if any component of `q1` or any component of `q2` is nonzero"""
     bout[0] = np.any(q1[:]) or np.any(q2[:])
 
 
 @attach_typelist_and_signature([(float64[:], boolean[:])], '(n)->()')
 def isfinite(qin, bout):
+    """Return True if all components are finite, otherwise False"""
     bout[0] = np.isfinite(qin[0]) and np.isfinite(qin[1]) and np.isfinite(qin[2]) and np.isfinite(qin[3])
 
 
 @attach_typelist_and_signature([(float64[:], boolean[:])], '(n)->()')
 def isinf(qin, bout):
+    """Return True if any component is `inf`, otherwise False"""
     bout[0] = np.isinf(qin[0]) or np.isinf(qin[1]) or np.isinf(qin[2]) or np.isinf(qin[3])
 
 
 @attach_typelist_and_signature([(float64[:], boolean[:])], '(n)->()')
 def isnan(qin, bout):
+    """Return True if any component is `nan`, otherwise False"""
     bout[0] = np.isnan(qin[0]) or np.isnan(qin[1]) or np.isnan(qin[2]) or np.isnan(qin[3])

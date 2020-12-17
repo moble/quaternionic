@@ -2,6 +2,46 @@
 # See LICENSE file for details:
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
+"""Distance functions of quaternions
+
+This module contains four distance functions:
+
+  * `rotor.intrinsic`
+  * `rotor.chordal`
+  * `rotation.intrinsic`
+  * `rotation.chordal`
+
+The "rotor" distances do not account for possible differences in signs, meaning
+that rotor distances can be large even when they represent identical rotations;
+the "rotation" functions just return the smaller of the distance between `q1`
+and `q2` or the distance between `q1` and `-q2`.  So, for example, either
+"rotation" distance between `q` and `-q` is always zero, whereas neither
+"rotor" distance between `q` and `-q` will ever be zero (unless `q` is zero).
+The "intrinsic" functions measure the geodesic distance within the manifold of
+*unit* quaternions, and is somewhat slower but may be more meaningful; the
+"chordal" functions measure the Euclidean distance in the (linear) space of all
+quaternions, and is faster but its precise value is not necessarily as
+meaningful.
+
+These functions satisfy some important conditions.  For each of these functions
+`d`, and for any nonzero quaternions `q1` and `q2`, and *unit* quaternions `q3`
+and `q4`, we have
+
+  * symmetry: `d(q1, q2) = d(q2, q1)`
+  * invariance: `d(q3*q1, q3*q2) = d(q1, q2) = d(q1*q4, q2*q4)`
+  * identity: `d(q1, q1) = 0`
+  * positive-definiteness:
+    * For rotor functions `d(q1, q2) > 0` whenever `q1 ≠ q2`
+    * For rotation functions `d(q1, q2) > 0` whenever `q1 ≠ q2` and `q1 ≠ -q2`
+
+Note that the rotation functions also satisfy both the usual identity property
+`d(q1, q1) = 0` and the opposite-identity property `d(q1, -q1) = 0`.
+
+See [Moakher (2002)](https://doi.org/10.1137/S0895479801383877) for a nice
+general discussion.
+
+"""
+
 import numpy as np
 from . import jit, guvectorize, algebra, float64
 from .utilities import ndarray_args
@@ -74,7 +114,6 @@ def CreateMetrics(jit=jit, guvectorize=guvectorize):
 
             """
             out[0] = np.sqrt((q1[0]-q2[0])**2 + (q1[1]-q2[1])**2 + (q1[2]-q2[2])**2 + (q1[3]-q2[3])**2)
-
 
     class Rotation(object):
         @ndarray_args
@@ -154,7 +193,6 @@ def CreateMetrics(jit=jit, guvectorize=guvectorize):
                 out[0] = np.sqrt(a)
             else:
                 out[0] = np.sqrt(b)
-
 
     return Rotor, Rotation
 

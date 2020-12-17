@@ -2,6 +2,14 @@
 # See LICENSE file for details:
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
+"""Utility functions
+
+This module provides a number of wrappers and other functions that enable
+JIT-compiling the various functions and classes of quaternionic arrays for
+faster processing.
+
+"""
+
 import sys
 import functools
 

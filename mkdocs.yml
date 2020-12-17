@@ -3,11 +3,12 @@ site_name: quaternionic
 repo_url: https://github.com/moble/quaternionic
 
 plugins:
-  - mktheapidocs:
-      modules:
-        quaternionic:
-          section: api
-          source_repo: "https://github.com/moble/quaternionic/blob/master"
+  - search
+  - mkapi
+
+nav:
+  - index.md
+  - API: mkapi/api/quaternionic
 
 theme:
   name: 'readthedocs'
@@ -16,5 +17,7 @@ extra_javascript:
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js
 
 markdown_extensions:
+  - toc:
+      permalink: "#"
   - pymdownx.arithmatex:
       generic: true

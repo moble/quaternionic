@@ -2,6 +2,15 @@
 # See LICENSE file for details:
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
+"""Functions for timeseries of quaternionic arrays
+
+This module provides functions for treating quaternionic arrays as time series —
+things like interpolation, differentiation, integration, and so on.  Note that some
+of these functions do not make sense with symbolic quaternions, so we assume that
+all inputs are numpy arrays.
+
+"""
+
 import numpy as np
 from numba import float64
 
@@ -51,10 +60,10 @@ def unflip_rotors(R_in, axis=-2, inplace=False):
     Quaternions form a "double cover" of the rotation group, meaning that if `q`
     represents a rotation, then `-q` represents the same rotation.  This is clear
     from the way a quaternion is used to rotate a vector `v`: the rotated vector is
-    `q * v * q.conjugate()`, which is precisely the same as the vector resulting
-    from `(-q) * v * (-q).conjugate()`.  Some ways of constructing quaternions
-    (such as converting from rotation matrices or other representations) can result
-    in unexpected sign choices.  For many applications, this will not be a problem.
+    `q * v * q.conjugate()`, which is identical to the product using `-q`, given by
+    `(-q) * v * (-q).conjugate()`.  Some ways of constructing quaternions (such as
+    converting from rotation matrices or other representations) can result in
+    unexpected sign choices.  For many applications, this will not be a problem.
     But if, for example, the quaternions need to be interpolated or differentiated,
     the results may be surprising.  This function flips the signs of successive
     quaternions (along some chosen axis, if relevant), so that successive

@@ -10,5 +10,5 @@ python:
       path: .
       extra_requirements:
         - mkdocs
-        - mktheapidocs
+        - mkapi
         - pymdown-extensions

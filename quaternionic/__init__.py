@@ -2,6 +2,17 @@
 # See LICENSE file for details:
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
+"""Quaternionic arrays.
+
+This module subclasses numpy's array type, interpreting the array as an array
+of quaternions, and accelerating the algebra using numba.  This enables natural
+manipulations, like multiplying quaternions as `a*b`, while also working with
+standard numpy functions, as in `np.log(q)`.  There is also basic initial
+support for symbolic manipulation of quaternions by creating quaternionic
+arrays with sympy symbols as elements, though this is a work in progress.
+
+"""
+
 try:
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:  # pragma: no cover
