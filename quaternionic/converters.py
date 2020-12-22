@@ -4,11 +4,45 @@
 
 import abc
 import numpy as np
+import numba
 from . import jit
 from .utilities import ndarray_args
 
 
 def QuaternionConvertersMixin(jit=jit):
+    @jit
+    def _to_euler_phases(R, z):
+        """Helper function for `to_euler_phases`"""
+        a = R[0]**2 + R[3]**2
+        b = R[1]**2 + R[2]**2
+        sqrta = np.sqrt(a)
+        sqrtb = np.sqrt(b)
+        z[1] = ((a - b) + 2j * sqrta * sqrtb) / (a + b)  # exp[iβ]
+        if sqrta > 0.0:
+            zp = (R[0] + 1j * R[3]) / sqrta  # exp[i(α+γ)/2]
+        else:
+            zp = 1.0 + 0.0j
+        if abs(sqrtb) > 0.0:
+            zm = (R[2] - 1j * R[1]) / sqrtb  # exp[i(α-γ)/2]
+        else:
+            zm = 1.0 +0.0j
+        z[0] = zp * zm
+        z[2] = zp * zm.conjugate()
+
+    @jit
+    def _from_euler_phases(R, z):
+        """Helper function for `from_euler_phases`"""
+        for i in range(R.shape[0]):
+            zb = np.sqrt(z[i, 1])  # exp[iβ/2]
+            zp = np.sqrt(z[i, 0] * z[i, 2])  # exp[i(α+γ)/2]
+            zm = np.sqrt(z[i, 0] * z[i, 2].conjugate())  # exp[i(α-γ)/2]
+            if abs(z[i, 0] - zp * zm) > abs(z[i, 0] + zp * zm):
+                zp *= -1
+            R[i, 0] = zb.real * zp.real
+            R[i, 1] = -zb.imag * zm.imag
+            R[i, 2] = zb.imag * zm.real
+            R[i, 3] = zb.real * zp.imag
+
     class mixin(abc.ABC):
         """Converters for quaternionic array class.
 
@@ -20,14 +54,12 @@ def QuaternionConvertersMixin(jit=jit):
 
         @property
         def to_scalar_part(self):
-            """The "scalar" part of the quaternion (first component).
-
-            """
+            """The "scalar" part of the quaternion (first component)."""
             return self.scalar
 
         @classmethod
         def from_scalar_part(cls, scalars):
-            """Create a quaternionic array from its scalar part
+            """Create a quaternionic array from its scalar part.
 
             Essentially, this just inserts three 0s after each scalar part, and
             re-interprets the result as a quaternion.
@@ -61,7 +93,7 @@ def QuaternionConvertersMixin(jit=jit):
 
         @classmethod
         def from_vector_part(cls, vec):
-            """Create a quaternionic array from its vector part
+            """Create a quaternionic array from its vector part.
 
             Essentially, this just inserts a 0 in front of each vector part, and
             re-interprets the result as a quaternion.
@@ -460,6 +492,89 @@ def QuaternionConvertersMixin(jit=jit):
             R[..., 3] =  np.cos(beta/2)*np.sin((alpha+gamma)/2)  # z quaternion components
 
             return cls(R)
+
+        @property
+        @ndarray_args
+        @jit
+        def to_euler_phases(self):
+            """Convert input quaternion to complex phases of Euler angles
+
+            Returns
+            -------
+            z : complex array
+                For each quaternion in the input array, this array contains the complex
+                phases (zₐ, zᵦ, zᵧ) in that order.  The shape of this output array is
+                self.shape[:-1]+(3,).
+
+            See Also
+            --------
+            from_euler_phases : Create quaternion from Euler phases
+            to_euler_angles : Convert quaternion to Euler angles
+            from_euler_angles : Create quaternion from Euler angles
+
+            Notes
+            -----
+            We define the Euler phases from the Euler angles (α, β, γ) as
+
+                zₐ ≔ exp(i*α)
+                zᵦ ≔ exp(i*β)
+                zᵧ ≔ exp(i*γ)
+
+            These are more useful geometric quantites than the angles themselves — being
+            involved in computing spherical harmonics and Wigner's 𝔇 matrices — and can be
+            computed from the components of the corresponding quaternion algebraically
+            (without the use of transcendental functions).
+
+            """
+            R = self.reshape(-1, 4)
+            z = np.empty(R.shape[:-1] + (3,), dtype=np.complex128)
+            for i in range(z.shape[0]):
+                _to_euler_phases(R[i], z[i])
+            return z.reshape(self.shape[:-1] + (3,))
+
+        @classmethod
+        def from_euler_phases(cls, z):
+            """Return the quaternion corresponding to these Euler phases.
+
+            Parameters
+            ----------
+            z : complex array_like
+                This argument must be able to be interpreted as a complex array with last
+                dimension of size 3, which represent the complex phases (zₐ, zᵦ, zᵧ) in
+                that order.
+
+            Returns
+            -------
+            R : quaternionic.array
+                The shape of this array will be the same as the input, except that the last
+                dimension will be removed and replaced with the quaternionic components.
+
+            See Also
+            --------
+            to_euler_phases : Convert quaternion to Euler phases
+            to_euler_angles : Convert quaternion to Euler angles
+            from_euler_angles : Create quaternion from Euler angles
+
+            Notes
+            -----
+            We define the Euler phases from the Euler angles (α, β, γ) as
+
+                zₐ ≔ exp(i*α)
+                zᵦ ≔ exp(i*β)
+                zᵧ ≔ exp(i*γ)
+
+            These are more useful geometric quantites than the angles themselves — being
+            involved in computing spherical harmonics and Wigner's 𝔇 matrices — and can be
+            used to compute the components of the corresponding quaternion algebraically
+            (without the use of transcendental functions).
+
+            """
+            z = np.asarray(z, dtype=complex)
+            shape = z.shape
+            z = z.reshape(-1, 3)
+            R = np.empty(z.shape[:-1]+(4,), dtype=float)
+            _from_euler_phases(R, z)
+            return cls(R.reshape(shape[:-1] + (4,)))
 
         @property
         def to_spherical_coordinates(self):
