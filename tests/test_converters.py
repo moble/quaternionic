@@ -236,6 +236,33 @@ def test_to_euler_angles(eps, array):
     assert abs(q0 - array.from_euler_angles(*list(q0.to_euler_angles))) < 1.e-15
 
 
+def test_from_euler_phases(eps, array):
+    np.random.seed(1843)
+    random_angles = [[np.random.uniform(0*-np.pi, 2 * np.pi),
+                      np.random.uniform(0, np.pi),
+                      np.random.uniform(0*-np.pi, 2 * np.pi)]
+                     for i in range(5000)]
+    for alpha, beta, gamma in random_angles:
+        R1 = array.from_euler_angles(alpha, beta, gamma)
+        R2 = array.from_euler_phases([np.exp(1j * alpha), np.exp(1j * beta), np.exp(1j * gamma)])
+        d = quaternionic.distance.rotation.intrinsic(R1, R2)
+        assert d < 5*eps, ((alpha, beta, gamma), R1, R2, d)  # Can't use allclose here; we don't care about rotor sign
+
+
+def test_to_euler_phases(eps):
+    np.random.seed(1843)
+    random_angles = [[np.random.uniform(-np.pi, 2 * np.pi),
+                      np.random.uniform(0, np.pi),
+                      np.random.uniform(-np.pi, 2 * np.pi)]
+                     for _ in range(5000)]
+    for alpha, beta, gamma in random_angles:
+        z1 = quaternionic.array.from_euler_angles(alpha, beta, gamma).to_euler_phases
+        z2 = np.array([np.exp(1j * alpha), np.exp(1j * beta), np.exp(1j * gamma)])
+        assert abs(z1[0] - z2[0]) < 5*eps, (alpha, beta, gamma)
+        assert abs(z1[1] - z2[1]) < 5*eps, (alpha, beta, gamma)
+        assert abs(z1[2] - z2[2]) < 5*eps, (alpha, beta, gamma)
+
+
 def test_to_angular_velocity():
     import math
     import numpy as np
