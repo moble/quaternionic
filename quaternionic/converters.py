@@ -572,7 +572,7 @@ def QuaternionConvertersMixin(jit=jit):
             z = np.asarray(z, dtype=complex)
             shape = z.shape
             z = z.reshape(-1, 3)
-            R = np.empty(z.shape[:-1]+(4,), dtype=z.dtype)
+            R = np.empty(z.shape[:-1]+(4,), dtype=float)
             _from_euler_phases(R, z)
             return cls(R.reshape(shape[:-1] + (4,)))
 
