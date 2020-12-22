@@ -54,14 +54,12 @@ def QuaternionConvertersMixin(jit=jit):
 
         @property
         def to_scalar_part(self):
-            """The "scalar" part of the quaternion (first component).
-
-            """
+            """The "scalar" part of the quaternion (first component)."""
             return self.scalar
 
         @classmethod
         def from_scalar_part(cls, scalars):
-            """Create a quaternionic array from its scalar part
+            """Create a quaternionic array from its scalar part.
 
             Essentially, this just inserts three 0s after each scalar part, and
             re-interprets the result as a quaternion.
@@ -95,7 +93,7 @@ def QuaternionConvertersMixin(jit=jit):
 
         @classmethod
         def from_vector_part(cls, vec):
-            """Create a quaternionic array from its vector part
+            """Create a quaternionic array from its vector part.
 
             Essentially, this just inserts a 0 in front of each vector part, and
             re-interprets the result as a quaternion.
@@ -529,24 +527,9 @@ def QuaternionConvertersMixin(jit=jit):
 
             """
             R = self.reshape(-1, 4)
-            z = np.empty(R.shape[:-1] + (3,), dtype=numba.complex128)
+            z = np.empty(R.shape[:-1] + (3,), dtype=np.complex128)
             for i in range(z.shape[0]):
                 _to_euler_phases(R[i], z[i])
-                # a = R[i, 0]**2 + R[i, 3]**2
-                # b = R[i, 1]**2 + R[i, 2]**2
-                # sqrta = np.sqrt(a)
-                # sqrtb = np.sqrt(b)
-                # z[i, 1] = ((a - b) + 2j * sqrta * sqrtb) / (a + b)  # exp[iβ]
-                # if sqrta > 0.0:
-                #     zp = (R[i, 0] + 1j * R[i, 3]) / sqrta  # exp[i(α+γ)/2]
-                # else:
-                #     zp = 1.0 + 0.0j
-                # if abs(sqrtb) > 0.0:
-                #     zm = (R[i, 2] - 1j * R[i, 1]) / sqrtb  # exp[i(α-γ)/2]
-                # else:
-                #     zm = 1.0 +0.0j
-                # z[i, 0] = zp * zm
-                # z[i, 2] = zp * zm.conjugate()
             return z.reshape(self.shape[:-1] + (3,))
 
         @classmethod
@@ -591,14 +574,6 @@ def QuaternionConvertersMixin(jit=jit):
             z = z.reshape(-1, 3)
             R = np.empty(z.shape[:-1]+(4,), dtype=z.dtype)
             _from_euler_phases(R, z)
-            # for i in range(R.shape[0]):
-            #     zp = np.sqrt(z[i, 0] * z[i, 2])  # exp[i(α+γ)/2]
-            #     zm = np.sqrt(z[i, 0] * z[i, 2].conjugate())  # exp[i(α-γ)/2]
-            #     zb = np.sqrt(z[i, 1])  # exp[iβ/2]
-            #     R[i, 0] = zb.real * zp.real
-            #     R[i, 1] = -zb.imag * zm.imag
-            #     R[i, 2] = zb.imag * zm.real
-            #     R[i, 3] = zb.real * zp.imag
             return cls(R.reshape(shape[:-1] + (4,)))
 
         @property
