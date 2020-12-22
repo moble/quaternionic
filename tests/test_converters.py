@@ -246,7 +246,7 @@ def test_from_euler_phases(eps, array):
         R1 = array.from_euler_angles(alpha, beta, gamma)
         R2 = array.from_euler_phases([np.exp(1j * alpha), np.exp(1j * beta), np.exp(1j * gamma)])
         d = quaternionic.distance.rotation.intrinsic(R1, R2)
-        assert d < 5*eps, ((alpha, beta, gamma), R1, R2, d)  # Can't use allclose here; we don't care about rotor sign
+        assert d < 8*eps, ((alpha, beta, gamma), R1, R2, d)  # Can't use allclose here; we don't care about rotor sign
 
 
 def test_to_euler_phases(eps, array):
