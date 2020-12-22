@@ -163,8 +163,10 @@ from other representations of rotations, including
    * `to_transformation_matrix` (for non-unit quaternions)
    * `to_axis_angle`, `from_axis_angle` representation
    * `to_euler_angles`, `from_euler_angles` (though using Euler angles is almost always a bad idea)
+   * `to_euler_phases`, `from_euler_phases` (see above)
    * `to_spherical_coordinates`, `from_spherical_coordinates`
    * `to_angular_velocity`, `from_angular_velocity`
+   * `to_minimal_rotation`
 
 Note that the last item relates to quaternion-valued functions of time.  Converting to an angular
 velocity requires differentiation, while converting from angular velocity requires integration (as
