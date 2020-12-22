@@ -9,7 +9,7 @@ from . import jit
 from .utilities import ndarray_args
 
 
-def QuaternionConvertersMixin(jit=jit):
+def ToEulerPhases(jit=jit):
     @jit
     def _to_euler_phases(R, z):
         """Helper function for `to_euler_phases`"""
@@ -28,7 +28,12 @@ def QuaternionConvertersMixin(jit=jit):
             zm = 1.0 +0.0j
         z[0] = zp * zm
         z[2] = zp * zm.conjugate()
+    return _to_euler_phases
 
+_to_euler_phases = ToEulerPhases(jit)
+
+
+def FromEulerPhases(jit=jit):
     @jit
     def _from_euler_phases(R, z):
         """Helper function for `from_euler_phases`"""
@@ -42,6 +47,14 @@ def QuaternionConvertersMixin(jit=jit):
             R[i, 1] = -zb.imag * zm.imag
             R[i, 2] = zb.imag * zm.real
             R[i, 3] = zb.real * zp.imag
+    return _from_euler_phases
+
+_from_euler_phases = FromEulerPhases(jit)
+
+
+def QuaternionConvertersMixin(jit=jit):
+    _to_euler_phases = ToEulerPhases(jit)
+    _from_euler_phases = FromEulerPhases(jit)
 
     class mixin(abc.ABC):
         """Converters for quaternionic array class.
