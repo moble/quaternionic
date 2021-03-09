@@ -157,9 +157,16 @@ is almost always more efficient, and more accurate.  That is what this package d
 whenever rotations are involved.
 
 Although this package does not restrict to unit quaternions, there are several converters to and
-from other representations of rotations, including
+from other representations of rotations.  First, we have
 
    * `to_vector_part`, `from_vector_part`
+
+These convert between the standard 3-d vector representation and their equivalent quaternions, which
+allows them to be manipulated as vectors — as in `R * from_vector_part(v) * R.conjugate()`.  It may
+also be relevant to consider a vector as a "generator" of rotations, in which case the actual
+rotation is obtained by applying `exp` to the generator.  We also have converters that deal with
+standard representations of rotations:
+
    * `to_rotation_matrix`, `from_rotation_matrix`
    * `to_transformation_matrix` (for non-unit quaternions)
    * `to_axis_angle`, `from_axis_angle`
@@ -171,7 +178,9 @@ from other representations of rotations, including
 
 Note that the last two items relate to quaternion-valued functions of time.  Converting to an angular
 velocity requires differentiation, while converting from angular velocity requires integration (as
-explored in [this paper](https://arxiv.org/abs/1604.08139)).  The "minimal rotation" 
+explored in [this paper](https://arxiv.org/abs/1604.08139)).  The 
+["minimal rotation"](https://arxiv.org/abs/1110.2965) modifies an input rotation-function-of-time to
+have the same effect on the `z` axis, while minimizing the amount of rotation that actually happens.
 
 For these converters, the "to" functions are properties on the individual arrays, whereas the "from"
 functions are "classmethod"s that take the corresponding objects as inputs.  For example, we could
