@@ -159,18 +159,19 @@ whenever rotations are involved.
 Although this package does not restrict to unit quaternions, there are several converters to and
 from other representations of rotations, including
 
+   * `to_vector_part`, `from_vector_part`
    * `to_rotation_matrix`, `from_rotation_matrix`
    * `to_transformation_matrix` (for non-unit quaternions)
-   * `to_axis_angle`, `from_axis_angle` representation
+   * `to_axis_angle`, `from_axis_angle`
    * `to_euler_angles`, `from_euler_angles` (though using Euler angles is almost always a bad idea)
    * `to_euler_phases`, `from_euler_phases` (see above)
    * `to_spherical_coordinates`, `from_spherical_coordinates`
    * `to_angular_velocity`, `from_angular_velocity`
    * `to_minimal_rotation`
 
-Note that the last item relates to quaternion-valued functions of time.  Converting to an angular
+Note that the last two items relate to quaternion-valued functions of time.  Converting to an angular
 velocity requires differentiation, while converting from angular velocity requires integration (as
-explored in [this paper](https://arxiv.org/abs/1604.08139)).
+explored in [this paper](https://arxiv.org/abs/1604.08139)).  The "minimal rotation" 
 
 For these converters, the "to" functions are properties on the individual arrays, whereas the "from"
 functions are "classmethod"s that take the corresponding objects as inputs.  For example, we could
@@ -236,7 +237,7 @@ See [Moakher (2002)](https://doi.org/10.1137/S0895479801383877) for a nice gener
 
 ## Interpolation
 
-Finally, there are also capabilities related to interpolation
+Finally, there are also capabilities related to interpolation, for example as functions of time:
 
   * slerp (spherical linear interpolation)
   * squad (spherical quadratic interpolation)
