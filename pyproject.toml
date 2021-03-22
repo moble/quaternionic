@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "quaternionic"
-version = "0.3.1"
+version = "0.3.2"
 description = "Interpret numpy arrays as quaternionic arrays with numba acceleration"
 readme = "README.md"
 license = "MIT"
