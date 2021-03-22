@@ -32,12 +32,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install poetry
+        shell: bash
         run: |
           curl -fsS -o get-poetry.py https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
           python get-poetry.py -y
           echo "$HOME/.poetry/bin" >> $GITHUB_PATH
 
       - name: Build and install with poetry
+        shell: bash
         run: |
           poetry env info
           poetry run python -m pip install --upgrade pip
@@ -47,7 +49,7 @@ jobs:
           poetry install --no-interaction
 
       - name: Run tests
-        #if: "matrix.os != 'windows-latest'"
+        shell: bash
         run: |
           poetry run pytest -s --cov=quaternionic --cov-branch --cov-report=xml
 
@@ -77,6 +79,7 @@ jobs:
           python-version: 3.9
 
       - name: Install poetry
+        shell: bash
         run: |
           curl -fsS -o get-poetry.py https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
           python get-poetry.py -y
@@ -84,6 +87,7 @@ jobs:
 
       - name: Build and install with poetry
         if: ${{ env.skipping_build_and_test_replicate != 'true' }}
+        shell: bash
         run: |
           poetry env info
           poetry run python -m pip install --upgrade pip toml
