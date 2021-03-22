@@ -6,18 +6,21 @@ jobs:
 
   build:
     name: ${{ matrix.os }} python ${{ matrix.python-version }}
+
     runs-on: ${{ matrix.os }}
+
     if: >-
         !contains(github.event.head_commit.message, '[skip ci]')
         && !contains(github.event.head_commit.message, '[skip tests]')
+
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8] #, 3.9] #, pypy3]
-        # exclude:
-        #   - os: windows-latest
-        #     python-version: pypy3
+        python-version: [3.6, 3.9]
+
+    env:
+      POETRY_VIRTUALENVS_CREATE: false
 
     steps:
       - name: Check out code
@@ -29,24 +32,29 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install poetry
+        shell: bash
         run: |
-          python -m pip install --upgrade pip
-          #python -m pip install poetry  # Only install poetry like this in containers
-          python -m pip install --no-warn-script-location --user --pre poetry -U  # Temporary: https://github.com/python-poetry/poetry/issues/2711
+          curl -fsS -o get-poetry.py https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
+          python get-poetry.py -y
+          echo "$HOME/.poetry/bin" >> $GITHUB_PATH
 
       - name: Build and install with poetry
+        shell: bash
         run: |
+          poetry env info
+          poetry run python -m pip install --upgrade pip
           rm poetry.lock
-          python -m poetry build
-          python -m poetry install
+          poetry update
+          poetry build
+          poetry install --no-interaction
 
       - name: Run tests
-        #if: "matrix.os != 'windows-latest'"
+        shell: bash
         run: |
-          python -m poetry run pytest -s --cov=quaternionic --cov-branch --cov-report=xml
+          poetry run pytest -s --cov=quaternionic --cov-branch --cov-report=xml
 
       - name: Upload coverage
-        if: "matrix.python-version == 3.8 && matrix.os == 'ubuntu-latest'"
+        if: "matrix.python-version == 3.9 && matrix.os == 'ubuntu-latest'"
         shell: bash
         run: |
           bash <(curl -s https://codecov.io/bash)
@@ -68,16 +76,25 @@ jobs:
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
 
-      - name: Install poetry and this package
+      - name: Install poetry
+        shell: bash
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install toml
-          python -m pip install poetry  # Only install poetry like this in containers
-          python -m poetry update
-          python -m poetry build
-          python -m poetry install --no-dev
+          curl -fsS -o get-poetry.py https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
+          python get-poetry.py -y
+          echo "$HOME/.poetry/bin" >> $GITHUB_PATH
+
+      - name: Build and install with poetry
+        if: ${{ env.skipping_build_and_test_replicate != 'true' }}
+        shell: bash
+        run: |
+          poetry env info
+          poetry run python -m pip install --upgrade pip toml
+          rm poetry.lock
+          poetry update
+          poetry build
+          poetry install --no-interaction --no-dev
 
       - name: Bump version
         shell: bash
@@ -86,7 +103,7 @@ jobs:
         run: |
           export version_bump_rule=$(python .github/scripts/parse_bump_rule.py)
           echo "version_bump_rule: '${version_bump_rule}'"
-          python -m poetry version "${version_bump_rule}"
+          poetry version "${version_bump_rule}"
           export new_version=$(python .github/scripts/parse_version.py pyproject.toml)
           echo "new_version: '${new_version}'"
           echo "new_version=${new_version}" >> $GITHUB_ENV
