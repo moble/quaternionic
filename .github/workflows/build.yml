@@ -137,7 +137,9 @@ jobs:
           # 1) Get key from https://pypi.org/manage/account/token/
           # 2) Copy it to Github > repo > Settings > Secrets
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+        shell: bash
         run: |
-          python -m poetry build
-          python -m poetry install --no-dev
-          python -m poetry publish
+          # Do these first two steps again to ensure the version is right
+          poetry build
+          poetry install --no-interaction --no-dev
+          poetry publish
