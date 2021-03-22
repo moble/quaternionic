@@ -90,7 +90,7 @@ jobs:
         shell: bash
         run: |
           poetry env info
-          poetry run python -m pip install --upgrade pip toml
+          poetry run python -m pip install --upgrade pip
           rm poetry.lock
           poetry update
           poetry build
@@ -101,12 +101,14 @@ jobs:
         env:
           github_event_head_commit_message: ${{ github.event.head_commit.message }}
         run: |
+          poetry add --dev toml
           export version_bump_rule=$(python .github/scripts/parse_bump_rule.py)
           echo "version_bump_rule: '${version_bump_rule}'"
           poetry version "${version_bump_rule}"
           export new_version=$(python .github/scripts/parse_version.py pyproject.toml)
           echo "new_version: '${new_version}'"
           echo "new_version=${new_version}" >> $GITHUB_ENV
+          poetry remove --dev toml
 
       - name: Tag and push new version
         shell: bash
