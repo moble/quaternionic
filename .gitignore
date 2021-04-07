@@ -115,3 +115,6 @@ notes
 
 build_artifacts
 # conda smithy ci-skeleton end
+
+# direnv file
+.envrc
