@@ -458,14 +458,31 @@ def test_to_minimal_rotation():
     assert np.max(abs(q_minimal_rotation.to_angular_velocity(t)[:, :2])) < 1e-8
 
 
-# def test_slerp():
-#     slerp()
+def test_random():
+    q = quaternionic.array.random()
+    assert isinstance(q, quaternionic.array)
+    assert q.dtype == np.float64
+    assert q.shape == (4,)
 
+    q = quaternionic.array.random(tuple())
+    assert isinstance(q, quaternionic.array)
+    assert q.dtype == np.float64
+    assert q.shape == (4,)
 
-# def test_slerp_pairwise():
-#     slerp_pairwise()
+    q = quaternionic.array.random(17)
+    assert isinstance(q, quaternionic.array)
+    assert q.dtype == np.float64
+    assert q.shape == (17, 4)
 
+    q = quaternionic.array.random((17, 3))
+    assert isinstance(q, quaternionic.array)
+    assert q.dtype == np.float64
+    assert q.shape == (17, 3, 4)
 
-# def test_squad():
-#     squad()
+    q = quaternionic.array.random((17, 3, 4))
+    assert isinstance(q, quaternionic.array)
+    assert q.dtype == np.float64
+    assert q.shape == (17, 3, 4)
 
+    q = quaternionic.array.random((17, 3, 4), normalize=True)
+    assert np.max(np.abs(1 - q.abs)) < 4 * np.finfo(float).eps

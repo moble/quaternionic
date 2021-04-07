@@ -841,4 +841,41 @@ def QuaternionConvertersMixin(jit=jit):
             Rγ = np.exp(z * γover2)
             return (R * Rγ).to_minimal_rotation(t_new, t_new=None, axis=axis, iterations=iterations-1)
 
+        @classmethod
+        def random(cls, shape=(4,), normalize=False):
+            """Construct random quaternions
+
+            Parameters
+            ----------
+            shape : tuple, optional
+                Shape of the array.  If this does not end with `4`, it will be appended.
+                Default is `(4,)`.
+            normalize : bool, optional
+                If True, normalize the result, so that the returned array can be
+                interpreted as rotors.  Defaults to False.
+
+            Returns
+            -------
+            q : array of quaternions
+
+            Notes
+            -----
+            This function constructs quaternions in which each component has a random value
+            drawn from a normal (Gaussian) distribution centered at 0 with scale 1.  This
+            has the nice property that the resulting distribution of quaternions is
+            isotropic — it is spherically symmetric.  If the result is normalized, these
+            are truly random rotors.
+
+            """
+            if isinstance(shape, int):
+                shape = (shape,)
+            if len(shape) == 0:
+                shape = (4,)
+            if shape[-1] != 4:
+                shape = shape + (4,)
+            q = np.random.normal(size=shape)  # Note the weird naming of this argument to `normal`
+            if normalize:
+                q /= np.linalg.norm(q, axis=-1)[..., np.newaxis]
+            return cls(q)
+
     return mixin

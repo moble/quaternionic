@@ -70,7 +70,7 @@ existing arrays:
 import numpy as np
 import quaternionic
 
-a = 1.0 - np.random.rand(17, 11, 4)  # Just some random numbers; last dimension is 4
+a = np.random.normal(size=(17, 11, 4))  # Just some random numbers; last dimension is 4
 q1 = quaternionic.array(a)  # Reinterpret an existing array
 q2 = quaternionic.array([1.2, 2.3, 3.4, 4.5])  # Create a new array
 ```
@@ -87,6 +87,11 @@ inverse of each float in the array, `1/q1` returns the *quaternionic* inverse of
 Similarly, if you multiply two quaternionic arrays, their product will be computed with the usual
 quaternion multiplication, rather than element-wise multiplication of floats as numpy usually
 performs.
+
+| :warning: WARNING                                                                                |
+|:-------------------------------------------------------------------------------------------------|
+| Because of an unfortunate choice by the numpy developers, the `np.copy` function will not preserve the quaternionic nature of an array by default; the result will just be a plain array of floats.  You could pass the optional argument `subok=True`, as in `q3 = np.copy(q1, subok=True)`, but it's easier to just use the member function: `q3 = q1.copy()`. |
+
 
 ## Algebra
 
@@ -208,6 +213,15 @@ quaternions as rotations:
 ```python
 np.max(quaternionic.distance.rotation.intrinsic(q1, q2))  # Typically around 1e-15
 ```
+
+Also note the classmethod
+
+   * `random`
+
+This constructs a quaternionic array in which each component is randomly selected from a normal
+(Gaussian) distribution centered at 0 with scale 1, which means that the result is isotropic
+(spherically symmetric).  It is also possible to pass the `normalize` argument to this function,
+which results in truly random unit quaternions.
 
 
 ## Distance functions

@@ -47,8 +47,7 @@ def test_setting_components():
 
 def test_two_spinor():
     np.random.seed(1234)
-    arr = np.random.rand(17, 9, 4)
-    q = quaternionic.array(arr)
+    q = quaternionic.array.random((17, 9, 4))
     s = q.two_spinor
     a = q.w + 1j * q.z
     b = q.y + 1j * q.x
@@ -70,13 +69,13 @@ def test_rotate_vectors(Rs):
     with pytest.raises(ValueError):
         one.rotate(np.array(3.14))
     with pytest.raises(ValueError):
-        one.rotate(np.random.rand(17, 9, 4))
+        one.rotate(np.random.normal(size=(17, 9, 4)))
     with pytest.raises(ValueError):
-        one.rotate(np.random.rand(17, 9, 3), axis=1)
+        one.rotate(np.random.normal(size=(17, 9, 3)), axis=1)
 
     np.random.seed(1234)
     # Test (1)*(1)
-    vecs = np.random.rand(3)
+    vecs = np.random.normal(size=(3,))
     quats = z
     vecsprime = quats.rotate(vecs)
     assert np.allclose(vecsprime,
@@ -84,7 +83,7 @@ def test_rotate_vectors(Rs):
                        rtol=0.0, atol=0.0)
     assert quats.shape[:-1] + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
     # Test (1)*(5)
-    vecs = np.random.rand(5, 3)
+    vecs = np.random.normal(size=(5, 3))
     quats = z
     vecsprime = quats.rotate(vecs)
     for i, vec in enumerate(vecs):
@@ -93,7 +92,7 @@ def test_rotate_vectors(Rs):
                            rtol=0.0, atol=0.0)
     assert quats.shape[:-1] + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
     # Test (1)*(5) inner axis
-    vecs = np.random.rand(3, 5)
+    vecs = np.random.normal(size=(3, 5))
     quats = z
     vecsprime = quats.rotate(vecs, axis=-2)
     for i, vec in enumerate(vecs.T):
@@ -102,7 +101,7 @@ def test_rotate_vectors(Rs):
                            rtol=0.0, atol=0.0)
     assert quats.shape[:-1] + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
     # Test (N)*(1)
-    vecs = np.random.rand(3)
+    vecs = np.random.normal(size=(3))
     quats = Rs
     vecsprime = quats.rotate(vecs)
     assert np.allclose(vecsprime,
@@ -110,7 +109,7 @@ def test_rotate_vectors(Rs):
                        rtol=1e-15, atol=1e-15)
     assert quats.shape[:-1] + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
     # Test (N)*(5)
-    vecs = np.random.rand(5, 3)
+    vecs = np.random.normal(size=(5, 3))
     quats = Rs
     vecsprime = quats.rotate(vecs)
     for i, vec in enumerate(vecs):
@@ -119,7 +118,7 @@ def test_rotate_vectors(Rs):
                            rtol=1e-15, atol=1e-15)
     assert quats.shape[:-1] + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
     # Test (N)*(5) inner axis
-    vecs = np.random.rand(3, 5)
+    vecs = np.random.normal(size=(3, 5))
     quats = Rs
     vecsprime = quats.rotate(vecs, axis=-2)
     for i, vec in enumerate(vecs.T):

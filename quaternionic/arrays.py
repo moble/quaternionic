@@ -30,11 +30,11 @@ def QuaternionicArray(jit=jit, dtype=float):
         also be used as expected — as in `np.exp(q)`, `np.log(q)`, etc.
 
         Because this is a subclass of numpy's ndarray object, its constructor takes
-        anything the ndarray constructor takes, or just an ndarray to be considered
+        anything the ndarray constructor takes, or just an ndarray to be re-interpreted
         as a quaternion array:
 
             q1 = quaternionic.array([1, 2, 3, 4])  # explicit array
-            q2 = quaternionic.array(np.random.rand(10, 4))  # re-interpret ndarray
+            q2 = quaternionic.array(np.random.normal(size=(10, 4))  # re-interpret ndarray
 
         In addition to the basic numpy array features, we also have a number of
         extra properties that are particularly useful for quaternions, including

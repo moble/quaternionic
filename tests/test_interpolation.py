@@ -6,9 +6,7 @@ import pytest
 def test_unflip_rotors(Rs):
     np.random.seed(12345)
     unflip_precision = 4e-16
-    f = 2 * np.random.rand(17, 1_000, 4) - 1
-    q = quaternionic.array(f)
-    q = q / abs(q)
+    q = quaternionic.array.random((17, 1_000, 4), normalize=True)
     ndim = q.ndim
     axis = -2
     inplace = False
