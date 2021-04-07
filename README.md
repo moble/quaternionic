@@ -90,10 +90,7 @@ performs.
 
 | :warning: WARNING                                                                                |
 |:-------------------------------------------------------------------------------------------------|
-| Because of unfortunate default values, the `np.copy` function will not preserve the quaternionic |
-| nature of an array by default; the result will just be a plain array of floats.  You could pass  |
-| the optional argument `subok=True`, as in `q3 = np.copy(q1, subok=True)`, but it's easier to t   |
-| just use the member function: `q3 = q1.copy()`.                                                  |
+| Because of unfortunate default values, the `np.copy` function will not preserve the quaternionic nature of an array by default; the result will just be a plain array of floats.  You could pass the optional argument `subok=True`, as in `q3 = np.copy(q1, subok=True)`, but it's easier to just use the member function: `q3 = q1.copy()`. |
 
 
 ## Algebra
@@ -216,6 +213,15 @@ quaternions as rotations:
 ```python
 np.max(quaternionic.distance.rotation.intrinsic(q1, q2))  # Typically around 1e-15
 ```
+
+Also note the classmethod
+
+   * `random`
+
+This constructs a quaternionic array in which each component is randomly selected from a normal
+(Gaussian) distribution centered at 0 with scale 1, which means that the result is isotropic
+(spherically symmetric).  It is also possible to pass the `normalize` argument to this function,
+which results in truly random unit quaternions.
 
 
 ## Distance functions
