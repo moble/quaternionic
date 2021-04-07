@@ -64,20 +64,28 @@ def subtract(q1, q2, qout):
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def multiply(q1, q2, qout):
     """Multiply quaternions q1*q2"""
-    qout[0] = q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3]
-    qout[1] = q1[0]*q2[1] + q1[1]*q2[0] + q1[2]*q2[3] - q1[3]*q2[2]
-    qout[2] = q1[0]*q2[2] - q1[1]*q2[3] + q1[2]*q2[0] + q1[3]*q2[1]
-    qout[3] = q1[0]*q2[3] + q1[1]*q2[2] - q1[2]*q2[1] + q1[3]*q2[0]
+    a = q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3]
+    b = q1[0]*q2[1] + q1[1]*q2[0] + q1[2]*q2[3] - q1[3]*q2[2]
+    c = q1[0]*q2[2] - q1[1]*q2[3] + q1[2]*q2[0] + q1[3]*q2[1]
+    d = q1[0]*q2[3] + q1[1]*q2[2] - q1[2]*q2[1] + q1[3]*q2[0]
+    qout[0] = a
+    qout[1] = b
+    qout[2] = c
+    qout[3] = d
 
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def divide(q1, q2, qout):
     """Divide quaternions q1/q2 = q1 * q2.inverse"""
     q2norm = q2[0]**2 + q2[1]**2 + q2[2]**2 + q2[3]**2
-    qout[0] = (+q1[0]*q2[0] + q1[1]*q2[1] + q1[2]*q2[2] + q1[3]*q2[3]) / q2norm
-    qout[1] = (-q1[0]*q2[1] + q1[1]*q2[0] - q1[2]*q2[3] + q1[3]*q2[2]) / q2norm
-    qout[2] = (-q1[0]*q2[2] + q1[1]*q2[3] + q1[2]*q2[0] - q1[3]*q2[1]) / q2norm
-    qout[3] = (-q1[0]*q2[3] - q1[1]*q2[2] + q1[2]*q2[1] + q1[3]*q2[0]) / q2norm
+    a = (+q1[0]*q2[0] + q1[1]*q2[1] + q1[2]*q2[2] + q1[3]*q2[3]) / q2norm
+    b = (-q1[0]*q2[1] + q1[1]*q2[0] - q1[2]*q2[3] + q1[3]*q2[2]) / q2norm
+    c = (-q1[0]*q2[2] + q1[1]*q2[3] + q1[2]*q2[0] - q1[3]*q2[1]) / q2norm
+    d = (-q1[0]*q2[3] - q1[1]*q2[2] + q1[2]*q2[1] + q1[3]*q2[0]) / q2norm
+    qout[0] = a
+    qout[1] = b
+    qout[2] = c
+    qout[3] = d
 
 
 true_divide = divide
@@ -288,10 +296,14 @@ def sqrt(q, qout):
 @attach_typelist_and_signature([(float64[:], float64[:])], '(n)->(n)')
 def square(q, qout):
     """Return square of quaternion q*q"""
-    qout[0] = q[0]**2 - q[1]**2 - q[2]**2 - q[3]**2
-    qout[1] = 2*q[0]*q[1]
-    qout[2] = 2*q[0]*q[2]
-    qout[3] = 2*q[0]*q[3]
+    a = q[0]**2 - q[1]**2 - q[2]**2 - q[3]**2
+    b = 2*q[0]*q[1]
+    c = 2*q[0]*q[2]
+    d = 2*q[0]*q[3]
+    qout[0] = a
+    qout[1] = b
+    qout[2] = c
+    qout[3] = d
 
 
 @attach_typelist_and_signature([(float64[:], float64[:])], '(n)->(n)')
@@ -341,10 +353,14 @@ def bitwise_xor(q1, q2, qout):
     Note that the result may seem surprising because we sometimes think of quaternions as 
 
     """
-    qout[0] = q1[0]*q2[0]
-    qout[1] = q1[0]*q2[1] + q1[1]*q2[0]
-    qout[2] = q1[0]*q2[2] + q1[2]*q2[0]
-    qout[3] = q1[0]*q2[3] + q1[3]*q2[0]
+    a = q1[0]*q2[0]
+    b = q1[0]*q2[1] + q1[1]*q2[0]
+    c = q1[0]*q2[2] + q1[2]*q2[0]
+    d = q1[0]*q2[3] + q1[3]*q2[0]
+    qout[0] = a
+    qout[1] = b
+    qout[2] = c
+    qout[3] = d
 
 
 invert = conj  # reversion (= conjugate for quaternion algebra)
@@ -361,10 +377,14 @@ def left_shift(q1, q2, qout):
     ```
 
     """
-    qout[0] = q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3]
-    qout[1] = q1[0]*q2[1]
-    qout[2] = q1[0]*q2[2]
-    qout[3] = q1[0]*q2[3]
+    a = q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3]
+    b = q1[0]*q2[1]
+    c = q1[0]*q2[2]
+    d = q1[0]*q2[3]
+    qout[0] = a
+    qout[1] = b
+    qout[2] = c
+    qout[3] = d
 
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
@@ -378,10 +398,14 @@ def right_shift(q1, q2, qout):
     ```
 
     """
-    qout[0] = q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3]
-    qout[1] = q1[1]*q2[0]
-    qout[2] = q1[2]*q2[0]
-    qout[3] = q1[3]*q2[0]
+    a = q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3]
+    b = q1[1]*q2[0]
+    c = q1[2]*q2[0]
+    d = q1[3]*q2[0]
+    qout[0] = a
+    qout[1] = b
+    qout[2] = c
+    qout[3] = d
 
 
 @attach_typelist_and_signature([(float64[:], float64[:], boolean[:])], '(n),(n)->()')

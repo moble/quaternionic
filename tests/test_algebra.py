@@ -48,6 +48,7 @@ def test_array_ufunc(array):
     with pytest.raises(NotImplementedError):
         np.negative.at(q, [0, 1])
 
+    # Addition
     p = array(np.random.normal(size=(17, 3, 4)))
     q = array(np.random.normal(size=(1, 3, 4)))
     pq1 = np.add(p, q)
@@ -59,6 +60,7 @@ def test_array_ufunc(array):
     assert np.array_equal(pq1, pq2)
     assert isinstance(pq2, array)
 
+    # Quaternion-scalar multiplication
     p = array(np.random.normal(size=(17, 3, 4)))
     q = np.random.rand(1, 3)
     pq1 = np.multiply(p, q)
@@ -68,7 +70,19 @@ def test_array_ufunc(array):
     np.multiply(p, q, out=pq2)
     assert np.array_equal(pq1, pq2)
     assert isinstance(pq2, array)
+    pq3 = p * q
+    assert np.array_equal(pq1, pq3)
+    assert isinstance(pq3, array)
+    pq4 = p.copy()
+    pq4 *= q
+    assert np.array_equal(pq1, pq4)
+    assert isinstance(pq4, array)
+    pq5 = p.copy()
+    np.multiply(pq5, q, out=pq5)
+    assert np.array_equal(pq1, pq5)
+    assert isinstance(pq5, array)
 
+    # Scalar-quaternion multiplication
     p = np.random.rand(1, 3)
     q = array(np.random.normal(size=(17, 3, 4)))
     pq1 = np.multiply(p, q)
@@ -78,6 +92,39 @@ def test_array_ufunc(array):
     np.multiply(p, q, out=pq2)
     assert np.array_equal(pq1, pq2)
     assert isinstance(pq2, array)
+    pq3 = p * q
+    assert np.array_equal(pq1, pq3)
+    assert isinstance(pq3, array)
+    pq4 = q.copy()
+    pq4 *= p
+    assert np.array_equal(pq1, pq4)
+    assert isinstance(pq4, array)
+    pq5 = q.copy()
+    np.multiply(p, pq5, out=pq5)
+    assert np.array_equal(pq1, pq5)
+    assert isinstance(pq5, array)
+
+    # Quaternion-quaternion multiplication
+    p = array(np.random.normal(size=(17, 3, 4)))
+    q = array(np.random.normal(size=(17, 3, 4)))
+    pq1 = np.multiply(p, q)
+    assert isinstance(pq1, array)
+    assert pq1.shape == (17, 3, 4)
+    pq2 = array(np.empty((17, 3, 4)))
+    np.multiply(p, q, out=pq2)
+    assert np.array_equal(pq1, pq2)
+    assert isinstance(pq2, array)
+    pq3 = p * q
+    assert np.array_equal(pq1, pq3)
+    assert isinstance(pq3, array)
+    pq4 = p.copy()
+    pq4 *= q
+    assert np.array_equal(pq1, pq4)
+    assert isinstance(pq4, array)
+    pq5 = p.copy()
+    np.multiply(pq5, q, out=pq5)
+    assert np.array_equal(pq1, pq5)
+    assert isinstance(pq5, array)
 
     p = np.random.rand(1, 3)
     q = np.random.normal(size=(17, 3, 4))
