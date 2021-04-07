@@ -464,6 +464,11 @@ def test_random():
     assert q.dtype == np.float64
     assert q.shape == (4,)
 
+    q = quaternionic.array.random(tuple())
+    assert isinstance(q, quaternionic.array)
+    assert q.dtype == np.float64
+    assert q.shape == (4,)
+
     q = quaternionic.array.random(17)
     assert isinstance(q, quaternionic.array)
     assert q.dtype == np.float64
