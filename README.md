@@ -70,7 +70,7 @@ existing arrays:
 import numpy as np
 import quaternionic
 
-a = 1.0 - np.random.rand(17, 11, 4)  # Just some random numbers; last dimension is 4
+a = np.random.normal(size=(17, 11, 4))  # Just some random numbers; last dimension is 4
 q1 = quaternionic.array(a)  # Reinterpret an existing array
 q2 = quaternionic.array([1.2, 2.3, 3.4, 4.5])  # Create a new array
 ```
@@ -91,9 +91,9 @@ performs.
 | :warning: WARNING                                                                                |
 |:-------------------------------------------------------------------------------------------------|
 | Because of unfortunate default values, the `np.copy` function will not preserve the quaternionic |
-| nature of an array by default; the result will just be a plain array of floats.  You can either  |
-| pass the optional argument `subok=True`, as in `q3 = np.copy(q1, subok=True)`, or you can just   |
-| use the member function: `q3 = q1.copy()`.                                                       |
+| nature of an array by default; the result will just be a plain array of floats.  You could pass  |
+| the optional argument `subok=True`, as in `q3 = np.copy(q1, subok=True)`, but it's easier to t   |
+| just use the member function: `q3 = q1.copy()`.                                                  |
 
 
 ## Algebra

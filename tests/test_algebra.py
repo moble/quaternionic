@@ -41,15 +41,15 @@ def test_basis_multiplication():
 def test_array_ufunc(array):
     np.random.seed(1234)
 
-    q = array(np.random.rand(1, 3, 4))
+    q = array(np.random.normal(size=(1, 3, 4)))
     with pytest.raises(NotImplementedError):
         np.exp(q, extra_arg=True)
 
     with pytest.raises(NotImplementedError):
         np.negative.at(q, [0, 1])
 
-    p = array(np.random.rand(17, 3, 4))
-    q = array(np.random.rand(1, 3, 4))
+    p = array(np.random.normal(size=(17, 3, 4)))
+    q = array(np.random.normal(size=(1, 3, 4)))
     pq1 = np.add(p, q)
     assert isinstance(pq1, array)
     assert pq1.shape == (17, 3, 4)
@@ -59,7 +59,7 @@ def test_array_ufunc(array):
     assert np.array_equal(pq1, pq2)
     assert isinstance(pq2, array)
 
-    p = array(np.random.rand(17, 3, 4))
+    p = array(np.random.normal(size=(17, 3, 4)))
     q = np.random.rand(1, 3)
     pq1 = np.multiply(p, q)
     assert isinstance(pq1, array)
@@ -70,7 +70,7 @@ def test_array_ufunc(array):
     assert isinstance(pq2, array)
 
     p = np.random.rand(1, 3)
-    q = array(np.random.rand(17, 3, 4))
+    q = array(np.random.normal(size=(17, 3, 4)))
     pq1 = np.multiply(p, q)
     assert isinstance(pq1, array)
     assert pq1.shape == (17, 3, 4)
@@ -80,7 +80,7 @@ def test_array_ufunc(array):
     assert isinstance(pq2, array)
 
     p = np.random.rand(1, 3)
-    q = np.random.rand(17, 3, 4)
+    q = np.random.normal(size=(17, 3, 4))
     s = np.random.rand(17, 3)
     pq1 = array(q).__array_ufunc__(np.multiply, "__call__", p, q)
     assert pq1 == NotImplemented
@@ -95,7 +95,7 @@ def test_array_ufunc(array):
     qfin = array(q).__array_ufunc__(np.isfinite, "__call__", q)
     assert qfin == NotImplemented
 
-    q = array(np.random.rand(17, 3, 4))
+    q = array(np.random.normal(size=(17, 3, 4)))
     qneg = np.negative(q)
     assert isinstance(qneg, array)
     assert qneg.shape == q.shape
@@ -114,7 +114,7 @@ def test_array_ufunc(array):
     assert isinstance(qneg2, array)
 
     p = np.random.rand(1, 3)
-    q = array(np.random.rand(17, 3, 4))
+    q = array(np.random.normal(size=(17, 3, 4)))
     qp1 = np.float_power(q, p)
     assert isinstance(qp1, array)
     assert qp1.shape == (17, 3, 4)
@@ -123,7 +123,7 @@ def test_array_ufunc(array):
     assert np.array_equal(qp1, qp2)
     assert isinstance(qp2, array)
 
-    q = array(np.random.rand(17, 3, 4))
+    q = array(np.random.normal(size=(17, 3, 4)))
     qabs = np.absolute(q)
     assert isinstance(qabs, np.ndarray) and not isinstance(qabs, array)
     assert qabs.shape == (17, 3)
@@ -131,14 +131,14 @@ def test_array_ufunc(array):
     np.absolute(q, out=qabs2)
     assert np.array_equal(qabs, qabs2)
     assert isinstance(qabs2, np.ndarray) and not isinstance(qabs, array)
-    q = array(np.random.rand(17, 3, 4, 4))
+    q = array(np.random.normal(size=(17, 3, 4, 4)))
     qabs = array(np.empty((17, 3, 4)))
     np.absolute(q, out=qabs)
     assert np.array_equal(qabs, np.absolute(q))
     assert isinstance(qabs2, np.ndarray) and isinstance(qabs, array)
 
-    p = array(np.random.rand(17, 3, 4))
-    q = array(np.random.rand(1, 3, 4))
+    p = array(np.random.normal(size=(17, 3, 4)))
+    q = array(np.random.normal(size=(1, 3, 4)))
     pq1 = np.equal(p, q)
     assert isinstance(pq1, np.ndarray) and not isinstance(pq1, array)
     assert pq1.shape == (17, 3)
@@ -148,13 +148,13 @@ def test_array_ufunc(array):
     assert np.array_equal(pq1, pq2)
     assert isinstance(pq2, np.ndarray) and not isinstance(pq2, array)
     assert pq2.shape == (17, 3)
-    p = array(np.random.rand(17, 3, 4, 4))
-    q = array(np.random.rand(17, 3, 4, 4))
+    p = array(np.random.normal(size=(17, 3, 4, 4)))
+    q = array(np.random.normal(size=(17, 3, 4, 4)))
     pq = array(np.empty((17, 3, 4)))
     np.equal(p, q, out=pq)
     assert isinstance(pq, np.ndarray) and isinstance(pq, array)
 
-    q = array(np.random.rand(17, 3, 4))
+    q = array(np.random.normal(size=(17, 3, 4)))
     qfin = np.isfinite(q)
     assert isinstance(qfin, np.ndarray) and not isinstance(qfin, array)
     assert qfin.shape == (17, 3)
@@ -164,7 +164,7 @@ def test_array_ufunc(array):
     assert np.array_equal(qfin, qfin2)
     assert isinstance(qfin2, np.ndarray) and not isinstance(qfin2, array)
     assert qfin2.shape == (17, 3)
-    q = array(np.random.rand(17, 3, 4, 4))
+    q = array(np.random.normal(size=(17, 3, 4, 4)))
     qfin = array(np.empty((17, 3, 4)))
     np.isfinite(q, out=qfin)
     assert isinstance(qfin, np.ndarray) and isinstance(qfin, array)
@@ -183,12 +183,12 @@ def test_array_ufunc(array):
     for k in dir(np):
         attr = getattr(np, k)
         if isinstance(attr, np.ufunc) and attr not in implemented_ufuncs:
-            p = array(np.random.rand(17, 3, 4))
+            p = array(np.random.normal(size=(17, 3, 4)))
             if attr.nin == 1:
                 with pytest.raises(TypeError):
                     attr(p)
             elif attr.nin == 2:
-                q = array(np.random.rand(17, 3, 4))
+                q = array(np.random.normal(size=(17, 3, 4)))
                 with pytest.raises(TypeError):
                     attr(p, q)
             else:  # pragma: no cover

@@ -12,9 +12,9 @@ def test_self_return():
         assert isinstance(c, np.ndarray) and isinstance(c, quaternionic.array)
         assert isinstance(d, np.ndarray) and not isinstance(d, quaternionic.array)
         return d
-    a = quaternionic.array(np.random.rand(17, 3, 4))
-    b = quaternionic.array(np.random.rand(13, 3, 4))
-    c = quaternionic.array(np.random.rand(11, 3, 4))
+    a = quaternionic.array.random((17, 3, 4))
+    b = quaternionic.array.random((13, 3, 4))
+    c = quaternionic.array.random((11, 3, 4))
     d1 = f1(a, b, c)
     assert isinstance(d1, np.ndarray) and not isinstance(d1, quaternionic.array)
     f2 = quaternionic.utilities.type_self_return(f1)
@@ -34,9 +34,9 @@ def test_ndarray_args():
         assert isinstance(c, np.ndarray) and not isinstance(c, quaternionic.array)
         assert isinstance(d, np.ndarray) and not isinstance(d, quaternionic.array)
         return d
-    a = quaternionic.array(np.random.rand(17, 3, 4))
-    b = quaternionic.array(np.random.rand(13, 3, 4))
-    c = quaternionic.array(np.random.rand(11, 3, 4))
+    a = quaternionic.array.random((17, 3, 4))
+    b = quaternionic.array.random((13, 3, 4))
+    c = quaternionic.array.random((11, 3, 4))
     f2 = quaternionic.utilities.ndarray_args(f1)
     d2 = f2(a, b, c)
     assert isinstance(d2, np.ndarray) and not isinstance(d2, quaternionic.array)
@@ -54,9 +54,9 @@ def test_ndarray_args_and_return():
         assert isinstance(c, np.ndarray) and not isinstance(c, quaternionic.array)
         assert isinstance(d, np.ndarray) and not isinstance(d, quaternionic.array)
         return d
-    a = quaternionic.array(np.random.rand(17, 3, 4))
-    b = quaternionic.array(np.random.rand(13, 3, 4))
-    c = quaternionic.array(np.random.rand(11, 3, 4))
+    a = quaternionic.array.random((17, 3, 4))
+    b = quaternionic.array.random((13, 3, 4))
+    c = quaternionic.array.random((11, 3, 4))
     f2 = quaternionic.utilities.ndarray_args_and_return(f1)
     d2 = f2(a, b, c)
     assert isinstance(d2, np.ndarray) and isinstance(d2, quaternionic.array)
@@ -97,8 +97,8 @@ def test_pyguvectorize():
     _quaternion_resolution = 10 * np.finfo(float).resolution
     np.random.seed(1234)
     one = quaternionic.array(1, 0, 0, 0)
-    x = quaternionic.array(np.random.rand(7, 13, 4))
-    y = quaternionic.array(np.random.rand(13, 4))
+    x = quaternionic.array.random((7, 13, 4))
+    y = quaternionic.array.random((13, 4))
     z = np.random.rand(13)
 
     arg0s = [one, -(1+2*_quaternion_resolution)*one, -one, x]

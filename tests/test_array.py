@@ -27,7 +27,7 @@ def test_new(array):
 
 
 def test_getitem(array):
-    q = array(np.random.rand(17, 3, 4))
+    q = array(np.random.normal(size=(17, 3, 4)))
     p = q[1:-1]
     assert isinstance(p, array)
     assert p.shape == (q.shape[0]-2,) + q.shape[1:]
@@ -43,12 +43,12 @@ def test_array_finalize(array):
 
 
 def test_repr(array):
-    q = array(np.random.rand(17, 3, 4))
+    q = array(np.random.normal(size=(17, 3, 4)))
     assert repr(q) == 'quaternionic.' + repr(q.ndarray)
 
 
 def test_str(array):
-    q = array(np.random.rand(17, 3, 4))
+    q = array(np.random.normal(size=(17, 3, 4)))
     assert str(q) == str(q.ndarray)
 
 
