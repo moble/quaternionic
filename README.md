@@ -88,6 +88,14 @@ Similarly, if you multiply two quaternionic arrays, their product will be comput
 quaternion multiplication, rather than element-wise multiplication of floats as numpy usually
 performs.
 
+| :warning: WARNING                                                                                |
+|:-------------------------------------------------------------------------------------------------|
+| Because of unfortunate default values, the `np.copy` function will not preserve the quaternionic |
+| nature of an array by default; the result will just be a plain array of floats.  You can either  |
+| pass the optional argument `subok=True`, as in `q3 = np.copy(q1, subok=True)`, or you can just   |
+| use the member function: `q3 = q1.copy()`.                                                       |
+
+
 ## Algebra
 
 All the usual quaternion operations are available, including
