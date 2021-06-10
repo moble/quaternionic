@@ -1,8 +1,8 @@
-[![Test Status](https://github.com/moble/quaternionic/workflows/tests/badge.svg)](https://github.com/moble/quaternionic/actions)
-[![Test Coverage](https://codecov.io/gh/moble/quaternionic/branch/master/graph/badge.svg)](https://codecov.io/gh/moble/quaternionic)
-[![Documentation Status](https://readthedocs.org/projects/quaternionic/badge/?version=latest)](https://quaternionic.readthedocs.io/en/latest/?badge=latest)
-[![PyPI Version](https://img.shields.io/pypi/v/quaternionic?color=)](https://pypi.org/project/quaternionic/)
-[![Conda Version](https://img.shields.io/conda/vn/conda-forge/quaternionic.svg?color=)](https://anaconda.org/conda-forge/quaternionic)
+ [![Test Status](https://github.com/moble/quaternionic/workflows/tests/badge.svg)](https://github.com/moble/quaternionic/actions)
+ [![Test Coverage](https://codecov.io/gh/moble/quaternionic/branch/main/graph/badge.svg)](https://codecov.io/gh/moble/quaternionic)
+ [![Documentation Status](https://readthedocs.org/projects/quaternionic/badge/?version=latest)](https://quaternionic.readthedocs.io/en/latest/?badge=latest)
+ [![PyPI Version](https://img.shields.io/pypi/v/quaternionic?color=)](https://pypi.org/project/quaternionic/)
+ [![Conda Version](https://img.shields.io/conda/vn/conda-forge/quaternionic.svg?color=)](https://anaconda.org/conda-forge/quaternionic)
 
 
 # Quaternionic arrays
