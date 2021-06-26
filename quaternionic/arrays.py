@@ -104,6 +104,12 @@ def QuaternionicArray(jit=jit, dtype=float):
                     "arrays of individual components, and `q.vector` to return the \"vector\" part."
                 )
 
+        def __array_function__(self, func, types, args, kwargs):
+            output = super().__array_function__(func, types, args, kwargs)
+            if func in [np.copy]:
+                output = output.view(type(self))
+            return output
+
         def __array_ufunc__(self, ufunc, method, *args, **kwargs):
             from . import algebra_ufuncs as algebra
 
