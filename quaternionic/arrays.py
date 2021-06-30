@@ -108,6 +108,9 @@ def QuaternionicArray(jit=jit, dtype=float):
             output = super().__array_function__(func, types, args, kwargs)
             if func in [np.copy]:
                 output = output.view(type(self))
+            if func in [np.ones_like]:
+                # Want the last dimension to equal [1,0,0,0] not [1,1,1,1]
+                output.vector = 0
             return output
 
         def __array_ufunc__(self, ufunc, method, *args, **kwargs):
