@@ -127,12 +127,12 @@ def squad(R_in, t_in, t_out):
 
     Notes
     -----
-    This is the smoothest way to interpolate a rotation as a function of time.  It
-    uses the analog of a cubic spline, except that the interpolant is confined to
-    the rotor manifold in a natural way.  Alternative methods involving
-    interpolation of other coordinates on the rotation group or normalization of
-    interpolated values give bad results.  The results from this method are as
-    natural as any, and are continuous in first and second derivatives.
+    This is a smoother way to interpolate a rotation as a function of time than
+    simple `slerp`.  It uses the analog of a cubic spline, except that the
+    interpolant is confined to the rotor manifold in a natural way.  Alternative
+    methods involving interpolation of other coordinates on the rotation group or
+    normalization of interpolated values give bad results.  The results from this
+    method are fairly natural, and are continuous in first derivatives.
 
     The input `R_in` rotors are assumed to be reasonably continuous (no sign
     flips), and the input `t` arrays are assumed to be sorted.  No checking is done
