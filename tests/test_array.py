@@ -52,3 +52,7 @@ def test_str(array):
     assert str(q) == str(q.ndarray)
 
 
+def test_ones_like(Qs):
+    z = np.ones_like(Qs)
+    assert np.all(z.ndarray[:, 1:] == 0)
+    assert np.all(z.ndarray[:, 0] == 1)
