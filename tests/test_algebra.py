@@ -437,6 +437,14 @@ def test_quaternion_log_exp(Qs, Q_names, Q_conditions, array):
     assert np.log(-one) == (np.pi) * i
 
 
+def test_quaternion_power_0(Qs, Q_conditions, array):
+    one = array(quaternionic.one)
+    Qs = array(Qs.ndarray)
+    for q in Qs[Q_conditions.finitenonzero]:
+        assert (q ** 0.0 - one).norm < 3e-16
+        assert (q ** 0 - one).norm < 3e-16
+
+
 # Binary quat returners
 def test_quaternion_conjugate(Qs, Q_names, Q_conditions, array):
     Qs = array(Qs.ndarray)
