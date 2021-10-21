@@ -42,8 +42,14 @@ def test_array_ufunc(array):
     np.random.seed(1234)
 
     q = array(np.random.normal(size=(1, 3, 4)))
-    with pytest.raises(NotImplementedError):
+    # Make sure the ufunc works
+    np.exp(q)
+    # Make sure the ufunc does *not* accept random other kwargs
+    with pytest.raises((TypeError, NotImplementedError)):
         np.exp(q, extra_arg=True)
+    # Make sure the ufunc does *not* accept kwargs other than `out`
+    with pytest.raises(NotImplementedError, match="Unrecognized arguments to QArray.__array_ufunc__: {'where': False}"):
+        np.exp(q, where=False)
 
     with pytest.raises(NotImplementedError):
         np.negative.at(q, [0, 1])
