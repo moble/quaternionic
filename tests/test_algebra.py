@@ -438,6 +438,7 @@ def test_quaternion_log_exp(Qs, Q_names, Q_conditions, array):
 
 
 def test_quaternion_power_0(Qs, Q_conditions, array):
+    # Test for github issue #11
     one = array(quaternionic.one)
     Qs = array(Qs.ndarray)
     for q in Qs[Q_conditions.finitenonzero]:
