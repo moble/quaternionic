@@ -176,6 +176,7 @@ def QuaternionicArray(jit=jit, dtype=float):
             elif ufunc in [
                 np.negative, np.positive, np.conj, np.conjugate, np.invert,
                 np.exp, np.log, np.sqrt, np.square, np.reciprocal,
+                np.core.umath._ones_like,
             ]:
                 if this_type(args[0]):
                     a1 = args[0]

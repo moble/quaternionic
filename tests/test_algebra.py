@@ -42,8 +42,14 @@ def test_array_ufunc(array):
     np.random.seed(1234)
 
     q = array(np.random.normal(size=(1, 3, 4)))
-    with pytest.raises(NotImplementedError):
+    # Make sure the ufunc works
+    np.exp(q)
+    # Make sure the ufunc does *not* accept random other kwargs
+    with pytest.raises((TypeError, NotImplementedError)):
         np.exp(q, extra_arg=True)
+    # Make sure the ufunc does *not* accept kwargs other than `out`
+    with pytest.raises(NotImplementedError, match="Unrecognized arguments to QArray.__array_ufunc__: {'where': False}"):
+        np.exp(q, where=False)
 
     with pytest.raises(NotImplementedError):
         np.negative.at(q, [0, 1])
@@ -429,6 +435,15 @@ def test_quaternion_log_exp(Qs, Q_names, Q_conditions, array):
     assert np.log(j) == (np.pi / 2) * j
     assert np.log(k) == (np.pi / 2) * k
     assert np.log(-one) == (np.pi) * i
+
+
+def test_quaternion_power_0(Qs, Q_conditions, array):
+    # Test for github issue #11
+    one = array(quaternionic.one)
+    Qs = array(Qs.ndarray)
+    for q in Qs[Q_conditions.finitenonzero]:
+        assert (q ** 0.0 - one).norm < 3e-16
+        assert (q ** 0 - one).norm < 3e-16
 
 
 # Binary quat returners

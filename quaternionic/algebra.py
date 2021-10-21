@@ -316,6 +316,19 @@ def reciprocal(q, qout):
     qout[3] = -q[3] / norm
 
 
+@attach_typelist_and_signature([(float64[:], float64[:])], '(n)->(n)')
+def _ones_like(q, qout):
+    """Return the identity quaternion
+
+    Note that this is a helper function related to the ufunc
+    `np.core.umath._ones_like`, which is different from the function
+    `np.ones_like`.
+
+    """
+    qout[0] = 1
+    qout[1:4] = 0
+
+
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
 def bitwise_or(q1, q2, qout):
     """Return scalar product of quaternions q1|q2.
