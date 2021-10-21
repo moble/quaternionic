@@ -326,7 +326,7 @@ def _ones_like(q, qout):
 
     """
     qout[0] = 1
-    qout[1:3] = 0
+    qout[1:4] = 0
 
 
 @attach_typelist_and_signature([(float64[:], float64[:], float64[:])], '(n),(n)->(n)')
