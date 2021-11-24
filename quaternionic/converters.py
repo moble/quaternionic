@@ -394,8 +394,9 @@ def QuaternionConvertersMixin(jit=jit):
 
             """
             vec = np.asarray(vec)
-            quats = np.zeros(vec.shape[:-1] + (4,), dtype=vec.dtype)
-            quats[..., 1:] = vec[...] / 2
+            dtype = np.result_type(0.5, vec)
+            quats = np.zeros(vec.shape[:-1] + (4,), dtype=dtype)
+            quats[..., 1:] = 0.5 * vec[...]
             return np.exp(cls(quats))
 
         from_rotation_vector = from_axis_angle
@@ -495,14 +496,18 @@ def QuaternionConvertersMixin(jit=jit):
                 beta  = np.asarray(beta)
                 gamma = np.asarray(gamma)
 
+            # Pre-compute trig
+            cosβover2 = np.cos(beta/2)
+            sinβover2 = np.sin(beta/2)
+
             # Set up the output array
-            R = np.empty(np.broadcast(alpha, beta, gamma).shape + (4,), dtype=alpha.dtype)
+            R = np.empty(np.broadcast(alpha, beta, gamma).shape + (4,), dtype=cosβover2.dtype)
 
             # Compute the actual values of the quaternion components
-            R[..., 0] =  np.cos(beta/2)*np.cos((alpha+gamma)/2)  # scalar quaternion components
-            R[..., 1] = -np.sin(beta/2)*np.sin((alpha-gamma)/2)  # x quaternion components
-            R[..., 2] =  np.sin(beta/2)*np.cos((alpha-gamma)/2)  # y quaternion components
-            R[..., 3] =  np.cos(beta/2)*np.sin((alpha+gamma)/2)  # z quaternion components
+            R[..., 0] =  cosβover2*np.cos((alpha+gamma)/2)  # scalar quaternion components
+            R[..., 1] = -sinβover2*np.sin((alpha-gamma)/2)  # x quaternion components
+            R[..., 2] =  sinβover2*np.cos((alpha-gamma)/2)  # y quaternion components
+            R[..., 3] =  cosβover2*np.sin((alpha+gamma)/2)  # z quaternion components
 
             return cls(R)
 
@@ -653,14 +658,20 @@ def QuaternionConvertersMixin(jit=jit):
                 theta = np.asarray(theta_phi)
                 phi = np.asarray(phi)
 
+            # Pre-compute trig
+            cp = np.cos(phi/2)
+            ct = np.cos(theta/2)
+            sp = np.sin(phi/2)
+            st = np.sin(theta/2)
+
             # Set up the output array
-            R = np.empty(np.broadcast(theta, phi).shape + (4,), dtype=theta.dtype)
+            R = np.empty(np.broadcast(theta, phi).shape + (4,), dtype=cp.dtype)
 
             # Compute the actual values of the quaternion components
-            R[..., 0] =  np.cos(phi/2)*np.cos(theta/2)  # scalar quaternion components
-            R[..., 1] = -np.sin(phi/2)*np.sin(theta/2)  # x quaternion components
-            R[..., 2] =  np.cos(phi/2)*np.sin(theta/2)  # y quaternion components
-            R[..., 3] =  np.sin(phi/2)*np.cos(theta/2)  # z quaternion components
+            R[..., 0] =  cp*ct  # scalar quaternion components
+            R[..., 1] = -sp*st  # x quaternion components
+            R[..., 2] =  cp*st  # y quaternion components
+            R[..., 3] =  sp*ct  # z quaternion components
 
             return cls(R)
 
@@ -773,7 +784,7 @@ def QuaternionConvertersMixin(jit=jit):
                 ω = omega
             else:
                 omega = np.asarray(omega)
-                if omega.dtype != np.float:
+                if not np.issubdtype(omega.dtype, np.floating):
                     raise ValueError(f"Input omega must have float dtype; it has dtype {omega.dtype}.")
                 if omega.shape != (t.shape[0], 3):
                     raise ValueError(f"Input omega must have shape {(t.shape[0], 3)}; it has shape {omega.shape}.")

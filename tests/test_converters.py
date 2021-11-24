@@ -146,6 +146,12 @@ def test_from_rotation_vector():
     quats2 = quaternionic.array.from_rotation_vector(quat_vecs)
     assert np.allclose(quats, quats2)
 
+    assert (
+        quaternionic.array.from_axis_angle([1, 2, 3])
+        ==
+        quaternionic.array.from_axis_angle([1.0, 2.0, 3.0])
+    )
+
 
 def test_from_spherical_coordinates():
     one, x, y, z = tuple(quaternionic.array(np.eye(4)))
@@ -181,6 +187,13 @@ def test_from_spherical_coordinates():
         quaternionic.array.from_spherical_coordinates(random_angles)
         - quaternionic.array([quaternionic.array.from_spherical_coordinates(vartheta, varphi) for vartheta, varphi in random_angles])
     )) < 1.e-15
+
+    # https://github.com/moble/quaternionic/issues/29
+    assert (
+        quaternionic.array.from_spherical_coordinates(1, 2)
+        ==
+        quaternionic.array.from_spherical_coordinates(1.0, 2.0)
+    )
 
 
 def test_to_spherical_coordinates(Rs):
@@ -218,6 +231,12 @@ def test_from_euler_angles():
     assert np.max(np.abs(quaternionic.array.from_euler_angles(random_angles)
                          - quaternionic.array([quaternionic.array.from_euler_angles(alpha, beta, gamma)
                                                for alpha, beta, gamma in random_angles]))) < 1.e-15
+
+    assert (
+        quaternionic.array.from_euler_angles(1, 2, 3)
+        ==
+        quaternionic.array.from_euler_angles(1.0, 2.0, 3.0)
+    )
 
 
 def test_to_euler_angles(eps, array):
