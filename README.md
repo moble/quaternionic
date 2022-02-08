@@ -46,9 +46,9 @@ You can also install the package from source if you have `pip` version 10.0 or g
 `python -m pip install .` — or if you have `poetry` by running `poetry install` — from the top-level
 directory.
 
-Note that only python 3.6 or greater is supported.  (I have also tried to support PyPy3, although I
-cannot test this as `scipy` does not currently install.  Pull requests are welcome.)  In any case, I
-strongly recommend installing by way of an environment manager — especially
+Note that only python 3.8 or greater is supported.  (I have also tried to support PyPy3, although
+I cannot test this as `scipy` does not currently install.  Pull requests are welcome.)  In any case,
+I strongly recommend installing by way of an environment manager — especially
 [conda](https://docs.anaconda.com/anaconda/install/), though other managers like `virtualenv` or
 `pipenv` should also work.
 
