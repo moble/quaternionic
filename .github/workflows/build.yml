@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.6, 3.10]
+        python-version: ['3.6', '3.10']
 
     steps:
       - name: Check out code
@@ -51,7 +51,7 @@ jobs:
           poetry run pytest -s --cov=quaternionic --cov-branch --cov-report=xml --durations=0
 
       - name: Upload coverage
-        if: "matrix.python-version == 3.10 && matrix.os == 'ubuntu-latest'"
+        if: "matrix.python-version == '3.10' && matrix.os == 'ubuntu-latest'"
         uses: codecov/codecov-action@v2
 
 
@@ -71,7 +71,7 @@ jobs:
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
-          python-version: 3.10
+          python-version: '3.10'
 
       - name: Install toml
         if: ${{ env.skipping_build_and_test_replicate != 'true' }}
