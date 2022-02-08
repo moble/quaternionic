@@ -7,15 +7,15 @@ import pytest
 # Array methods
 def test_new(array):
     q = array(1, 2, 3, 4)
-    assert q.dtype == np.float
+    assert q.dtype == float
     assert q.shape == (4,)
     assert q.w == 1.0 and q.x == 2.0 and q.y == 3.0 and q.z == 4.0
     q = array([1, 2, 3, 4])
-    assert q.dtype == np.float
+    assert q.dtype == float
     assert q.shape == (4,)
     assert q.w == 1.0 and q.x == 2.0 and q.y == 3.0 and q.z == 4.0
     q = array([[1, 2, 3, 4]])
-    assert q.dtype == np.float
+    assert q.dtype == float
     assert q.shape == (1, 4)
     assert q.w == 1.0 and q.x == 2.0 and q.y == 3.0 and q.z == 4.0
     with pytest.raises(ValueError):
