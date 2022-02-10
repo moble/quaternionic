@@ -253,12 +253,11 @@ def QuaternionPropertiesMixin(jit=jit):
             if v.shape[axis] != 3:
                 raise ValueError("Input `v` axis {0} has length {1}, not 3.".format(axis, v.shape[axis]))
             m = self.to_rotation_matrix
-            m_axes = list(range(m.ndim))
-            v_axes = list(range(m.ndim, m.ndim+v.ndim))
-            mv_axes = list(v_axes)
-            mv_axes[axis] = m_axes[-2]
-            mv_axes = m_axes[:-2] + mv_axes
-            v_axes[axis] = m_axes[-1]
-            return np.einsum(m, m_axes, v, v_axes, mv_axes)
+            tensordot_axis = m.ndim-2
+            final_axis = tensordot_axis + (axis % v.ndim)
+            return np.moveaxis(
+                np.tensordot(m, v, axes=(-1, axis)),
+                tensordot_axis, final_axis
+            )
 
     return mixin
