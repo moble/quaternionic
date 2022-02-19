@@ -368,8 +368,7 @@ def QuaternionConvertersMixin(jit=jit):
             -------
             rot : float array
                 Output shape is q.shape[:-1]+(3,).  Each vector represents the axis of
-                the rotation, with norm proportional to the angle of the rotation in
-                radians.
+                the rotation, with norm equal to the angle of the rotation in radians.
 
             """
             return 2 * np.log(self.normalized).vector
