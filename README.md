@@ -167,10 +167,16 @@ from other representations of rotations.  First, we have
    * `to_vector_part`, `from_vector_part`
 
 These convert between the standard 3-d vector representation and their equivalent quaternions, which
-allows them to be manipulated as vectors — as in `R * from_vector_part(v) * R.conjugate()`.  It may
-also be relevant to consider a vector as a "generator" of rotations, in which case the actual
-rotation is obtained by applying `exp` to the generator.  We also have converters that deal with
-standard representations of rotations:
+allows them to be manipulated as vectors — as in `R * from_vector_part(v) * R.conjugate()`.  However,
+note that you may not need to convert to/from quaternions.  For example, to rotate vectors `v` by
+`R`, you can use
+```python
+R.rotate(v)
+```
+It may also be relevant to consider a vector as a "generator" of
+rotations, in which case the actual rotation is obtained by applying `exp` to the generator.  This
+*does* require conversion to a quaternionic array.  We also have converters that deal with standard
+representations of rotations:
 
    * `to_rotation_matrix`, `from_rotation_matrix`
    * `to_transformation_matrix` (for non-unit quaternions)
