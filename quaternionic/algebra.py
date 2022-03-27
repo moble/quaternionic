@@ -259,6 +259,25 @@ def log(q, qout):
         qout[3] = f * q[3]
 
 
+@attach_typelist_and_signature([(float64[:], float64[:])], '(n)->()')
+def angle(q, qout):
+    """Return angle (in radians) through which input quaternion rotates a vector
+
+    If `q = np.exp(v̂ * θ/2)` for some unit vector `v̂` and an angle `θ` ∈[-2π,2π],
+    then this function returns `abs(θ)`.  This equals 2*abs(log(q)), but is more
+    efficient.
+
+    """
+    b = np.sqrt(q[1]**2 + q[2]**2 + q[3]**2)
+    if b <= _quaternion_resolution * np.abs(q[0]):
+        if q[0] < 0.0:
+            qout[0] = 2*np.pi
+        else:
+            qout[0] = 0.0
+    else:
+        qout[0] = 2*np.abs(np.arctan2(b, q[0]))
+
+
 @attach_typelist_and_signature([(float64[:], float64[:])], '(n)->(n)')
 def sqrt(q, qout):
     """Return square-root of input quaternion √q.

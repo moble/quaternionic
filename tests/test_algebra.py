@@ -38,6 +38,27 @@ def test_basis_multiplication():
     assert i*j*k == -one
 
 
+def test_array_function(array):
+    np.random.seed(1234)
+
+    # Test np.angle
+    assert np.angle(array(1, 0, 0, 0)) == 0.0
+    assert np.angle(array(-1, 0, 0, 0)) == 2*np.pi
+    assert np.angle(array(0, 1, 0, 0)) == np.pi
+    assert np.angle(array(0, -1, 0, 0)) == np.pi
+    assert np.angle(array(0, 0, 1, 0, 0)) == np.pi
+    assert np.angle(array(0, 0, -1, 0, 0)) == np.pi
+    assert np.angle(array(0, 0, 0, 1)) == np.pi
+    assert np.angle(array(0, 0, 0, -1)) == np.pi
+    angle_precision = 2e-15
+    for θ in np.random.uniform(-2*np.pi, 2*np.pi, size=100):
+        for _ in range(20):
+            v̂ = array.from_vector_part(np.random.normal(size=3)).normalized
+            R = np.exp(v̂ * θ/2)
+            assert abs(abs(θ) - np.angle(R)) < angle_precision
+            assert abs(abs(np.rad2deg(θ)) - np.angle(R, deg=True)) < np.rad2deg(angle_precision)
+
+
 def test_array_ufunc(array):
     np.random.seed(1234)
 
