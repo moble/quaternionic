@@ -111,7 +111,7 @@ def QuaternionicArray(jit=jit, dtype=float):
                 output = np.zeros(args[0].shape[:-1], dtype=dtype)
                 algebra.angle(args[0].ndarray, output)
                 if kwargs.get("deg", False):
-                    output *= 180/pi
+                    output *= 180/np.pi
             else:
                 output = super().__array_function__(func, types, args, kwargs)
                 if func in [np.ones_like]:

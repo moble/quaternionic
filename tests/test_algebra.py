@@ -56,6 +56,7 @@ def test_array_function(array):
             v̂ = array.from_vector_part(np.random.normal(size=3)).normalized
             R = np.exp(v̂ * θ/2)
             assert abs(abs(θ) - np.angle(R)) < angle_precision
+            assert abs(abs(np.rad2deg(θ)) - np.angle(R, deg=True)) < np.rad2deg(angle_precision)
 
 
 def test_array_ufunc(array):
