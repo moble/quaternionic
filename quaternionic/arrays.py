@@ -105,10 +105,18 @@ def QuaternionicArray(jit=jit, dtype=float):
                 )
 
         def __array_function__(self, func, types, args, kwargs):
-            output = super().__array_function__(func, types, args, kwargs)
-            if func in [np.ones_like]:
-                # Want the last dimension to equal [1,0,0,0] not [1,1,1,1]
-                output.vector = 0
+            from . import algebra_ufuncs as algebra
+
+            if func == np.angle:
+                output = np.zeros(args[0].shape[:-1], dtype=dtype)
+                algebra.angle(args[0].ndarray, output)
+                if kwargs.get("deg", False):
+                    output *= 180/pi
+            else:
+                output = super().__array_function__(func, types, args, kwargs)
+                if func in [np.ones_like]:
+                    # Want the last dimension to equal [1,0,0,0] not [1,1,1,1]
+                    output.vector = 0
             return output
 
         def __array_ufunc__(self, ufunc, method, *args, **kwargs):
