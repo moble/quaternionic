@@ -9,7 +9,7 @@ homepage = "https://github.com/moble/quaternionic"
 include = ["tests"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.8,<3.12"
 numpy = "^1.19"
 scipy = "^1.0"
 numba = {version = ">=0.55", markers = "implementation_name == 'cpython'"}
