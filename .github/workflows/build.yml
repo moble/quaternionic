@@ -31,8 +31,7 @@ jobs:
       - name: Install poetry
         shell: bash
         run: |
-          curl -fsS -o get-poetry.py https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
-          python get-poetry.py -y
+          curl -sSL https://install.python-poetry.org | POETRY_HOME="$HOME/.poetry" python -
           echo "$HOME/.poetry/bin" >> $GITHUB_PATH
 
       - name: Build and install with poetry
@@ -82,8 +81,8 @@ jobs:
       - name: Install poetry
         shell: bash
         run: |
-          curl -fsS -o get-poetry.py https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
-          python get-poetry.py -y
+          curl -sSL https://install.python-poetry.org | POETRY_HOME="$HOME/.poetry" python -
+          echo "$HOME/.poetry/bin" >> $GITHUB_PATH
 
       - name: Build and install with poetry
         if: ${{ env.skipping_build_and_test_replicate != 'true' }}
