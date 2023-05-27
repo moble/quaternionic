@@ -176,14 +176,14 @@ def squad(R_in, t_in, t_out):
             - np.log((~R_in) * roll(R_in, -1))
             + np.log((~roll(R_in, 1)) * R_in)
             * np.reshape((roll(t_in, -1) - t_in) / (t_in - roll(t_in, 1)), t_in_broadcast_shape)[..., 0]
-         ) * 0.25
+         ) * (roll(t_in, -1) - t_in) / (2 * (roll(t_in, -1) - roll(t_in, 1)))
     )
     B = roll(R_in, -1) * np.exp(
         (
             np.log((~roll(R_in, -1)) * roll(R_in, -2))
             * np.reshape((roll(t_in, -1) - t_in) / (roll(t_in, -2) - roll(t_in, -1)), t_in_broadcast_shape)[..., 0]
             - np.log((~R_in) * roll(R_in, -1))
-        ) * -0.25
+        ) * -(roll(t_in, -1) - t_in) / (2 * (roll(t_in, -2) - t_in))
     )
 
     # Correct the first and last A time steps, and last two B time steps.  We extend R_in with the following wrap-around
