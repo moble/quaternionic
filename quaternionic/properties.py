@@ -4,10 +4,11 @@
 
 import abc
 import collections
-import numpy as np
-from . import jit
-from .utilities import type_self_return, ndarray_args, ndarray_args_and_return
 
+import numpy as np
+
+from . import jit
+from .utilities import ndarray_args, ndarray_args_and_return
 
 TwoSpinor = collections.namedtuple("TwoSpinor", ["a", "b"])
 
@@ -37,7 +38,7 @@ def QuaternionPropertiesMixin(jit=jit):
             self.ndarray[..., 0] = wprime
 
         @property
-        def x(self):
+        def x(self) -> float:
             """The second component of the quaternion (rotation about x)"""
             return self.ndarray[..., 1]
 
@@ -46,7 +47,7 @@ def QuaternionPropertiesMixin(jit=jit):
             self.ndarray[..., 1] = xprime
 
         @property
-        def y(self):
+        def y(self) -> float:
             """The third component of the quaternion (rotation about y)"""
             return self.ndarray[..., 2]
 
@@ -60,7 +61,7 @@ def QuaternionPropertiesMixin(jit=jit):
             return self.ndarray[..., 3]
 
         @z.setter
-        def z(self, zprime):
+        def z(self, zprime) -> float:
             self.ndarray[..., 3] = zprime
 
         @property
@@ -91,8 +92,7 @@ def QuaternionPropertiesMixin(jit=jit):
 
             """
             return TwoSpinor(
-                self.ndarray[..., 0] + 1j * self.ndarray[..., 3],
-                self.ndarray[..., 2] + 1j * self.ndarray[..., 1]
+                self.ndarray[..., 0] + 1j * self.ndarray[..., 3], self.ndarray[..., 2] + 1j * self.ndarray[..., 1]
             )
 
         @property
@@ -123,7 +123,7 @@ def QuaternionPropertiesMixin(jit=jit):
             s = self.reshape((-1, 4))
             n = np.empty(s.shape[0], dtype=self.dtype)
             for i in range(s.shape[0]):
-                n[i] = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
+                n[i] = s[i, 0] ** 2 + s[i, 1] ** 2 + s[i, 2] ** 2 + s[i, 3] ** 2
             return n.reshape(self.shape[:-1])
 
         @property
@@ -142,7 +142,7 @@ def QuaternionPropertiesMixin(jit=jit):
             s = self.reshape((-1, 4))
             n = np.empty(s.shape[0], dtype=self.dtype)
             for i in range(s.shape[0]):
-                n[i] = np.sqrt(s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2)
+                n[i] = np.sqrt(s[i, 0] ** 2 + s[i, 1] ** 2 + s[i, 2] ** 2 + s[i, 3] ** 2)
             return n.reshape(self.shape[:-1])
 
         def conjugate(self):
@@ -159,7 +159,7 @@ def QuaternionPropertiesMixin(jit=jit):
             s = self.reshape((-1, 4))
             inv = np.empty(s.shape, dtype=self.dtype)
             for i in range(s.shape[0]):
-                n = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
+                n = s[i, 0] ** 2 + s[i, 1] ** 2 + s[i, 2] ** 2 + s[i, 3] ** 2
                 inv[i, 0] = s[i, 0] / n
                 inv[i, 1] = -s[i, 1] / n
                 inv[i, 2] = -s[i, 2] / n
@@ -200,7 +200,7 @@ def QuaternionPropertiesMixin(jit=jit):
             """Iterate over all but the last dimension of this quaternion array"""
             s = self.reshape((-1, 4))
             for i in range(s.shape[0]):
-                yield(s[i])
+                yield (s[i])
 
         def nonzero(self):
             """Return the indices of all nonzero elements.
@@ -253,11 +253,9 @@ def QuaternionPropertiesMixin(jit=jit):
             if v.shape[axis] != 3:
                 raise ValueError("Input `v` axis {0} has length {1}, not 3.".format(axis, v.shape[axis]))
             m = self.to_rotation_matrix
-            tensordot_axis = m.ndim-2
+            tensordot_axis = m.ndim - 2
             final_axis = tensordot_axis + (axis % v.ndim)
-            return np.moveaxis(
-                np.tensordot(m, v, axes=(-1, axis)),
-                tensordot_axis, final_axis
-            )
+            return np.moveaxis(np.tensordot(m, v, axes=(-1, axis)), tensordot_axis, final_axis)
 
+    return mixin
     return mixin

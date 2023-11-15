@@ -15,7 +15,7 @@ from . import algebra, properties, converters, distance, utilities
 algebra_ufuncs = type('AlgebraUfuncs', (object,), dict())()
 utilities.guvectorize_module_functions(algebra, algebra_ufuncs)
 
-from .arrays import QuaternionicArray, array
+from .arrays import QuaternionicArray, array, QArray
 
 one = array(1, 0, 0, 0)
 one.flags.writeable = False
@@ -33,3 +33,5 @@ z.flags.writeable = False
 k = z
 
 from .interpolation import unflip_rotors, slerp, squad
+
+__all__ = ['array', 'QArray']

@@ -2,11 +2,14 @@
 # See LICENSE file for details:
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
+
 import numpy as np
 
 from . import jit
-from .properties import QuaternionPropertiesMixin
 from .converters import QuaternionConvertersMixin
+from .properties import QuaternionPropertiesMixin
+
+QArray = None
 
 
 def QuaternionicArray(jit=jit, dtype=float):
@@ -21,6 +24,8 @@ def QuaternionicArray(jit=jit, dtype=float):
     sympy expressions.
 
     """
+    global QArray
+
     class QArray(QuaternionPropertiesMixin(jit), QuaternionConvertersMixin(jit), np.ndarray):
         """Subclass of numpy arrays interpreted as quaternions.
 
@@ -71,8 +76,11 @@ def QuaternionicArray(jit=jit, dtype=float):
         # https://numpy.org/doc/1.18/user/basics.subclassing.html
         def __new__(cls, input_array, *args, **kwargs):
             from numbers import Real
+
             if isinstance(input_array, Real) and len(args) >= 3 and all(isinstance(a, Real) for a in args[:3]):
-                input_array = [input_array,] + list(args[:3])
+                input_array = [
+                    input_array,
+                ] + list(args[:3])
             input_array = np.asanyarray(input_array, dtype=dtype)
             if len(input_array.shape) == 0:
                 raise ValueError("len(input_array.shape) == 0")
@@ -101,7 +109,7 @@ def QuaternionicArray(jit=jit, dtype=float):
                     "For example, instead of `q[..., 2:]`, you must use `q.ndarray[..., 2:]` to return a\n"
                     "general (non-quaternion) numpy array.  This is a limitation of numpy.\n\n"
                     "Also note that quaternions have attributes like `q.w`, `q.x`, `q.y`, and `q.z` to return\n"
-                    "arrays of individual components, and `q.vector` to return the \"vector\" part."
+                    'arrays of individual components, and `q.vector` to return the "vector" part.'
                 )
 
         def __array_function__(self, func, types, args, kwargs):
@@ -111,7 +119,7 @@ def QuaternionicArray(jit=jit, dtype=float):
                 output = np.zeros(args[0].shape[:-1], dtype=dtype)
                 algebra.angle(args[0].ndarray, output)
                 if kwargs.get("deg", False):
-                    output *= 180/np.pi
+                    output *= 180 / np.pi
             else:
                 output = super().__array_function__(func, types, args, kwargs)
                 if func in [np.ones_like]:
@@ -122,7 +130,7 @@ def QuaternionicArray(jit=jit, dtype=float):
         def __array_ufunc__(self, ufunc, method, *args, **kwargs):
             from . import algebra_ufuncs as algebra
 
-            out = kwargs.pop('out', None)
+            out = kwargs.pop("out", None)
 
             # We will not be supporting any more ufunc keywords beyond `out`
             if kwargs:
@@ -131,11 +139,19 @@ def QuaternionicArray(jit=jit, dtype=float):
             if method in ["reduce", "accumulate", "reduceat", "outer", "at"]:
                 raise NotImplementedError(f"Only __call__ method works for quaternionic arrays; got {method}")
 
-            this_type = lambda o: isinstance(o, type(self))
+            def this_type(o):
+                return isinstance(o, type(self))
 
             if ufunc in [
-                np.add, np.subtract, np.multiply, np.divide, np.true_divide,
-                np.bitwise_or, np.bitwise_xor, np.right_shift, np.left_shift,
+                np.add,
+                np.subtract,
+                np.multiply,
+                np.divide,
+                np.true_divide,
+                np.bitwise_or,
+                np.bitwise_xor,
+                np.right_shift,
+                np.left_shift,
             ]:
                 # float64[4](float64[4], float64[4])
                 if this_type(args[0]) and this_type(args[1]):
@@ -151,7 +167,9 @@ def QuaternionicArray(jit=jit, dtype=float):
                     result = type(self)(result)
 
                 # float64[4](float64, float64[4])
-                elif not this_type(args[0]) and this_type(args[1]) and ufunc in [np.multiply, np.divide, np.true_divide]:
+                elif (
+                    not this_type(args[0]) and this_type(args[1]) and ufunc in [np.multiply, np.divide, np.true_divide]
+                ):
                     a1, a2 = args[:2]
                     b1 = a1
                     b2 = a2.ndarray[..., 0]
@@ -165,7 +183,9 @@ def QuaternionicArray(jit=jit, dtype=float):
                     result = type(self)(result)
 
                 # float64[4](float64[4], float64)
-                elif this_type(args[0]) and not this_type(args[1]) and ufunc in [np.multiply, np.divide, np.true_divide]:
+                elif (
+                    this_type(args[0]) and not this_type(args[1]) and ufunc in [np.multiply, np.divide, np.true_divide]
+                ):
                     a1, a2 = args[:2]
                     b1 = a1.ndarray[..., 0]
                     b2 = a2
@@ -182,8 +202,16 @@ def QuaternionicArray(jit=jit, dtype=float):
 
             # float64[4](float64[4])
             elif ufunc in [
-                np.negative, np.positive, np.conj, np.conjugate, np.invert,
-                np.exp, np.log, np.sqrt, np.square, np.reciprocal,
+                np.negative,
+                np.positive,
+                np.conj,
+                np.conjugate,
+                np.invert,
+                np.exp,
+                np.log,
+                np.sqrt,
+                np.square,
+                np.reciprocal,
                 np.core.umath._ones_like,
             ]:
                 if this_type(args[0]):
@@ -265,7 +293,7 @@ def QuaternionicArray(jit=jit, dtype=float):
             return result
 
         def __repr__(self):
-            return 'quaternionic.' + repr(self.ndarray)
+            return "quaternionic." + repr(self.ndarray)
 
         def __str__(self):
             return str(self.ndarray)
