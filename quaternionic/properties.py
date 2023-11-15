@@ -29,7 +29,7 @@ def QuaternionPropertiesMixin(jit=jit):
         """
 
         @property
-        def w(self):
+        def w(self) -> float:
             """The first (scalar) component of the quaternion"""
             return self.ndarray[..., 0]
 
@@ -56,12 +56,12 @@ def QuaternionPropertiesMixin(jit=jit):
             self.ndarray[..., 2] = yprime
 
         @property
-        def z(self):
+        def z(self) -> float:
             """The fourth component of the quaternion (rotation about z)"""
             return self.ndarray[..., 3]
 
         @z.setter
-        def z(self, zprime) -> float:
+        def z(self, zprime):
             self.ndarray[..., 3] = zprime
 
         @property
