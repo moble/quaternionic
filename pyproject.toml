@@ -57,10 +57,6 @@ dependencies = [
 build = "mkdocs build --clean"
 serve = "mkdocs serve --dev-addr localhost:8000"
 
-# This is just a workaround; see https://github.com/danielfrg/mkdocs-jupyter/issues/154
-[tool.hatch.envs.docs.env-vars]
-JUPYTER_PLATFORM_DIRS = "1"
-
 
 [tool.black]
 line-length = 120
