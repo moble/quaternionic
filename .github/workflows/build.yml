@@ -127,4 +127,5 @@ jobs:
           HATCH_INDEX_AUTH: ${{ secrets.PYPI_TOKEN }}
         shell: bash
         run: |
+          hatch build
           hatch publish
