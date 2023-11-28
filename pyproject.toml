@@ -1,42 +1,71 @@
-[tool.poetry]
+[project]
 name = "quaternionic"
 version = "1.0.6"
 description = "Interpret numpy arrays as quaternionic arrays with numba acceleration"
 readme = "README.md"
-license = "MIT"
-authors = ["Michael Boyle <michael.oliver.boyle@gmail.com>"]
-homepage = "https://github.com/moble/quaternionic"
-include = ["tests"]
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+authors = [
+  { name = "Michael Boyle", email = "michael.oliver.boyle@gmail.com" }
+]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Development Status :: 5 - Production/Stable",
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Topic :: Scientific/Engineering :: Astronomy"
+]
 
-[tool.poetry.dependencies]
-python = ">=3.8,<3.12"
-numpy = "^1.19"
-scipy = "^1.0"
-numba = {version = ">=0.55", markers = "implementation_name == 'cpython'"}
-mkdocs = {version = ">=1.1.2", optional = true, markers = "implementation_name == 'cpython'"}
-mktheapidocs = {version = ">=0.2", optional = true, markers = "implementation_name == 'cpython'"}
-pymdown-extensions = {version = "^8", optional = true, markers = "implementation_name == 'cpython'"}
+dependencies = [
+  "numpy >=1.20",
+  "scipy >=1.5",
+  "numba >=0.55; implementation_name == 'cpython'"
+]
 
-[tool.poetry.dev-dependencies]
-pytest = "^7.0"
-pytest-cov = ">=2.10.1"
-black = {version = ">=22.1", optional = true, markers = "implementation_name == 'cpython'"}
+[project.urls]
+Homepage = "https://github.com/moble/quaternionic"
+Documentation = "https://sxs.readthedocs.io/"
 
-[tool.poetry.extras]
-mkdocs = ["mkdocs"]
-mktheapidocs = ["mktheapidocs"]
-pymdown-extensions = ["pymdown-extensions"]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+  "black"
+]
+[tool.hatch.envs.default.scripts]
+# Run these as `hatch run test`
+test = "pytest {args:tests}"
+
+[tool.hatch.envs.docs]
+dependencies = [
+  "mkdocs",
+  "mktheapidocs",
+  "pymdown-extensions"
+]
+[tool.hatch.envs.docs.scripts]
+# Run these as `hatch run docs:build` or `hatch run docs:serve`
+build = "mkdocs build --clean"
+serve = "mkdocs serve --dev-addr localhost:8000"
+
+# This is just a workaround; see https://github.com/danielfrg/mkdocs-jupyter/issues/154
+[tool.hatch.envs.docs.env-vars]
+JUPYTER_PLATFORM_DIRS = "1"
+
 
 [tool.black]
 line-length = 120
-target-version = ['py38','py39','py310']
+target-version = ["py38"]
+
 
 [tool.pytest.ini_options]
 minversion = "6.0"
 norecursedirs = ".* build dist *.egg-info install ENV"
 junit_family="xunit2"
 addopts = "-s -v --tb=short --doctest-glob='' --cov=quaternionic --cov-branch --cov-report xml"
-
-[build-system]
-requires = ["poetry-core>=1.0.1"]
-build-backend = "poetry.core.masonry.api"
