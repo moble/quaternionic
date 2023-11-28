@@ -248,7 +248,7 @@ def QuaternionConvertersMixin(jit=jit):
 
                 if not shape:
                     q = np.empty((4,), dtype=rot.dtype)
-                    eigvals, eigvecs = linalg.eigh(K3.T, eigvals=(3, 3))
+                    eigvals, eigvecs = linalg.eigh(K3.T, subset_by_index=(3, 3))
                     q[0] = eigvecs[-1]
                     q[1:] = -eigvecs[:-1].flatten()
                     return cls(q)
@@ -256,7 +256,7 @@ def QuaternionConvertersMixin(jit=jit):
                     q = np.empty(shape+(4,), dtype=rot.dtype)
                     for flat_index in range(reduce(mul, shape)):
                         multi_index = np.unravel_index(flat_index, shape)
-                        eigvals, eigvecs = linalg.eigh(K3[multi_index], eigvals=(3, 3))
+                        eigvals, eigvecs = linalg.eigh(K3[multi_index], subset_by_index=(3, 3))
                         q[multi_index+(0,)] = eigvecs[-1]
                         q[multi_index+(slice(1,None),)] = -eigvecs[:-1].flatten()
                     return cls(q)
