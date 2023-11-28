@@ -81,7 +81,7 @@ jobs:
           export version_bump_rule=$(python .github/scripts/parse_bump_rule.py)
           echo "version_bump_rule: '${version_bump_rule}'"
           hatch version "${version_bump_rule}"
-          export new_version=$(hatch version)
+          export new_version=$(TERM="unknown" hatch version)
           echo "new_version: '${new_version}'"
           echo "new_version=${new_version}" >> $GITHUB_ENV  # Save env variable for later steps
 
