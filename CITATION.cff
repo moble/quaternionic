@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Boyle
+    given-names: Michael
+    orcid: https://orcid.org/0000-0002-5075-5116
+title: "The quaternionic package"
+license: MIT
+doi: 10.5281/zenodo.4097227
+version: 1.0.6
+date-released: 2023-02-07

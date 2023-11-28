@@ -1,6 +1,6 @@
 [project]
 name = "quaternionic"
-version = "1.0.6"
+dynamic = ["version"]
 description = "Interpret numpy arrays as quaternionic arrays with numba acceleration"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -17,7 +17,6 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Physics",
   "Topic :: Scientific/Engineering :: Astronomy"
 ]
-
 dependencies = [
   "numpy >=1.20",
   "scipy >=1.5",
@@ -26,12 +25,16 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/moble/quaternionic"
-Documentation = "https://sxs.readthedocs.io/"
+Documentation = "https://quaternionic.readthedocs.io/"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+
+
+[tool.hatch.version]
+path = "quaternionic/__version__.py"
 
 [tool.hatch.envs.default]
 dependencies = [
