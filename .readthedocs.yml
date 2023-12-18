@@ -13,6 +13,4 @@ python:
     - method: pip
       path: .
       extra_requirements:
-        - mkdocs
-        - mktheapidocs
-        - pymdown-extensions
+        - docs

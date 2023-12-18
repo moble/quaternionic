@@ -23,9 +23,17 @@ dependencies = [
   "numba >=0.55; implementation_name == 'cpython'"
 ]
 
+[project.optional-dependencies]
+docs = [
+  "mkdocs",
+  "mktheapidocs",
+  "pymdown-extensions"
+]
+
 [project.urls]
 Homepage = "https://github.com/moble/quaternionic"
 Documentation = "https://quaternionic.readthedocs.io/"
+
 
 [build-system]
 requires = ["hatchling"]
