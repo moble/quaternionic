@@ -1,4 +1,4 @@
-# Copyright (c) 2020, Michael Boyle
+# Copyright (c) 2024, Michael Boyle
 # See LICENSE file for details:
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
