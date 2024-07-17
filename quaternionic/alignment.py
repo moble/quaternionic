@@ -5,7 +5,7 @@
 import numpy as np
 from scipy.linalg import eigh
 
-from . import jit, array
+from . import jit, array, unflip_rotors
 
 def align(a, b, w=None):
     """Find the rotation aligning vectors `a` to `b`
@@ -42,7 +42,7 @@ def align(a, b, w=None):
         [    S[1,0]-S[0,1],         S[0,2]+S[2,0],         S[1,2]+S[2,1],       -S[0,0]-S[1,1]+S[2,2],],
     ])
     # This extracts the dominant eigenvector, and interprets it as a quaternion
-    return array(eigh(M, subset_by_index=(3, 3))[1][:, 0])
+    return unflip_rotors(array(eigh(M, subset_by_index=(3, 3))[1][:, 0]))
 
 @jit
 def _construct_S(S, a, b, w=None):
