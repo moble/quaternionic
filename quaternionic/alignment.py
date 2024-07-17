@@ -5,7 +5,8 @@
 import numpy as np
 from scipy.linalg import eigh
 
-from . import jit, array, unflip_rotors
+from . import jit, array
+from .interpolation import unflip_rotors
 
 def align(a, b, w=None):
     """Find the rotation aligning vectors `a` to `b`
