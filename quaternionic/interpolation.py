@@ -68,6 +68,15 @@ def unflip_rotors(R_in, axis=-2, inplace=False):
 
     """
     R_in = quaternionic.array(R_in)
+    if R_in.ndim == 1:
+        if R_in.w < 0:
+            if inplace:
+                R_in *= -1
+                return R_in
+            else:
+                return -R_in
+        else:
+            return R_in
     axis = axis % R_in.ndim
     if axis >= R_in.ndim - 1:
         raise ValueError(f"Requested axis {axis} is outside the input array's non-quaternionic shape {R_in.shape[:-1]}")
