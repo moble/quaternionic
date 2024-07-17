@@ -17,6 +17,8 @@ utilities.guvectorize_module_functions(algebra, algebra_ufuncs)
 
 from .arrays import QuaternionicArray, array
 
+from .alignment import align
+
 one = array(1, 0, 0, 0)
 one.flags.writeable = False
 
