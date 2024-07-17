@@ -4,6 +4,7 @@
 
 import sys
 import functools
+import numpy as np
 
 ufunc_attributes = [
     'nin', 'nout', 'nargs', 'ntypes', 'types', 'identity', 'signature',
@@ -69,7 +70,6 @@ def convert_numpy_ufunc_type_to_numba_ftylist(typelist):
         # 'e': numba.half,  # numba.half doesn't exist
         # 'f': numba.single,  # numba.single doesn't exist
         'f': numba.float32,  # probably closest
-        'd': numba.float_,
         # 'g': numba.longfloat,  # numba.longfloat doesn't exist
         'g': numba.double,  # probably closest
         # 'F': numba.csingle,  # numba.csingle doesn't exist
@@ -78,6 +78,10 @@ def convert_numpy_ufunc_type_to_numba_ftylist(typelist):
         'D': numba.complex128,  # probably closest
         # 'G': numba.clongfloat,  # numba.clongfloat doesn't exist
     }
+    try:  # This is broken on numpy >= 2.0
+        map_numpy_typecode_to_numba_type["d"] = numba.float_
+    except:
+        pass
 
     ftylist = []
     for types in typelist:
