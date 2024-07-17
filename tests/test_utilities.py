@@ -70,7 +70,7 @@ def test_ndarray_args_and_return():
 def test_types_to_ftylist():
     import numba
     types_to_ftylist = quaternionic.utilities.convert_numpy_ufunc_type_to_numba_ftylist
-    types = '?bhilqpBHILQPfdgF->D'
+    types = '?bhilqpBHILQPfgF->D'
     ftylist = numba.complex128(
         numba.boolean,
         numba.byte,
@@ -86,7 +86,6 @@ def test_types_to_ftylist():
         numba.ulonglong,
         numba.uintp,
         numba.float32,
-        numba.float_,
         numba.double,
         numba.complex64,
     )
