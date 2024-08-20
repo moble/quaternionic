@@ -1,3 +1,4 @@
+import subprocess
 import sys
 import numpy as np
 import quaternionic
@@ -118,3 +119,37 @@ def test_pyguvectorize():
                     atol=0.0,
                     rtol=_quaternion_resolution
                 )
+
+
+@pytest.mark.skipif(sys.implementation.name.lower() == "pypy", reason="No numba on pypy")
+def test_cache_disable(tmp_path):
+    # First check caching works by default.
+    cache_dir = tmp_path / "enabled"
+    subprocess.run(
+        [sys.executable, "-c", "import quaternionic"],
+        env={
+            "NUMBA_CACHE_DIR": str(cache_dir),
+        },
+    )
+
+    # Numba uses a subdirectory named `quaternionic_<hashstr>`, with the hashstr computed
+    # from the full path to the source. We should have 1 directory in our cache, and that
+    # should contain many files.
+    contents = list(cache_dir.iterdir())
+    assert len(contents) == 1
+    subdir = contents[0]
+    assert subdir.name.startswith("quaternionic_")
+    assert len(list(subdir.iterdir())) > 10
+
+    # Change the cache location and check with the environment variable disabling caching.
+    # This seems to not create the cache directory, but include an alternative check that
+    # it is empty if it exists in case the directory does get created sometimes.
+    cache_dir = tmp_path / "disabled"
+    subprocess.run(
+        [sys.executable, "-c", "import quaternionic"],
+        env={
+            "QUATERNIONIC_DISABLE_CACHE": "1",
+            "NUMBA_CACHE_DIR": str(cache_dir),
+        },
+    )
+    assert (not cache_dir.exists()) or len(list(cache_dir.iterdir())) == 0

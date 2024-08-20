@@ -2,6 +2,7 @@
 # See LICENSE file for details:
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
 
+import os
 import sys
 import functools
 import numpy as np
@@ -213,5 +214,6 @@ if sys.implementation.name.lower() == 'pypy':  # pragma: no cover
 else:
     import numba
     from numba import float64, boolean
-    jit = functools.partial(numba.njit, cache=True)
-    guvectorize = functools.partial(numba.guvectorize, nopython=True, cache=True)
+    cache = os.environ.get("QUATERNIONIC_DISABLE_CACHE", "0") != "1"
+    jit = functools.partial(numba.njit, cache=cache)
+    guvectorize = functools.partial(numba.guvectorize, nopython=True, cache=cache)
