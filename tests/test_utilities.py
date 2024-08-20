@@ -1,4 +1,6 @@
 import subprocess
+import platform
+import os
 import sys
 import numpy as np
 import quaternionic
@@ -123,13 +125,24 @@ def test_pyguvectorize():
 
 @pytest.mark.skipif(sys.implementation.name.lower() == "pypy", reason="No numba on pypy")
 def test_cache_disable(tmp_path):
+    # Stolen from https://github.com/pypa/setuptools/blob/477f713450ff57de126153f3034d032542916d03/setuptools/tests/test_distutils_adoption.py#L13-L22
+    def win_sr(env):
+        """
+        On Windows, SYSTEMROOT must be present to avoid
+    
+        > Fatal Python error: _Py_HashRandomization_Init: failed to get random numbers to initialize Python
+        """
+        if platform.system() == "Windows":
+            env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
+        return env
+
     # First check caching works by default.
     cache_dir = tmp_path / "enabled"
     subprocess.run(
         [sys.executable, "-c", "import quaternionic"],
-        env={
+        env=win_sr({
             "NUMBA_CACHE_DIR": str(cache_dir),
-        },
+        }),
     )
 
     # Numba uses a subdirectory named `quaternionic_<hashstr>`, with the hashstr computed
@@ -147,9 +160,9 @@ def test_cache_disable(tmp_path):
     cache_dir = tmp_path / "disabled"
     subprocess.run(
         [sys.executable, "-c", "import quaternionic"],
-        env={
+        env=win_sr({
             "QUATERNIONIC_DISABLE_CACHE": "1",
             "NUMBA_CACHE_DIR": str(cache_dir),
-        },
+        }),
     )
     assert (not cache_dir.exists()) or len(list(cache_dir.iterdir())) == 0
