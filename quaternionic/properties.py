@@ -260,4 +260,43 @@ def QuaternionPropertiesMixin(jit=jit):
                 tensordot_axis, final_axis
             )
 
+        def rotate_broadcast(self, v, axis=-1):
+            """Rotate vectors by quaternions in this array with NumPy broadcasting.
+
+            The shape of this array and the vector array must be broadcastable
+            under standard NumPy rules (with the exception of the final axis of
+            this array, and the vector dimension axis of the vector array).
+
+            For an Nx4 quaternion array and an Nx3 vector array, this function
+            will return a Nx3 rotated vector array. Note that this is in contrast
+            to the `rotate` method which performs the rotations as an outer
+            product and would return an NxNx3 rotated vector array in this case.
+
+            Parameters
+            ----------
+            v : float array
+                Three-vectors to be rotated.
+            axis : int, optional
+                Axis of the `v` array to use as the vector dimension.  This axis of
+                `v` must have length 3.  The default is the last axis.
+
+            Returns
+            -------
+            vprime : float array
+                The rotated vectors.  The shape of this array is the broadcast
+                shape of self.shape and v.shape.  The vector component will be
+                along the axis specified by the `axis` parameter.  Note that this
+                means for an MxN quaternion array and a 3xN vector array, axis=0
+                will give a 3xMxN output but axis=-2 will give a Mx3xN output.
+
+            """
+            v = np.asarray(v, dtype=self.dtype)
+            if v.ndim < 1 or 3 not in v.shape:
+                raise ValueError("Input `v` does not have at least one dimension of length 3")
+            if v.shape[axis] != 3:
+                raise ValueError("Input `v` axis {0} has length {1}, not 3.".format(axis, v.shape[axis]))
+            vq = self.from_vector_part(np.moveaxis(v, axis, -1))
+            vprime = (self * vq * self.inverse).to_vector_part
+            return np.moveaxis(vprime, -1, axis)
+
     return mixin
