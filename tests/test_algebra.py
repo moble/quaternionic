@@ -484,6 +484,10 @@ def test_quaternion_conjugate(Qs, Q_names, Q_conditions, array):
         assert np.conjugate(q) == np.conj(q)
 
 
+def test_canonicalized(Rs):
+    assert not np.any(quaternionic.distance.rotation.chordal(Rs, Rs.canonicalized))
+
+
 def test_xor(array):
     basis = one, i, j, k = tuple(array(np.eye(4)))
     zero = 0 * one
