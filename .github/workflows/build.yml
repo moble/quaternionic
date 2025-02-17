@@ -30,7 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.8", "3.11"]
+        python-version: ["3.8", "3.13"]
 
     steps:
       - name: Check out code
@@ -48,7 +48,7 @@ jobs:
         run: hatch run test
           
       - name: Upload coverage
-        if: "matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'"
+        if: "matrix.python-version == '3.13' && matrix.os == 'ubuntu-latest'"
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -70,7 +70,7 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       - name: Install Hatch
         run: pip install --upgrade hatch
