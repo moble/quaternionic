@@ -485,6 +485,10 @@ def test_quaternion_conjugate(Qs, Q_names, Q_conditions, array):
 
 
 def test_canonicalized(Rs):
+    assert (-quaternionic.one).canonicalized == quaternionic.one
+    assert (-quaternionic.x).canonicalized == quaternionic.x
+    assert (-quaternionic.y).canonicalized == quaternionic.y
+    assert (-quaternionic.z).canonicalized == quaternionic.z
     assert not np.any(quaternionic.distance.rotation.chordal(Rs, Rs.canonicalized))
 
 
