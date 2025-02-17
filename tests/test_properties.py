@@ -126,3 +126,74 @@ def test_rotate_vectors(Rs):
                            [vprime.vector for vprime in quats * quaternionic.array(0, *vec) * ~quats],
                            rtol=1e-15, atol=1e-15)
     assert quats.shape[:-1] + vecs.shape == vecsprime.shape, ("Out of shape!", quats.shape, vecs.shape, vecsprime.shape)
+
+
+def test_rotate_broadcast():
+    one, x, y, z = tuple(quaternionic.array(np.eye(4)))
+    zero = 0.0 * one
+
+    with pytest.raises(ValueError):
+        one.rotate_broadcast(np.array(3.14))
+    with pytest.raises(ValueError):
+        one.rotate_broadcast(np.random.normal(size=(17, 9, 4)))
+    with pytest.raises(ValueError):
+        one.rotate_broadcast(np.random.normal(size=(17, 9, 3)), axis=1)
+    with pytest.raises(ValueError, match="objects cannot be broadcast"):
+        quaternionic.array.random(10).rotate_broadcast([[1, 0, 0], [0, 1, 0]])
+
+    # Test (1)*(1)
+    vecs = np.random.normal(size=(3,))
+    quats = z
+    vecsprime = quats.rotate_broadcast(vecs)
+    assert vecsprime.shape == vecs.shape
+    assert np.allclose(vecsprime, quats.rotate(vecs))
+
+    # Test (1)*(5) (both vector axis positions)
+    vecs = np.random.normal(size=(5, 3))
+    quats = z
+    vecsprime = quats.rotate_broadcast(vecs)
+    assert vecsprime.shape == vecs.shape
+    assert np.allclose(vecsprime, quats.rotate(vecs))
+    vecs = np.random.normal(size=(3, 5))
+    quats = z
+    vecsprime = quats.rotate_broadcast(vecs, axis=0)
+    assert vecsprime.shape == vecs.shape
+    assert np.allclose(vecsprime, quats.rotate(vecs, axis=0))
+
+    # Test (5)*(1)
+    vecs = np.random.normal(size=(3,))
+    quats = quaternionic.array.random(5)
+    vecsprime = quats.rotate_broadcast(vecs)
+    assert vecsprime.shape == (5, 3)
+    assert np.allclose(vecsprime, quats.rotate(vecs))
+
+    # Test (5)*(5)
+    vecs = np.random.normal(size=(5, 3))
+    quats = quaternionic.array.random(5)
+    vecsprime = quats.rotate_broadcast(vecs)
+    assert vecsprime.shape == vecs.shape
+    for i in range(3):
+        assert np.allclose(vecsprime[:, i], np.diag(quats.rotate(vecs)[..., i]))
+
+    # Test (8,5)*(5) (both vector axis positions).
+    vecs = np.random.normal(size=(5, 3))
+    quats = quaternionic.array.random((8, 5))
+    vecsprime = quats.rotate_broadcast(vecs)
+    assert vecsprime.shape == (8, 5, 3)
+    for i in range(8):
+        for j in range(3):
+            assert np.allclose(vecsprime[i, :, j], np.diag(quats[i].rotate(vecs)[..., j]))
+
+    vecs = np.random.normal(size=(3, 5))
+    vecsprime = quats.rotate_broadcast(vecs, axis=0)
+    assert vecsprime.shape == (3, 8, 5)
+    for i in range(8):
+        for j in range(3):
+            assert np.allclose(vecsprime[j, i, :], np.diag(quats[i].rotate(vecs, axis=0)[:, j]))
+
+    # Same, but giving axis=-2 will yield a different output shape.
+    vecsprime = quats.rotate_broadcast(vecs, axis=-2)
+    assert vecsprime.shape == (8, 3, 5)
+    for i in range(8):
+        for j in range(3):
+            assert np.allclose(vecsprime[i, j, :], np.diag(quats[i].rotate(vecs, axis=0)[:, j]))
