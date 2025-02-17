@@ -166,6 +166,45 @@ def QuaternionPropertiesMixin(jit=jit):
                 inv[i, 3] = -s[i, 3] / n
             return inv.reshape(self.shape)
 
+        @property
+        @ndarray_args_and_return
+        @jit
+        def canonicalized(self):
+            """Convert the quaternion to "canonical" rotor.
+            
+            For a given rotor `R`, both `R` and its opposite `-R`
+            represent the same rotation.  Usually, one of these will
+            be closer to 1 than to -1, and this one is chosen as the
+            "canonical" version of the rotor.  Here "closer" means
+            that the logarithm has smaller magnitude.  This property
+            is roughly equivalent to the scalar part being positive;
+            if that is true, then the rotor is closer to 1 than its
+            opposite is.
+            
+            This condition only fails when the scalar part is exactly
+            zero, in which case both `R` and `-R` are the same
+            distance from 1.  For definiteness, we choose the sign
+            that makes the `x` component positive; if that is also
+            zero, we choose the sign that makes the `y` component
+            positive; if that is also zero, we choose the sign that
+            makes the `z` component positive.  This choice is
+            arbitrary, but consistent.
+            
+            """
+            s = self.reshape((-1, 4))
+            canonical = np.empty(s.shape, dtype=self.dtype)
+            for i in range(s.shape[0]):
+                if (
+                    s[i, 0] > 0
+                    or (s[i, 0] == 0 and s[i, 1] > 0)
+                    or (s[i, 0] == 0 and s[i, 1] == 0 and s[i, 2] > 0)
+                    or (s[i, 0] == 0 and s[i, 1] == 0 and s[i, 2] == 0 and s[i, 3] > 0)
+                ):
+                    canonical[i] = s[i]
+                else:
+                    canonical[i, :] = -s[i, :]
+            return canonical.reshape(self.shape)
+
         # Aliases
         scalar = w
         real = w
