@@ -44,18 +44,17 @@ helps avoid problems that new python users frequently run into; the reason is ex
 python core contributor [here](https://snarky.ca/why-you-should-use-python-m-pip/).)
 
 You can also install the package from source if you have `pip` version 10.0 or greater by running
-`python -m pip install .` — or if you have `poetry` by running `poetry install` — from the top-level
-directory.
+`python -m pip install .`.
 
 Note that only python 3.8 or greater is supported.  (I have also tried to support PyPy3, although
 I cannot test this as `scipy` does not currently install.  Pull requests are welcome.)  In any case,
 I strongly recommend installing by way of an environment manager — especially
-[conda](https://docs.anaconda.com/anaconda/install/), though other managers like `virtualenv` or
-`pipenv` should also work.
+[conda](https://docs.anaconda.com/anaconda/install/) or [uv](https://docs.astral.sh/uv/), though
+other managers like `virtualenv` or pipenv` should also work.
 
-For development work, the best current option is [poetry](https://python-poetry.org/).  From the
-top-level directory, you can run `poetry run <some command>` to run the command in an isolated
-environment.
+For development work, the best current option is [hatch](https://hatch.pypa.io).  From the
+top-level directory, you can run `hatch run test` to run the tests in an isolated
+environment, or `hatch run docs:serve` to see what the docs would look like.
 
 
 # Usage
