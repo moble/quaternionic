@@ -138,11 +138,14 @@ def pyguvectorize(types, signature):
     inputs = inputs.split(',')
     slice_a = slice(None) if inputs[0]=='()' else 0
     pad_a = np.newaxis if inputs[0]=='()' else slice(None)
-    last_dim_a = slice(None, 1) if inputs[0]=='()' else slice(None)
+    # Scalar (`()`) inputs are passed to the gufunc as actual scalars, so
+    # extract element 0 rather than taking a length-1 slice; scalar *outputs*,
+    # however, are passed by numba as length-1 arrays, so keep the slice below.
+    last_dim_a = 0 if inputs[0]=='()' else slice(None)
     if len(inputs) > 1:
         slice_b = slice(None) if inputs[1]=='()' else 0
         pad_b = np.newaxis if inputs[1]=='()' else slice(None)
-        last_dim_b = slice(None, 1) if inputs[1]=='()' else  slice(None)
+        last_dim_b = 0 if inputs[1]=='()' else slice(None)
     #slice_c = slice(None) if output=='()' else 0
     pad_c = slice(None)# np.newaxis if output=='()' else slice(None)
     last_dim_c = slice(None, 1) if output=='()' else  slice(None)
