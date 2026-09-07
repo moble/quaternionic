@@ -3,7 +3,7 @@ name = "quaternionic"
 dynamic = ["version"]
 description = "Interpret numpy arrays as quaternionic arrays with numba acceleration"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = {file = "LICENSE"}
 authors = [
   { name = "Michael Boyle", email = "michael.oliver.boyle@gmail.com" }
@@ -17,10 +17,14 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Physics",
   "Topic :: Scientific/Engineering :: Astronomy"
 ]
+# These floors are set by numba, which is the binding constraint on CPython:
+# numba >=0.61 is the first series requiring Python >=3.10, and it requires
+# numpy >=1.22.  Older floors here could not actually be installed alongside a
+# current numba, so they only advertised combinations that were never tested.
 dependencies = [
-  "numpy >=1.20",
-  "scipy >=1.5",
-  "numba >=0.55; implementation_name == 'cpython'"
+  "numpy >=1.22",
+  "scipy >=1.8",
+  "numba >=0.61; implementation_name == 'cpython'"
 ]
 
 [project.optional-dependencies]
@@ -52,6 +56,10 @@ dependencies = [
 [tool.hatch.envs.default.scripts]
 # Run these as `hatch run test`
 test = "pytest {args:tests}"
+# Same, but turns DeprecationWarnings into failures.  Upstream
+# deprecations are how breakage announces itself here well before it
+# lands.  CI runs this on the newest Python.
+test-strict = "pytest -W error::DeprecationWarning {args:tests}"
 
 [tool.hatch.envs.docs]
 dependencies = [
@@ -67,7 +75,7 @@ serve = "mkdocs serve --dev-addr localhost:8000"
 
 [tool.black]
 line-length = 120
-target-version = ["py38"]
+target-version = ["py310"]
 
 
 [tool.pytest.ini_options]
