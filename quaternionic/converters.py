@@ -1,12 +1,31 @@
 # Copyright (c) 2024, Michael Boyle
 # See LICENSE file for details:
 # <https://github.com/moble/quaternionic/blob/master/LICENSE>
-
+import re
 import abc
 import numpy as np
 import numba
 from . import jit
 from .utilities import ndarray_args
+
+def _is_intrinsic(seq):
+    num_axes = len(seq)
+    if num_axes < 1 or num_axes > 3:
+        raise ValueError(f"Axis must be a string of upto 3 characters,"
+                         " got {seq}")
+
+    intrinsic = (re.match(r'^[XYZ]{1,3}$', seq) is not None)
+    extrinsic = (re.match(r'^[xyz]{1,3}$', seq) is not None)
+
+    if not (intrinsic or extrinsic):
+        raise ValueError(f"Expected axes from `seq` to be from "
+                         "['x','y','z'] or ['X', 'Y', 'Z'], got {seq}")
+
+    if any(seq[i] == seq[i+1] for i in range(num_axes - 1)):
+        raise ValueError(f"Consecutive axes shoud be different, "
+                         "got {seq}")
+
+    return intrinsic
 
 
 def ToEulerPhases(jit=jit):
@@ -115,7 +134,7 @@ def QuaternionConvertersMixin(jit=jit):
             ----------
             vec : (..., 3) float array
 
-                Array of vector parts of quaternions. 
+                Array of vector parts of quaternions.
 
             Returns
             -------
@@ -400,37 +419,46 @@ def QuaternionConvertersMixin(jit=jit):
 
         from_rotation_vector = from_axis_angle
 
-        @property
+#        @property
         @ndarray_args
         @jit
-        def to_euler_angles(self):
+        def to_euler_angles(self, seq='ZYZ'):
             """Open Pandora's Box.
-
-            If somebody is trying to make you use Euler angles, tell them no, and
-            walk away, and go and tell your mum.
-
-            You don't want to use Euler angles.  They are awful.  Stay away.  It's
-            one thing to convert from Euler angles to quaternions; at least you're
-            moving in the right direction.  But to go the other way?!  It's just not
-            right.
 
             Assumes the Euler angles correspond to the quaternion R via
 
-                R = exp(alpha*z/2) * exp(beta*y/2) * exp(gamma*z/2)
+            If intrinsic:
+                R = exp(α*e1/2) * exp(β*e2/2) * exp(γ*e3/2)
+            If extrinsic:
+                R = exp(α*e3/2) * exp(β*e2/2) * exp(γ*e1/2)
+
+            Where e1, e2 and e3 are the elementary basis vectors defined
+            by `seq`
+
+            Where:
+                e1 == the unit vector of axis seq[0]
+                e2 == the unit vector of axis seq[1]
+                e3 == the unit vector of axis seq[2]
 
             The angles are naturally in radians.
 
-            NOTE: Before opening an issue reporting something "wrong" with this
-            function, be sure to read all of the following page, *especially* the
-            very last section about opening issues or pull requests.
-            <https://github.com/moble/quaternion/wiki/Euler-angles-are-horrible>
+            This implements the method described in [1]_.
+
+            Parameters
+            -------
+            seq : str or list of chars
+                Defines rotation sequence, must be of length 3. Uppercase letters
+                are interpreted as intrinsic sequences, lowercase letters are
+                interpreted as extrinsic sequences.
 
             Returns
             -------
             alpha_beta_gamma : float array
                 Output shape is q.shape+(3,).  These represent the angles (alpha,
                 beta, gamma) in radians, where the normalized input quaternion
-                represents `exp(alpha*z/2) * exp(beta*y/2) * exp(gamma*z/2)`.
+                represents `exp(α*e1/2) * exp(β*e2/2) * exp(γ*e3/2)`
+                if intrinsic or `exp(α*e3/2) * exp(β*e2/2) * exp(γ*e1/2)`
+                if extrinsic.
 
             Raises
             ------
@@ -438,36 +466,85 @@ def QuaternionConvertersMixin(jit=jit):
                 ...if you try to actually use Euler angles, when you could have
                 been using quaternions like a sensible person.
 
+            References
+            ------
+
+            .. [1] https://doi.org/10.1371/journal.pone.0276302
             """
+
+            # check if sequence is correctly formatted and get lowercase
+            intrinsic = _is_intrinsic(seq)
+            seq = seq.lower()
+
+            if intrinsic:
+                seq = seq[::-1]
+                angle_first = 2
+                angle_third = 0
+            else:
+                angle_first = 0
+                angle_third = 2
+
+            i, j, k = [ord(axis) - ord('x') for axis in seq]
+
+            if symmetric := i == k:
+                k = 3 - i - j # get third axis
+
+            # +1 if ijk is an even permutation, -1 otherwise:
+            sign = (i - j) * (j - k) * (k - i) / 2
+
             s = self.reshape((-1, 4))
             alpha_beta_gamma = np.empty((s.shape[0], 3), dtype=self.dtype)
-            for i in range(s.shape[0]):
-                n = s[i, 0]**2 + s[i, 1]**2 + s[i, 2]**2 + s[i, 3]**2
-                alpha_beta_gamma[i, 0] = np.arctan2(s[i, 3], s[i, 0]) + np.arctan2(-s[i, 1], s[i, 2])
-                alpha_beta_gamma[i, 1] = 2*np.arccos(np.sqrt((s[i, 0]**2 + s[i, 3]**2) / n))
-                alpha_beta_gamma[i, 2] = np.arctan2(s[i, 3], s[i, 0]) - np.arctan2(-s[i, 1], s[i, 2])
+
+            # permutate quaternion elements
+            try:
+                a = s.real
+                b, c, d = s.vector[:, [i, j, k]].T
+            except:
+                a, b, c, d = s[:, [0, i+1, j+1, k+1]].T
+
+            d *= sign
+
+            # If not a proper Euler sequence, like 313, 323, etc.
+            if not symmetric:
+                a, b, c, d = a - c, b + d, c + a, d - b
+
+            # beta is always easy
+            alpha_beta_gamma[:, 1] = 2*np.arctan2(np.hypot(c,d), np.hypot(a,b))
+
+            # alpha and gamma can lead to singularities, ignoring them
+            # in this implementation
+            half_sum = np.arctan2(b, a) # == (alpha+gamma)/2
+            half_diff = np.arctan2(d, c) # == (alpha-gamma)/2
+            alpha_beta_gamma[:, angle_first] = half_sum - half_diff
+            alpha_beta_gamma[:, angle_third] = half_sum + half_diff
+
+            if not symmetric:
+                alpha_beta_gamma[:, 1] -= np.pi/2
+                alpha_beta_gamma[:, angle_third] *= sign
+
             return alpha_beta_gamma.reshape(self.shape[:-1] + (3,))
 
         @classmethod
-        def from_euler_angles(cls, alpha_beta_gamma, beta=None, gamma=None):
+        def from_euler_angles(cls, alpha_beta_gamma, beta=None, gamma=None, seq='ZYZ'):
             """Improve your life drastically.
 
             Assumes the Euler angles correspond to the quaternion R via
 
-                R = exp(alpha*z/2) * exp(beta*y/2) * exp(gamma*z/2)
+            If intrinsic:
+                R = exp(α*e1/2) * exp(β*e2/2) * exp(γ*e3/2)
+            If extrinsic:
+                R = exp(α*e3/2) * exp(β*e2/2) * exp(γ*e1/2)
+
+            Where e1, e2 and e3 are the elementary basis vectors defined
+            by `seq`
 
             The angles naturally must be in radians for this to make any sense.
-
-            NOTE: Before opening an issue reporting something "wrong" with this
-            function, be sure to read all of the following page, *especially* the
-            very last section about opening issues or pull requests.
-            <https://github.com/moble/quaternion/wiki/Euler-angles-are-horrible>
 
             Parameters
             ----------
             alpha_beta_gamma : float or array of floats
                 This argument may either contain an array with last dimension of
-                size 3, where those three elements describe the (alpha, beta, gamma)
+                size 3, where those three elements describe the (α, β, γ)
                 radian values for each rotation; or it may contain just the alpha
                 values, in which case the next two arguments must also be given.
             beta : None, float, or array of floats
@@ -476,6 +553,10 @@ def QuaternionConvertersMixin(jit=jit):
             gamma : None, float, or array of floats
                 If this array is given, it must be able to broadcast against the
                 first and second arguments.
+            seq : str or list of chars
+                Defines rotation sequence, must be of length 3. Uppercase letters
+                are interpreted as intrinsic sequences, lowercase letters are
+                interpreted as extrinsic sequences.
 
             Returns
             -------
@@ -484,6 +565,10 @@ def QuaternionConvertersMixin(jit=jit):
                 the last dimension will be removed.
 
             """
+            # check if sequence is correctly formatted and get lowercase
+            intrinsic = _is_intrinsic(seq)
+            seq = seq.lower()
+
             # Figure out the input angles from either type of input
             if gamma is None:
                 alpha_beta_gamma = np.asarray(alpha_beta_gamma)
@@ -495,20 +580,19 @@ def QuaternionConvertersMixin(jit=jit):
                 beta  = np.asarray(beta)
                 gamma = np.asarray(gamma)
 
-            # Pre-compute trig
-            cosβover2 = np.cos(beta/2)
-            sinβover2 = np.sin(beta/2)
+            # get axes
+            e1 = [1 if n == seq[0] else 0 for n in 'xyz']
+            e2 = [1 if n == seq[1] else 0 for n in 'xyz']
+            e3 = [1 if n == seq[2] else 0 for n in 'xyz']
 
-            # Set up the output array
-            R = np.empty(np.broadcast(alpha, beta, gamma).shape + (4,), dtype=cosβover2.dtype)
+            q_alpha = cls.from_axis_angle(e1 * alpha[..., np.newaxis])
+            q_beta = cls.from_axis_angle(e2 * beta[..., np.newaxis])
+            q_gamma = cls.from_axis_angle(e3 * gamma[..., np.newaxis])
 
-            # Compute the actual values of the quaternion components
-            R[..., 0] =  cosβover2*np.cos((alpha+gamma)/2)  # scalar quaternion components
-            R[..., 1] = -sinβover2*np.sin((alpha-gamma)/2)  # x quaternion components
-            R[..., 2] =  sinβover2*np.cos((alpha-gamma)/2)  # y quaternion components
-            R[..., 3] =  cosβover2*np.sin((alpha+gamma)/2)  # z quaternion components
-
-            return cls(R)
+            if intrinsic:
+                return q_alpha * q_beta * q_gamma
+            else:
+                return q_gamma * q_beta * q_alpha
 
         @property
         @ndarray_args
@@ -611,7 +695,7 @@ def QuaternionConvertersMixin(jit=jit):
                 rotation about `z`.
 
             """
-            return self.to_euler_angles[..., 1::-1]
+            return self.to_euler_angles()[..., 1::-1]
 
         @classmethod
         def from_spherical_coordinates(cls, theta_phi, phi=None):

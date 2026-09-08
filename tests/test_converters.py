@@ -1,9 +1,10 @@
 import warnings
 import math
 import numpy as np
+from numpy.testing import assert_allclose
 import quaternionic
 import pytest
-
+from itertools import permutations
 
 def test_to_scalar_part(Rs):
     assert np.array_equal(Rs.to_scalar_part, Rs.ndarray[..., 0])
@@ -247,12 +248,44 @@ def test_to_euler_angles(eps, array):
                      for i in range(5000)]
     for alpha, beta, gamma in random_angles:
         R1 = array.from_euler_angles(alpha, beta, gamma)
-        R2 = array.from_euler_angles(*list(R1.to_euler_angles))
+        R2 = array.from_euler_angles(*list(R1.to_euler_angles()))
         d = quaternionic.distance.rotation.intrinsic(R1, R2)
         assert d < 6e3*eps, ((alpha, beta, gamma), R1, R2, d)  # Can't use allclose here; we don't care about rotor sign
     q0 = array(0, 0.6, 0.8, 0)
     assert q0.norm == 1.0
-    assert abs(q0 - array.from_euler_angles(*list(q0.to_euler_angles))) < 1.e-15
+    assert abs(q0 - array.from_euler_angles(*list(q0.to_euler_angles()))) < 1.e-15
+
+
+def test_to_euler_asymmetric_axes(eps, array):
+    rnd = np.random.RandomState(0)
+    n = 1000
+    angles = np.empty((n, 3))
+    angles[:, 0] = rnd.uniform(low=-np.pi, high=np.pi, size=(n,))
+    angles[:, 1] = rnd.uniform(low=-np.pi / 2, high=np.pi / 2, size=(n,))
+    angles[:, 2] = rnd.uniform(low=-np.pi, high=np.pi, size=(n,))
+
+    for xyz in ('xyz', 'XYZ'):
+        for seq_tuple in permutations(xyz):
+            seq = ''.join(seq_tuple)
+            R1 = array.from_euler_angles(angles, seq=seq)
+            angles_back = R1.to_euler_angles(seq=seq)
+            assert_allclose(angles, angles_back)
+
+
+def test_to_euler_symmetric_axes(eps, array):
+    rnd = np.random.RandomState(0)
+    n = 1000
+    angles = np.empty((n, 3))
+    angles[:, 0] = rnd.uniform(low=-np.pi, high=np.pi, size=(n,))
+    angles[:, 1] = rnd.uniform(low=0, high=np.pi, size=(n,))
+    angles[:, 2] = rnd.uniform(low=-np.pi, high=np.pi, size=(n,))
+
+    for xyz in ('xyz', 'XYZ'):
+        for seq_tuple in permutations(xyz):
+            seq = ''.join([seq_tuple[0], seq_tuple[1], seq_tuple[0]])
+            R1 = array.from_euler_angles(angles, seq=seq)
+            angles_back = R1.to_euler_angles(seq=seq)
+            assert_allclose(angles, angles_back)
 
 
 def test_from_euler_phases(eps, array):
